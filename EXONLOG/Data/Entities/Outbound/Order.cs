@@ -27,6 +27,10 @@
         [Required]
         public int UserID { get; set; } // User who created the Order
         public User User { get; set; } // Navigation Property for User
+                                       // Navigation Property for OutboundLadings
+        public virtual ICollection<OutboundLading> OutboundLadings { get; set; } // Order has many OutboundLadings
+
+
     }
 
 }
