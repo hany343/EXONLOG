@@ -1,9 +1,12 @@
-﻿namespace EXONLOG.Data.Entities
+﻿namespace EXONLOG.Model.Account
 {
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.Collections.Generic;
-    using EXONLOG.Data.Entities.Outbound;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using EXONLOG.Model.Outbound;
+    using EXONLOG.Model.Shared;
+    using EXONLOG.Model.Inbound;
 
     public class User
     {
@@ -12,10 +15,12 @@
 
         [Required]
         [MaxLength(50)]
+        [Column(TypeName = "nvarchar(50)")]
         public string Username { get; set; } // Unique Username
 
         [Required]
         [MaxLength(100)]
+        [Column(TypeName = "nvarchar(100)")]
         public string FullName { get; set; } // Full Name of the User
 
         [Required]
@@ -35,12 +40,14 @@
         [Required]
         public bool IsActive { get; set; } = true; // Indicates if the user is active
 
-        [MaxLength(20)]
-        public string Role { get; set; } // Role of the user (e.g., "Admin", "StockManager", etc.)
 
+        [Column(TypeName = "nvarchar(400)")]
         public string Notes { get; set; } // Additional Notes about the User
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the User was Created
+
+        public int RoleId { get; set; }
+        public Role Role { get; set; }// Role of the user (e.g., "Admin", "StockManager", etc.)
 
         // Navigation Properties
         public ICollection<Material> Materials { get; set; } // Materials created by the User

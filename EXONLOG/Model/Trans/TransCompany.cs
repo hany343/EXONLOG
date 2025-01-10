@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EXONLOG.Data.Trans
+namespace EXONLOG.Model.Trans
 {
     public class TransCompany
     {

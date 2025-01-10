@@ -1,4 +1,4 @@
-﻿namespace EXONLOG.Data.Trans
+﻿namespace EXONLOG.Model.Trans
 {
     using System;
     using System.ComponentModel.DataAnnotations;

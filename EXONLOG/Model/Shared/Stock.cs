@@ -1,5 +1,6 @@
-﻿namespace EXONLOG.Data.Entities.Outbound
+﻿namespace EXONLOG.Model.Shared
 {
+    using EXONLOG.Model.Account;
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
@@ -11,9 +12,11 @@
 
         [Required]
         [MaxLength(100)]
+        [Column(TypeName = "nvarchar(100)")]
         public string Name { get; set; } // Stock Name (e.g., Warehouse A)
 
         [MaxLength(250)]
+        [Column(TypeName = "nvarchar(100)")]
         public string Location { get; set; } // Physical Location of the Stock
 
         [Required]
@@ -24,6 +27,7 @@
         [Required]
         public double Quantity { get; set; } // Total Quantity of the Material in this Stock
 
+        [Column(TypeName = "nvarchar(200)")]
         public string Notes { get; set; } // Additional Notes about the Stock
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the Stock was Created

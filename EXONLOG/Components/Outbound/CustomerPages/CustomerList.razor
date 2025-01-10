@@ -1,0 +1,78 @@
+﻿@page "/customers"
+@using EXONLOG.Data
+@using EXONLOG.Model.Outbound
+@using EXONLOG.Model.Shared
+@using Microsoft.EntityFrameworkCore
+
+@inject EXONContext DbContext
+@inject NavigationManager Navigation
+
+<h3>Customers</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Address</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Customers == null)
+        {
+            <tr>
+                <td colspan="4">Loading...</td>
+            </tr>
+        }
+        else if (Customers.Count == 0)
+        {
+            <tr>
+                <td colspan="4">No customers found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var customer in Customers)
+            {
+                <tr>
+                    <td>@customer.Name</td>
+                    <td>@customer.ContactNumber</td>
+                    <td>@customer.Address</td>
+                    <td>
+                        <button class="btn btn-secondary" @onclick="() => EditCustomer(customer.CustomerID)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteCustomer(customer)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="CreateCustomer">Add New Customer</button>
+
+@code {
+    private List<Customer> Customers { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Customers = await DbContext.Customers.ToListAsync();
+    }
+
+    private void CreateCustomer()
+    {
+        Navigation.NavigateTo("/customer/form");
+    }
+
+    private void EditCustomer(int id)
+    {
+        Navigation.NavigateTo($"/customer/form/{id}");
+    }
+
+    private async Task DeleteCustomer(Customer customer)
+    {
+        DbContext.Customers.Remove(customer);
+        await DbContext.SaveChangesAsync();
+        Customers = await DbContext.Customers.ToListAsync();
+    }
+}

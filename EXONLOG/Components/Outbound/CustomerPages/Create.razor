@@ -1,0 +1,178 @@
+﻿
+@page "/Customer/Create/"
+@using EXONLOG.Data
+@using EXONLOG.Model.Outbound
+@using EXONLOG.Model.Shared
+@inject EXONContext DbContext
+@inject NavigationManager Navigation
+
+
+@using Microsoft.AspNetCore.Components
+@using System.Text.RegularExpressions
+
+<h3 class="text-center text-primary mb-4">Create New Customer</h3>
+
+<div class="container">
+    <EditForm Model="Customer" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <!-- Customer Name -->
+        <div class="row mb-3">
+            <div class="col-md-6 col-12 mb-3">
+                <label for="name" class="form-label">
+                    Customer Name <span class="text-danger">*</span>
+                </label>
+                <input id="name" class="form-control" @bind="Customer.Name" required />
+                <ValidationMessage For="@(() => Customer.Name)" class="text-danger" />
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div class="row mb-3">
+            <div class="col-md-6 col-12 mb-3">
+                <label for="email" class="form-label">
+                    Email <span class="text-danger">*</span>
+                </label>
+                <input id="email" type="email" class="form-control" @bind="Customer.Email" required />
+                <ValidationMessage For="@(() => Customer.Email)" class="text-danger" />
+            </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="row mb-3">
+            <div class="col-md-6 col-12 mb-3">
+                <label for="phone" class="form-label">
+                    Phone
+                </label>
+                <input id="phone" class="form-control" @bind="Customer.ContactNumber" />
+                <ValidationMessage For="@(() => Customer.ContactNumber)" class="text-danger" />
+            </div>
+        </div>
+
+        <!-- Address -->
+        <div class="row mb-3">
+            <div class="col-md-6 col-12 mb-3">
+                <label for="address" class="form-label">
+                    Address
+                </label>
+                <input id="address" class="form-control" @bind="Customer.Address" />
+                <ValidationMessage For="@(() => Customer.Address)" class="text-danger" />
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <label for="notes" class="form-label">
+                    Notes
+                </label>
+                <textarea id="notes" class="form-control" @bind="Customer.Notes"></textarea>
+            </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="row mb-3">
+            <div class="col-md-6 col-12 mb-3">
+                <label for="shippingAddress" class="form-label">
+                    Shipping Address
+                </label>
+                <input id="shippingAddress" class="form-control" @bind="Customer.Address" />
+                <ValidationMessage For="@(() => Customer.Address)" class="text-danger" />
+            </div>
+        </div>
+
+        <!-- Shipping City -->
+        <!--<div class="row mb-3">
+            <div class="col-md-6 col-12 mb-3">
+                <label for="shippingCity" class="form-label">
+                    Shipping City
+                </label>
+                <input id="shippingCity" class="form-control" @bind="Customer.ShippingCity" />
+                <ValidationMessage For="@(() => Customer.ShippingCity)" class="text-danger" />
+            </div>
+        </div>-->
+
+        <!-- Create Date -->
+        @*<div class="row mb-3">
+            <div class="col-md-6 col-12 mb-3">
+                <label for="createDate" class="form-label">
+                    Create Date
+                </label>
+                <input id="createDate" class="form-control" @bind="Customer.CreateDate" disabled />
+            </div>
+        </div>*@
+
+        <!-- User ID -->
+        <div class="row mb-3">
+            <div class="col-md-6 col-12 mb-3">
+                <label for="userID" class="form-label">
+                    User ID
+                </label>
+                <input id="userID" class="form-control" @bind="Customer.UserID" />
+                <ValidationMessage For="@(() => Customer.UserID)" class="text-danger" />
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private Customer Customer = new Customer();
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            // Custom validation
+            if (IsValidCustomer(Customer))
+            {
+                DbContext.Customers.Add(Customer);
+                await DbContext.SaveChangesAsync();
+                // Navigate back or show a success message
+                NavigateBack();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        Console.WriteLine("Form is invalid");
+    }
+
+    private void NavigateBack()
+    {
+        // Navigate to customer listing or wherever needed
+        Navigation.NavigateTo("/customers");
+    }
+
+    private bool IsValidCustomer(Customer customer)
+    {
+        // Custom validation rules
+        if (string.IsNullOrEmpty(customer.Name) || string.IsNullOrEmpty(customer.Email))
+        {
+            Console.WriteLine("Name and Email are required.");
+            return false;
+        }
+
+        // Validate Phone: only numbers, optional field
+        if (!string.IsNullOrEmpty(customer.ContactNumber) && !Regex.IsMatch(customer.ContactNumber, @"^\d+$"))
+        {
+            Console.WriteLine("Phone number should contain only numbers.");
+            return false;
+        }
+
+        // Email validation (already handled by Data Annotations)
+        // More complex checks can go here...
+
+        return true;
+    }
+}

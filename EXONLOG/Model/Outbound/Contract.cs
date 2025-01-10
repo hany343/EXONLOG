@@ -1,8 +1,11 @@
-﻿namespace EXONLOG.Data.Entities.Outbound
+﻿namespace EXONLOG.Model.Outbound
 {
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using EXONLOG.Model.Account;
+    using EXONLOG.Model.Inbound;
+    using EXONLOG.Model.Shared;
 
     public class Contract
     {
@@ -11,10 +14,12 @@
 
         [Required]
         [MaxLength(50)]
+        [Column(TypeName = "nvarchar(100)")]
         public string RefNumber { get; set; } // Unique Reference Number for the Contract
 
         [Required]
         [MaxLength(100)]
+        [Column(TypeName = "nvarchar(100)")]
         public string Name { get; set; } // Name or Title of the Contract
 
         [Required]
@@ -38,11 +43,7 @@
         public Customer Customer { get; set; } // Navigation Property for Customer
 
         [Required]
-        [ForeignKey("Importer")]
-        public int ImporterID { get; set; } // Foreign Key to Importer
-        public Importer Importer { get; set; } // Navigation Property for Importer
-
-        [Required]
+        [Column(TypeName = "datetime2(0)")]
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the Contract was Created
 
         [Required]
@@ -55,6 +56,7 @@
         public DateTime Deadline { get; set; } // Contract Deadline
 
         [MaxLength(500)]
+        [Column(TypeName = "nvarchar(250)")]
         public string Notes { get; set; } // Additional Notes or Comments about the Contract
 
         // Navigation Property for Orders

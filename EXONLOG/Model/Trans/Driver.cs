@@ -1,6 +1,6 @@
-﻿namespace EXONLOG.Data.Trans
+﻿namespace EXONLOG.Model.Trans
 {
-    using EXONLOG.Data.Entities;
+    using EXONLOG.Model.Account;
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
@@ -12,9 +12,11 @@
 
         [Required]
         [MaxLength(100)]
+        [Column(TypeName = "nvarchar(100)")]
         public string Name { get; set; } // Driver's name
 
         [MaxLength(15)]
+        [Column(TypeName = "nvarchar(100)")]
         public string Contact { get; set; } // Driver's contact number
 
         [MaxLength(20)]
@@ -29,8 +31,10 @@
         public User User { get; set; } // Navigation property for User
 
         [MaxLength(250)]
+        [Column(TypeName = "nvarchar(250)")]
         public string Address { get; set; } // Driver's address
 
+        [Column(TypeName = "nvarchar(250)")]
         public string Notes { get; set; } // Additional notes about the driver
 
         public byte[]? Image { get; set; } // Optional image for the driver (stored as byte array)
