@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/EXONLOG/appsettings.json
+/EXONLOG/Migrations/20250111174403_initialCreate.cs
+/EXONLOG/Migrations/20250111174403_initialCreate.Designer.cs
+*.cs
