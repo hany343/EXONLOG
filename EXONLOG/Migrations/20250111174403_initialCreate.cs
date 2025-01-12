@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EXONLOG.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -47,7 +47,7 @@ namespace EXONLOG.Migrations
                     Address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -69,7 +69,7 @@ namespace EXONLOG.Migrations
                     TruckType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Capacity = table.Column<double>(type: "float", nullable: true),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()")
                 },
                 constraints: table =>
                 {
@@ -88,8 +88,8 @@ namespace EXONLOG.Migrations
                     MobileNumber = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(400)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(400)", nullable: true),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     RoleId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -110,11 +110,11 @@ namespace EXONLOG.Migrations
                     CustomerID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(100)", maxLength: 250, nullable: false),
-                    ContactNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(250)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ContactNumber = table.Column<string>(type: "nvarchar(100)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(100)", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(250)", nullable: true),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -142,7 +142,7 @@ namespace EXONLOG.Migrations
                     Address = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(250)", nullable: false),
                     Image = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()")
                 },
                 constraints: table =>
                 {
@@ -152,7 +152,7 @@ namespace EXONLOG.Migrations
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -166,7 +166,7 @@ namespace EXONLOG.Migrations
                     ContactNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(250)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -177,7 +177,7 @@ namespace EXONLOG.Migrations
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -190,7 +190,7 @@ namespace EXONLOG.Migrations
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 500, nullable: false),
                     QuantityInStock = table.Column<double>(type: "float", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(200)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -201,7 +201,7 @@ namespace EXONLOG.Migrations
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -213,7 +213,7 @@ namespace EXONLOG.Migrations
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Location = table.Column<string>(type: "nvarchar(100)", maxLength: 250, nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(250)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -224,7 +224,7 @@ namespace EXONLOG.Migrations
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -237,7 +237,7 @@ namespace EXONLOG.Migrations
                     Address = table.Column<string>(type: "nvarchar(250)", nullable: true),
                     ContactNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(250)", nullable: true)
                 },
@@ -249,7 +249,7 @@ namespace EXONLOG.Migrations
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -263,7 +263,7 @@ namespace EXONLOG.Migrations
                     MaterialID = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<double>(type: "float", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(200)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -274,7 +274,7 @@ namespace EXONLOG.Migrations
                         column: x => x.MaterialID,
                         principalTable: "Materials",
                         principalColumn: "MaterialID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Stocks_Users_UserID",
                         column: x => x.UserID,
@@ -295,8 +295,7 @@ namespace EXONLOG.Migrations
                     MaterialID = table.Column<int>(type: "int", nullable: false),
                     PortID = table.Column<int>(type: "int", nullable: false),
                     CustomerID = table.Column<int>(type: "int", nullable: false),
-                    ImporterID = table.Column<int>(type: "int", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     Quantity = table.Column<double>(type: "float", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Deadline = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -310,31 +309,25 @@ namespace EXONLOG.Migrations
                         column: x => x.CustomerID,
                         principalTable: "Customers",
                         principalColumn: "CustomerID",
-                        onDelete: ReferentialAction.NoAction);
-                    table.ForeignKey(
-                        name: "FK_Contracts_Importers_ImporterID",
-                        column: x => x.ImporterID,
-                        principalTable: "Importers",
-                        principalColumn: "ImporterID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Contracts_Materials_MaterialID",
                         column: x => x.MaterialID,
                         principalTable: "Materials",
                         principalColumn: "MaterialID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Contracts_Ports_PortID",
                         column: x => x.PortID,
                         principalTable: "Ports",
                         principalColumn: "PortID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Contracts_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -351,31 +344,38 @@ namespace EXONLOG.Migrations
                     Quantity = table.Column<double>(type: "float", nullable: false),
                     ArrivalDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(250)", nullable: true),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false),
-                    ShipmentStatusId = table.Column<int>(type: "int", nullable: false)
+                    ShipmentStatusId = table.Column<int>(type: "int", nullable: false),
+                    ImporterID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Shipments", x => x.ID);
                     table.ForeignKey(
+                        name: "FK_Shipments_Importers_ImporterID",
+                        column: x => x.ImporterID,
+                        principalTable: "Importers",
+                        principalColumn: "ImporterID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Shipments_Materials_MaterialID",
                         column: x => x.MaterialID,
                         principalTable: "Materials",
                         principalColumn: "MaterialID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Shipments_Ports_PortID",
                         column: x => x.PortID,
                         principalTable: "Ports",
                         principalColumn: "PortID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Shipments_ShipmentStatuses_ShipmentStatusId",
                         column: x => x.ShipmentStatusId,
                         principalTable: "ShipmentStatuses",
                         principalColumn: "ShipmentStatusId",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Shipments_Suppliers_SupplierID",
                         column: x => x.SupplierID,
@@ -387,7 +387,7 @@ namespace EXONLOG.Migrations
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -410,13 +410,13 @@ namespace EXONLOG.Migrations
                         column: x => x.StockId,
                         principalTable: "Stocks",
                         principalColumn: "StockID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_StockMovements_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -429,7 +429,7 @@ namespace EXONLOG.Migrations
                     Quantity = table.Column<double>(type: "float", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(250)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -440,13 +440,13 @@ namespace EXONLOG.Migrations
                         column: x => x.ContractID,
                         principalTable: "Contracts",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Orders_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -458,7 +458,7 @@ namespace EXONLOG.Migrations
                     BatchRef = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     ShipmentID = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<double>(type: "float", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
                     UserID = table.Column<int>(type: "int", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(200)", nullable: true)
                 },
@@ -476,7 +476,7 @@ namespace EXONLOG.Migrations
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -488,31 +488,31 @@ namespace EXONLOG.Migrations
                     TruckID = table.Column<int>(type: "int", nullable: false),
                     DriverID = table.Column<int>(type: "int", nullable: false),
                     OrderID = table.Column<int>(type: "int", nullable: false),
-                    TransCompanyID = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     FirstWeight = table.Column<double>(type: "float", nullable: false),
                     FirstWeigherID = table.Column<int>(type: "int", nullable: true),
-                    FirstWeightDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FirstWeightDate = table.Column<DateTime>(type: "datetime2(0)", nullable: true),
                     SecondWeight = table.Column<double>(type: "float", nullable: false),
                     SecondWeigherID = table.Column<int>(type: "int", nullable: true),
-                    SecondWeightDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SecondWeightDate = table.Column<DateTime>(type: "datetime2(0)", nullable: true),
                     NetWeight = table.Column<double>(type: "float", nullable: false),
                     Shrink = table.Column<double>(type: "float", nullable: false, defaultValue: 0.0),
                     Quantity = table.Column<double>(type: "float", nullable: false),
-                    FillType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StackBar = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BagsCount = table.Column<int>(type: "int", nullable: false),
-                    ShippingAddress = table.Column<string>(type: "nvarchar(100)", nullable: false),
-                    ShippingCity = table.Column<string>(type: "nvarchar(100)", nullable: false),
-                    LeaveDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ApprovedUserID = table.Column<int>(type: "int", nullable: false),
-                    RepresentativeName = table.Column<string>(type: "nvarchar(100)", nullable: false),
-                    WeighNotes = table.Column<string>(type: "nvarchar(250)", nullable: false),
+                    FillType = table.Column<string>(type: "nvarchar(100)", nullable: false),
+                    StackBar = table.Column<string>(type: "nvarchar(100)", nullable: true),
+                    BagsCount = table.Column<int>(type: "int", nullable: true),
+                    ShippingAddress = table.Column<string>(type: "nvarchar(100)", nullable: true),
+                    ShippingCity = table.Column<string>(type: "nvarchar(100)", nullable: true),
+                    LeaveDate = table.Column<DateTime>(type: "datetime2(0)", nullable: true),
+                    ApprovedUserID = table.Column<int>(type: "int", nullable: true),
+                    RepresentativeName = table.Column<string>(type: "nvarchar(100)", nullable: true),
+                    WeighNotes = table.Column<string>(type: "nvarchar(250)", nullable: true),
                     LadingState = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     ShippingType = table.Column<string>(type: "nvarchar(100)", maxLength: 50, nullable: false),
                     WeightStatus = table.Column<string>(type: "nvarchar(100)", maxLength: 50, nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
-                    UserID = table.Column<int>(type: "int", nullable: false)
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
+                    UserID = table.Column<int>(type: "int", nullable: false),
+                    TransCompanyID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -522,7 +522,7 @@ namespace EXONLOG.Migrations
                         column: x => x.DriverID,
                         principalTable: "Drivers",
                         principalColumn: "DriverID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OutLadings_Orders_OrderID",
                         column: x => x.OrderID,
@@ -530,33 +530,36 @@ namespace EXONLOG.Migrations
                         principalColumn: "OrderID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
+                        name: "FK_OutLadings_TransCompanies_TransCompanyID",
+                        column: x => x.TransCompanyID,
+                        principalTable: "TransCompanies",
+                        principalColumn: "TransCompanyID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_OutLadings_Trucks_TruckID",
                         column: x => x.TruckID,
                         principalTable: "Trucks",
                         principalColumn: "TruckID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OutLadings_Users_FirstWeigherID",
                         column: x => x.FirstWeigherID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
-
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OutLadings_Users_SecondWeigherID",
                         column: x => x.SecondWeigherID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
-
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OutLadings_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
-
 
             migrationBuilder.CreateTable(
                 name: "InLadings",
@@ -577,8 +580,9 @@ namespace EXONLOG.Migrations
                     FirstWeigherID = table.Column<int>(type: "int", nullable: false),
                     SecondWeigherID = table.Column<int>(type: "int", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(250)", nullable: true),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserID = table.Column<int>(type: "int", nullable: false)
+                    CreateDate = table.Column<DateTime>(type: "datetime2(0)", nullable: false, defaultValueSql: "GETDATE()"),
+                    UserID = table.Column<int>(type: "int", nullable: false),
+                    TransCompanyID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -594,6 +598,12 @@ namespace EXONLOG.Migrations
                         column: x => x.DriverID,
                         principalTable: "Drivers",
                         principalColumn: "DriverID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_InLadings_TransCompanies_TransCompanyID",
+                        column: x => x.TransCompanyID,
+                        principalTable: "TransCompanies",
+                        principalColumn: "TransCompanyID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_InLadings_Trucks_TruckID",
@@ -618,7 +628,7 @@ namespace EXONLOG.Migrations
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "UserID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -635,11 +645,6 @@ namespace EXONLOG.Migrations
                 name: "IX_Contracts_CustomerID",
                 table: "Contracts",
                 column: "CustomerID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Contracts_ImporterID",
-                table: "Contracts",
-                column: "ImporterID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contracts_MaterialID",
@@ -692,6 +697,11 @@ namespace EXONLOG.Migrations
                 column: "SecondWeigherID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_InLadings_TransCompanyID",
+                table: "InLadings",
+                column: "TransCompanyID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InLadings_TruckID",
                 table: "InLadings",
                 column: "TruckID");
@@ -737,6 +747,11 @@ namespace EXONLOG.Migrations
                 column: "SecondWeigherID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OutLadings_TransCompanyID",
+                table: "OutLadings",
+                column: "TransCompanyID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OutLadings_TruckID",
                 table: "OutLadings",
                 column: "TruckID");
@@ -750,6 +765,11 @@ namespace EXONLOG.Migrations
                 name: "IX_Ports_UserID",
                 table: "Ports",
                 column: "UserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Shipments_ImporterID",
+                table: "Shipments",
+                column: "ImporterID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shipments_MaterialID",
@@ -827,9 +847,6 @@ namespace EXONLOG.Migrations
                 name: "StockMovements");
 
             migrationBuilder.DropTable(
-                name: "TransCompanies");
-
-            migrationBuilder.DropTable(
                 name: "Batches");
 
             migrationBuilder.DropTable(
@@ -837,6 +854,9 @@ namespace EXONLOG.Migrations
 
             migrationBuilder.DropTable(
                 name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "TransCompanies");
 
             migrationBuilder.DropTable(
                 name: "Trucks");
@@ -851,6 +871,9 @@ namespace EXONLOG.Migrations
                 name: "Contracts");
 
             migrationBuilder.DropTable(
+                name: "Importers");
+
+            migrationBuilder.DropTable(
                 name: "ShipmentStatuses");
 
             migrationBuilder.DropTable(
@@ -858,9 +881,6 @@ namespace EXONLOG.Migrations
 
             migrationBuilder.DropTable(
                 name: "Customers");
-
-            migrationBuilder.DropTable(
-                name: "Importers");
 
             migrationBuilder.DropTable(
                 name: "Materials");

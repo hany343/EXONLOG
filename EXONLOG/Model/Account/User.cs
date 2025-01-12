@@ -42,7 +42,7 @@
 
 
         [Column(TypeName = "nvarchar(400)")]
-        public string Notes { get; set; } // Additional Notes about the User
+        public string? Notes { get; set; } // Additional Notes about the User
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the User was Created
 

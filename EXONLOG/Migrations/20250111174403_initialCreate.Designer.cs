@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EXONLOG.Migrations
 {
     [DbContext(typeof(EXONContext))]
-    [Migration("20250110175335_CreateDate")]
-    partial class CreateDate
+    [Migration("20250111174403_initialCreate")]
+    partial class initialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,7 +74,6 @@ namespace EXONLOG.Migrations
                         .HasColumnType("nvarchar(15)");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(400)");
 
                     b.Property<string>("PasswordHash")
@@ -989,7 +988,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany("Importers")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1059,7 +1058,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Inbound.Importer", "Importer")
                         .WithMany("Shipments")
                         .HasForeignKey("ImporterID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Shared.Material", "Material")
@@ -1121,7 +1120,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Outbound.Customer", "Customer")
                         .WithMany("Contracts")
                         .HasForeignKey("CustomerID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Shared.Material", "Material")
@@ -1139,7 +1138,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany("Contracts")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Customer");
@@ -1156,7 +1155,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany("Customers")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1167,7 +1166,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Outbound.Contract", "Contract")
                         .WithMany("Orders")
                         .HasForeignKey("ContractID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "User")
@@ -1192,7 +1191,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "FirstWeigher")
                         .WithMany()
                         .HasForeignKey("FirstWeigherID")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("EXONLOG.Model.Outbound.Order", "Order")
                         .WithMany("OutLadings")
@@ -1203,7 +1202,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "SecondWeigher")
                         .WithMany()
                         .HasForeignKey("SecondWeigherID")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("EXONLOG.Model.Trans.TransCompany", "TransCompany")
                         .WithMany()
@@ -1243,7 +1242,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany("Ports")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1254,7 +1253,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany("Materials")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1265,7 +1264,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Shared.Material", "Material")
                         .WithOne("Stock")
                         .HasForeignKey("EXONLOG.Model.Shared.Stock", "MaterialID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "User")

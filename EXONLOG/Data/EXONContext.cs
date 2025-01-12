@@ -6,6 +6,7 @@
     using EXONLOG.Model.Outbound;
     using EXONLOG.Model.Shared;
     using EXONLOG.Model.Trans;
+    using Microsoft.AspNetCore.Identity;
 
     public class EXONContext : DbContext
     {
@@ -68,71 +69,85 @@
                     createDateProperty.SetDefaultValueSql("GETDATE()");
                 }
             }
+          
 
             // Example: Configure relationships with User
             modelBuilder.Entity<Material>()
                 .HasOne(m => m.User)
                 .WithMany() // One User can create many materials
-                .HasForeignKey(m => m.UserID);
+                .HasForeignKey(m => m.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Customer>()
                 .HasOne(c => c.User)
                 .WithMany() // One User can create many customers
-                .HasForeignKey(c => c.UserID);
+                .HasForeignKey(c => c.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Importer>()
                 .HasOne(i => i.User)
                 .WithMany() // One User can create many importers
-                .HasForeignKey(i => i.UserID);
+                .HasForeignKey(i => i.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Port>()
                 .HasOne(p => p.User)
                 .WithMany() // One User can create many ports
-                .HasForeignKey(p => p.UserID);
+                .HasForeignKey(p => p.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // User-Entity Relationships
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Materials)
                 .WithOne(m => m.User)
-                .HasForeignKey(m => m.UserID);
+                .HasForeignKey(m => m.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Customers)
                 .WithOne(c => c.User)
-                .HasForeignKey(c => c.UserID);
+                .HasForeignKey(c => c.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Importers)
                 .WithOne(i => i.User)
-                .HasForeignKey(i => i.UserID);
+                .HasForeignKey(i => i.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Ports)
                 .WithOne(p => p.User)
-                .HasForeignKey(p => p.UserID);
+                .HasForeignKey(p => p.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Contracts)
                 .WithOne(c => c.User)
-                .HasForeignKey(c => c.UserID);
+                .HasForeignKey(c => c.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Customer-Contract relationship: One Customer can have many Contracts
             modelBuilder.Entity<Customer>()
                 .HasMany(c => c.Contracts)
                 .WithOne(c => c.Customer) // Each Contract is related to one Customer
-                .HasForeignKey(c => c.CustomerID);
+                .HasForeignKey(c => c.CustomerID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Contract-Order relationship: One Contract can have many Orders
             modelBuilder.Entity<Contract>()
                 .HasMany(c => c.Orders)
                 .WithOne(o => o.Contract)
-                .HasForeignKey(o => o.ContractID);
+                .HasForeignKey(o => o.ContractID)
+                .OnDelete(DeleteBehavior.Restrict);
 
           
             // Material-Stock relationship: One Material has one Stock
             modelBuilder.Entity<Material>()
                 .HasOne(m => m.Stock)
                 .WithOne(s => s.Material)
-                .HasForeignKey<Stock>(s => s.MaterialID);
+                .HasForeignKey<Stock>(s => s.MaterialID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Truck>()
                .HasIndex(t => new { t.TruckNumber, t.TrailerNumber })
@@ -144,13 +159,13 @@
                 .HasOne(l => l.FirstWeigher)  // First weigher as a user
                 .WithMany()  // Assuming each User can be the first weigher in many ladings
                 .HasForeignKey(l => l.FirstWeigherID)
-                .OnDelete(DeleteBehavior.SetNull);  // Handle delete behavior
+                .OnDelete(DeleteBehavior.Restrict);  // Handle delete behavior
 
             modelBuilder.Entity<OutLading>()
                 .HasOne(l => l.SecondWeigher) // Second weigher as a user
                 .WithMany()
                 .HasForeignKey(l => l.SecondWeigherID)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
             // Configure other fields, such as constraints and defaults
             modelBuilder.Entity<OutLading>()
                 .Property(l => l.WeightStatus)
@@ -198,7 +213,8 @@
             modelBuilder.Entity<Importer>()
               .HasMany(i => i.Shipments) // An Importer can have many Shipments
               .WithOne(s => s.Importer)  // Each Shipment is linked to one Importer
-              .HasForeignKey(s => s.ImporterID); // Foreign key in Shipment referring to Importer
+              .HasForeignKey(s => s.ImporterID)
+              .OnDelete(DeleteBehavior.Restrict); // Foreign key in Shipment referring to Importer
 
 
             // Shipment -> Batches Relationship
