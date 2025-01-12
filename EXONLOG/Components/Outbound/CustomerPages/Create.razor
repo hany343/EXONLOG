@@ -1,154 +1,103 @@
-﻿
-@page "/Customer/Create/"
-@using EXONLOG.Data
+﻿@page "/Customer/Create"
 @using EXONLOG.Model.Outbound
-@using EXONLOG.Model.Shared
-@inject EXONContext DbContext
+@using EXONLOG.Data
+@using Microsoft.EntityFrameworkCore
 @inject NavigationManager Navigation
+@inject EXONContext DbContext
 
+<h3 class="text-primary">Create New Customer</h3>
 
-@using Microsoft.AspNetCore.Components
-@using System.Text.RegularExpressions
+<EditForm Model="customer" OnValidSubmit="HandleValidSubmit" FormName="Create">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-<h3 class="text-center text-primary mb-4">Create New Customer</h3>
+    <div class="form-group mb-3">
+        <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+        <InputText id="name" class="form-control" @bind-Value="customer.Name" />
+        <ValidationMessage For="() => customer.Name" class="text-danger" />
+    </div>
 
-<div class="container">
-    <EditForm Model="Customer" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit" FormName="Create">
-        @*<DataAnnotationsValidator />*@
-        <ValidationSummary />
+    <div class="form-group mb-3">
+        <label for="address" class="form-label">Address</label>
+        <InputText id="address" class="form-control" @bind-Value="customer.Address" />
+        <ValidationMessage For="() => customer.Address" class="text-danger" />
+    </div>
 
-        <!-- Customer Name -->
-        <div class="row mb-3">
-            <div class="col-md-6 col-12 mb-3">
-                <label for="name" class="form-label">
-                    Customer Name <span class="text-danger">*</span>
-                </label>
-                <input id="name" class="form-control" @bind="Customer.Name" required />
-                <ValidationMessage For="@(() => Customer.Name)" class="text-danger" />
-            </div>
-        </div>
+    <div class="form-group mb-3">
+        <label for="contactNumber" class="form-label">Contact Number</label>
+        <InputText id="contactNumber" class="form-control" @bind-Value="customer.ContactNumber" />
+        <ValidationMessage For="() => customer.ContactNumber" class="text-danger" />
+    </div>
 
-        <!-- Email -->
-        <div class="row mb-3">
-            <div class="col-md-6 col-12 mb-3">
-                <label for="email" class="form-label">
-                    Email <span class="text-danger">*</span>
-                </label>
-                <input id="email" type="email" class="form-control" @bind="Customer.Email" required />
-                <ValidationMessage For="@(() => Customer.Email)" class="text-danger" />
-            </div>
-        </div>
+    <div class="form-group mb-3">
+        <label for="email" class="form-label">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="customer.Email" />
+        <ValidationMessage For="() => customer.Email" class="text-danger" />
+    </div>
 
-        <!-- Phone -->
-        <div class="row mb-3">
-            <div class="col-md-6 col-12 mb-3">
-                <label for="phone" class="form-label">
-                    Phone
-                </label>
-                <input id="phone" class="form-control" @bind="Customer.ContactNumber" />
-                <ValidationMessage For="@(() => Customer.ContactNumber)" class="text-danger" />
-            </div>
-        </div>
+    <div class="form-group mb-3">
+        <label for="notes" class="form-label">Notes</label>
+        <InputTextArea id="notes" class="form-control" @bind-Value="customer.Notes" />
+        <ValidationMessage For="() => customer.Notes" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <label for="UserID">User ID <span class="text-danger">*</span></label>
+        <InputNumber id="UserID" class="form-control" @bind-Value="customer.UserID" />
+        <ValidationMessage For="@(() => customer.UserID)" />
+    </div>
 
-        <!-- Address -->
-        <div class="row mb-3">
-            <div class="col-md-6 col-12 mb-3">
-                <label for="address" class="form-label">
-                    Address
-                </label>
-                <input id="address" class="form-control" @bind="Customer.Address" />
-                <ValidationMessage For="@(() => Customer.Address)" class="text-danger" />
-            </div>
-        </div>
-
-        <!-- Notes -->
-        <div class="row mb-3">
-            <div class="col-12">
-                <label for="notes" class="form-label">
-                    Notes
-                </label>
-                <textarea id="notes" class="form-control" @bind="Customer.Notes"></textarea>
-            </div>
-        </div>
-
-
-        <!-- User ID -->
-        <div class="row mb-3">
-            <div class="col-md-6 col-12 mb-3">
-                <label for="userID" class="form-label">
-                    User ID
-                </label>
-                <input id="userID" class="form-control" @bind="Customer.UserID" />
-                <ValidationMessage For="@(() => Customer.UserID)" class="text-danger" />
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-between">
-            <button type="submit" class="btn btn-success">Save</button>
-            <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
-        </div>
-    </EditForm>
-</div>
+    <button type="submit" class="btn btn-success">Save</button>
+    <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
+</EditForm>
 
 @code {
-    [SupplyParameterFromForm]
-    private Customer? Customer { get; set; } = new Customer();
+    [SupplyParameterFromForm (FormName ="Create")]
+    private Customer customer { set; get; } = new Customer();
 
-
-    private async Task HandleSubmit()
+    private async Task HandleValidSubmit()
     {
-        try
+        if (ValidateCustomer())
         {
-            // Custom validation
-            if (IsValidCustomer(Customer))
-            {
-                DbContext.Customers.Add(Customer);
-                await DbContext.SaveChangesAsync();
-                // Navigate back or show a success message
-                NavigateBack();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
+            //customer.CreateDate = DateTime.UtcNow;
+            customer.UserID = GetCurrentUserId(); // Replace with actual method to get current user ID
+
+            DbContext.Customers.Add(customer);
+            await DbContext.SaveChangesAsync();
+            int newCustomerId = customer.CustomerID;
+            Navigation.NavigateTo($"/Customer/Details/{newCustomerId}");
         }
     }
 
-    private void HandleInvalidSubmit()
+    private bool ValidateCustomer()
     {
-        Console.WriteLine("Form is invalid");
+        bool isValid = true;
+
+        if (string.IsNullOrWhiteSpace(customer.Name))
+        {
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(customer.Email))
+        {
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(customer.ContactNumber) )
+        {
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    private int GetCurrentUserId()
+    {
+        // TODO: Implement logic to retrieve the current user's ID
+        return 1; // Placeholder for the default admin user
     }
 
     private void NavigateBack()
     {
-        // Navigate to customer listing or wherever needed
         Navigation.NavigateTo("/customers");
-    }
-
-    private bool IsValidCustomer(Customer customer)
-    {
-        // Custom validation rules
-        if (string.IsNullOrEmpty(customer.Name) )
-        {
-            Console.WriteLine("Name is required.");
-            return false;
-        }
-
-        if (string.IsNullOrEmpty(customer.Email))
-        {
-            Console.WriteLine(" Email is required.");
-            return false;
-        }
-        // Validate Phone: only numbers, optional field
-        //if (!string.IsNullOrEmpty(customer.ContactNumber) && !Regex.IsMatch(customer.ContactNumber, @"^\d+$"))
-        //{
-        //    Console.WriteLine("Phone number should contain only numbers.");
-        //    return false;
-        //}
-
-        // Email validation (already handled by Data Annotations)
-        // More complex checks can go here...
-
-        return true;
     }
 }

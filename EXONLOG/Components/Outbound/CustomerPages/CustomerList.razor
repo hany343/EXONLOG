@@ -49,7 +49,7 @@
     </tbody>
 </table>
 
-<button class="btn btn-primary" @onclick="CreateCustomer">Add New Customer</button>
+<button class="btn btn-primary" @onclick="@CreateCustomer">Add New Customer</button>
 
 @code {
     private List<Customer> Customers { get; set; }
@@ -61,12 +61,12 @@
 
     private void CreateCustomer()
     {
-        Navigation.NavigateTo("/customer/form");
+        Navigation.NavigateTo("/Customer/Create");
     }
 
     private void EditCustomer(int id)
     {
-        Navigation.NavigateTo($"/customer/form/{id}");
+        Navigation.NavigateTo($"/Customer/Create/{id}");
     }
 
     private async Task DeleteCustomer(Customer customer)

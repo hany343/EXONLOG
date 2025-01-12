@@ -35,7 +35,7 @@
 
         [Required]
         public int UserID { get; set; } // Foreign Key to the User who created the customer
-        public User User { get; set; } // Navigation Property for User
+        public User? User { get; set; } // Navigation Property for User
 
         public ICollection<Contract>? Contracts { get; set; } // A customer can have many contracts
     }
