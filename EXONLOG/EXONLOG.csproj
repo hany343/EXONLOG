@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -20,5 +20,5 @@
     <Folder Include="Migrations\" />
     <Folder Include="Model\Inventory\" />
   </ItemGroup>
-
+  
 </Project>
