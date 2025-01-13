@@ -72,21 +72,21 @@ mainNav {
             transform: rotate(90deg);
         }
 .btn-toggle-nav {
-    margin-left:25px;
-    background-color: #91e3f9;
+    margin-left:10px;
     border-radius:10%;
 }
-.btn-toggle-nav a {
-    display: inline-flex;
-    padding: .1875rem .5rem;
-    margin-top: .125rem;
-    margin-left: 1.25rem;
-    text-decoration: none;
-    font-family: "Arial", Helvetica, sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-    
-}
+    .btn-toggle-nav a {
+        display: inline-flex;
+        width:120px;
+        padding: .1875rem .5rem;
+        margin-top: .125rem;
+        margin-left: 1.25rem;
+        text-decoration: none;
+        font-family: "Arial", Helvetica, sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        box-shadow: 0 4px 6px -6px black;
+    }
 
     .btn-toggle-nav a:hover,
     .btn-toggle-nav a:focus {
