@@ -7,7 +7,25 @@
 
     <main>
         <div class="top-row px-4">
+
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+
+            <div class="dropdown ">
+                
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-success"
+                   id="dropdownUserProfile"
+                   data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-person-circle fs-3"></i>
+                    <span class="d-none d-sm-inline-block">Hany R</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUserProfile">
+                    <li><a class="dropdown-item" href="/profile">My Profile</a></li>
+                    <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
+                </ul>
+            </div>
         </div>
 
         <article class="content px-4">

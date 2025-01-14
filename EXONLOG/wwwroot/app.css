@@ -58,3 +58,10 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.styled-title {
+    font-family: 'Poppins', sans-serif; /* Modern font */
+    color: #007bff; /* Bootstrap primary color */
+    font-weight: 500; /* Medium weight for a balanced look */
+    margin: 0; /* Remove margin for better alignment */
+}

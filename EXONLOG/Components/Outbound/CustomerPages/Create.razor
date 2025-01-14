@@ -5,49 +5,46 @@
 @inject NavigationManager Navigation
 @inject EXONContext DbContext
 
-<h3 class="text-primary">Create New Customer</h3>
+<h4 class="styled-title border-bottom mb-2">Create New Customer</h4>
 
 <EditForm Model="customer" OnValidSubmit="HandleValidSubmit" FormName="Create">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div class="form-group mb-3">
+    <div class="form-group mb-2">
         <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
         <InputText id="name" class="form-control" @bind-Value="customer.Name" />
         <ValidationMessage For="() => customer.Name" class="text-danger" />
     </div>
-
-    <div class="form-group mb-3">
-        <label for="address" class="form-label">Address</label>
-        <InputText id="address" class="form-control" @bind-Value="customer.Address" />
-        <ValidationMessage For="() => customer.Address" class="text-danger" />
-    </div>
-
-    <div class="form-group mb-3">
-        <label for="contactNumber" class="form-label">Contact Number</label>
-        <InputText id="contactNumber" class="form-control" @bind-Value="customer.ContactNumber" />
-        <ValidationMessage For="() => customer.ContactNumber" class="text-danger" />
-    </div>
-
-    <div class="form-group mb-3">
+    <div class="form-group mb-2">
         <label for="email" class="form-label">Email</label>
         <InputText id="email" class="form-control" @bind-Value="customer.Email" />
         <ValidationMessage For="() => customer.Email" class="text-danger" />
     </div>
 
-    <div class="form-group mb-3">
+    <div class="form-group mb-2">
+        <label for="contactNumber" class="form-label">Contact Number</label>
+        <InputText id="contactNumber" class="form-control" @bind-Value="customer.ContactNumber" />
+        <ValidationMessage For="() => customer.ContactNumber" class="text-danger" />
+    </div>
+
+    <div class="form-group mb-2">
+        <label for="address" class="form-label">Address</label>
+        <InputText id="address" class="form-control" @bind-Value="customer.Address" />
+        <ValidationMessage For="() => customer.Address" class="text-danger" />
+    </div>
+
+    <div class="form-group mb-2">
         <label for="notes" class="form-label">Notes</label>
         <InputTextArea id="notes" class="form-control" @bind-Value="customer.Notes" />
         <ValidationMessage For="() => customer.Notes" class="text-danger" />
     </div>
-    <div class="form-group">
-        <label for="UserID">User ID <span class="text-danger">*</span></label>
-        <InputNumber id="UserID" class="form-control" @bind-Value="customer.UserID" />
-        <ValidationMessage For="@(() => customer.UserID)" />
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary m-1">Save</button>
+        <button type="button" class="btn btn-secondary m-1" @onclick="NavigateBack">Cancel</button>
     </div>
 
-    <button type="submit" class="btn btn-success">Save</button>
-    <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
+
 </EditForm>
 
 @code {

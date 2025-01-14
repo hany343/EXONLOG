@@ -5,9 +5,21 @@ mainNav {
     height: 100vh;
     height: -webkit-fill-available;
     max-height: 100vh;
+    height:100vh;
     overflow-x: auto;
     overflow-y: hidden;
-    
+    box-shadow: orange 0px 2px 3px 0px;
+}
+.logo-text {
+    font-family: 'Faster One', cursive; /* Apply the Faster One font */
+    color: orange; /* Set the text color to orange */
+    font-size: 1.2rem; /* Adjust the font size */
+    line-height: 1.5; /* Increase line height */
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide text outside the container */
+    border-right: 2px solid orange; /* Simulate cursor */
+    width: 0; /* Start with no visible text */
+    animation: typing 5s steps(30, end), blink 0.7s step-end infinite; /* Typing and cursor blink */
 }
 
 .b-example-divider {
@@ -19,6 +31,66 @@ mainNav {
     border-width: 1px 0;
     box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
 }
+.animation-container {
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+    height: 60px; /* Adjust based on your text size */
+    align-content:center;
+
+}
+
+.word {
+    position: absolute;
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide text outside the container */
+    opacity: 0;
+    animation: fadeSwap 12s infinite;
+    transition: opacity 1s; /* Smooth fade effect */
+}
+
+/* Default word styling */
+.default-word {
+  
+    font-family: 'Faster One', cursive; /* Apply the Faster One font */
+    color: orange; /* Set the text color to orange */
+    font-size: 20px; /* Adjust the font size */
+    animation-delay: 0s;
+}
+
+/* Alternate word styling */
+.alternate-word {
+   
+    font-size:14px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #068dbb;
+    animation-delay: 8s; /* Appears after 8 seconds */
+}
+@keyframes fadeSwap {
+    0%, 66.66% { /* Default word visible (first 8 seconds) */
+        opacity: 1;
+    }
+
+    66.67%, 100% { /* Default word hidden (last 4 seconds) */
+        opacity: 0;
+    }
+}
+
+@keyframes fadeAlternate {
+    0%, 66.66% { /* Alternate word hidden (first 8 seconds) */
+        opacity: 0;
+    }
+
+    66.67%, 100% { /* Alternate word visible (last 4 seconds) */
+        opacity: 1;
+    }
+}
+.alternate-word {
+    animation: fadeAlternate 12s infinite;
+}
+
+
 
 .bi {
     vertical-align: -.125em;
