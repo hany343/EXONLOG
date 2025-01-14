@@ -20,5 +20,9 @@
     <Folder Include="Migrations\" />
     <Folder Include="Model\Inventory\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\ex nlog.mp4" />
+  </ItemGroup>
   
 </Project>

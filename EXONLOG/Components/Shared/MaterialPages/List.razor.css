@@ -1,0 +1,9 @@
+﻿/* Add this to your main CSS file */
+.table th, .table td {
+    text-align: left;
+    padding: 8px;
+}
+
+.table th {
+    background-color: #f2f2f2;
+}

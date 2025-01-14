@@ -3,14 +3,11 @@
 <mainNav>
 
 
-    <div class=" p-3 " style="width: 200px; background-image: linear-gradient(#ffffff,#ffffff,#ffffff,orange);box-shadow: 0 1 1 1 ; ">
+    <div class=" p-3 " style="width: 200px; background-image: linear-gradient(#ffffff,#ffffff,#ffffff,orange); ; ">
         <a href="/" class="d-flex align-items-center pb-3 mb-3 link-dark text-decoration-none border-bottom">
 
-            <img width="40" height="40" src="../exonlog.png" />
-            <div class="animation-container">
-                <span class="word default-word">exonlog</span>
-                <span class="word alternate-word">Boundless Logistics Control</span>
-            </div>
+            <img width="160" height="46" src="../exonlog.gif" />
+            
 
             @*<span class=" logo-text">EXONLOG</span>*@
         </a>
@@ -30,12 +27,13 @@
             </li>
             <li class="mb-1">
                 <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
-                    Dashboard
+                    Materials
                 </button>
                 <div class="collapse" id="dashboard-collapse">
                     <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                        <li><a href="#" class="link-dark rounded">Overview</a></li>
-                        <li><a href="#" class="link-dark rounded">Weekly</a></li>
+                       
+                        <li> <a href="/Materials/Create" class="link-dark rounded "> <i class="bi bi-plus-circle fs-5"></i>Create</a></li>
+                        <li><a href="/Materials/List" class="link-dark rounded">List</a></li>
                         <li><a href="#" class="link-dark rounded">Monthly</a></li>
                         <li><a href="#" class="link-dark rounded">Annually</a></li>
                     </ul>
@@ -71,6 +69,7 @@
         </ul>
         
     </div>
+
 
     <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white visually-hidden" style="width: 380px;">
         <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">

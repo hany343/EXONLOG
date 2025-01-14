@@ -1,0 +1,32 @@
+﻿@page "/material/{MaterialId}"
+@using EXONLOG.Model.Shared
+@inject MaterialService MaterialService
+
+<h3>Material Details</h3>
+
+@if (material != null)
+{
+    <div>
+        <p><strong>Name:</strong> @material.Name</p>
+        <p><strong>Description:</strong> @material.Description</p>
+        <p><strong>Available Quantity:</strong> @availableQuantity</p>
+    </div>
+}
+else
+{
+    <p>Material not found.</p>
+}
+
+@code {
+    [Parameter]
+    public int MaterialId { get; set; }
+
+    private Material material;
+    private double availableQuantity;
+
+    protected override async Task OnInitializedAsync()
+    {
+        material = await MaterialService.GetMaterialDetailsAsync(MaterialId);
+        availableQuantity = await MaterialService.GetAvailableQuantityAsync(MaterialId);
+    }
+}

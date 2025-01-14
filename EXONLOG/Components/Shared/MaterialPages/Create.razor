@@ -1,0 +1,77 @@
+﻿@page "/Materials/Create"
+@using EXONLOG.Model.Shared
+@using EXONLOG.Model.Account
+@using EXONLOG.Data
+@using Microsoft.EntityFrameworkCore
+@inject NavigationManager Navigation
+@inject EXONContext DbContext
+
+<h3>Create Material</h3>
+
+<EditForm Model="material" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="name">Name</label>
+        <InputText id="name" @bind-Value="material.Name" />
+    </div>
+
+    <div>
+        <label for="description">Description</label>
+        <InputText id="description" @bind-Value="material.Description" />
+    </div>
+
+    <div>
+        <label for="notes">Notes</label>
+        <InputText id="notes" @bind-Value="material.Notes" />
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary m-1">Save</button>
+        <button type="button" class="btn btn-secondary m-1" @onclick="NavigateBack">Cancel</button>
+    </div>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm(FormName = "Create")]
+    private Material material { set; get; } = new Material();
+
+    private async Task HandleValidSubmit()
+    {
+        if (Validatematerial())
+        {
+            //material.CreateDate = DateTime.UtcNow;
+            material.UserID = GetCurrentUserId(); // Replace with actual method to get current user ID
+
+            DbContext.Materials.Add(material);
+            await DbContext.SaveChangesAsync();
+            int newmaterialId = material.MaterialID;
+            Navigation.NavigateTo($"/Materials/Details/{newmaterialId}");
+        }
+    }
+
+    private bool Validatematerial()
+    {
+        bool isValid = true;
+
+        if (string.IsNullOrWhiteSpace(material.Name))
+        {
+            isValid = false;
+        }
+
+
+        return isValid;
+    }
+
+    private int GetCurrentUserId()
+    {
+        // TODO: Implement logic to retrieve the current user's ID
+        return 1; // Placeholder for the default admin user
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/Materials/List");
+    }
+}

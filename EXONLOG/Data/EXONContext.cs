@@ -142,13 +142,6 @@
                 .OnDelete(DeleteBehavior.Restrict);
 
           
-            // Material-Stock relationship: One Material has one Stock
-            modelBuilder.Entity<Material>()
-                .HasOne(m => m.Stock)
-                .WithOne(s => s.Material)
-                .HasForeignKey<Stock>(s => s.MaterialID)
-                .OnDelete(DeleteBehavior.Restrict);
-
             modelBuilder.Entity<Truck>()
                .HasIndex(t => new { t.TruckNumber, t.TrailerNumber })
                .IsUnique()

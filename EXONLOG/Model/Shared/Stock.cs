@@ -17,7 +17,7 @@
 
         [MaxLength(250)]
         [Column(TypeName = "nvarchar(100)")]
-        public string Location { get; set; } // Physical Location of the Stock
+        public string? Location { get; set; } // Physical Location of the Stock
 
         [Required]
         [ForeignKey("Material")]
@@ -28,13 +28,15 @@
         public double Quantity { get; set; } // Total Quantity of the Material in this Stock
 
         [Column(TypeName = "nvarchar(200)")]
-        public string Notes { get; set; } // Additional Notes about the Stock
+        public string? Notes { get; set; } // Additional Notes about the Stock
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the Stock was Created
+        public DateTime? LastUpdated { get; set; } // Last time stock was updated
+
 
         [Required]
         public int UserID { get; set; } // User who created or updated the Stock
-        public User User { get; set; } // Navigation Property for User
+        public User? User { get; set; } // Navigation Property for User
     }
 
 }

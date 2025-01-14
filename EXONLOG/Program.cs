@@ -1,4 +1,6 @@
+using EXONLOG;
 using EXONLOG.Components;
+using EXONLOG.Components.Shared.MaterialPages;
 using EXONLOG.Data;
 using EXONLOG.Model.Account;
 using Microsoft.AspNetCore.Identity;
@@ -9,9 +11,43 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+var primaryConnectionString = builder.Configuration.GetConnectionString("homeString");
+var secondaryConnectionString = builder.Configuration.GetConnectionString("alexString");
+
+string activeConnectionString;
+string serverName;
+if (await ConnectionHelper.TestConnectionAsync(primaryConnectionString))
+{
+    activeConnectionString = primaryConnectionString;
+    serverName = "Home";
+}
+else if (await ConnectionHelper.TestConnectionAsync(secondaryConnectionString))
+{
+    activeConnectionString = secondaryConnectionString;
+    serverName = "Alex";
+}
+else
+{
+    throw new Exception("Both connection strings failed to connect to the database.");
+}
+
 builder.Services.AddDbContext<EXONContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(activeConnectionString));
+
+// Register the active connection string in the service container
+builder.Services.AddSingleton(new ConnectionStringService
+{
+    ActiveConnectionString = serverName
+});
+
+
+// Register the MaterialService
+//builder.Services.AddScoped<MaterialService>();
+
+//// Add services to the container.
+//builder.Services.AddDbContext<EXONContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("homeString")));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

@@ -1,0 +1,46 @@
+﻿@page "/materials/list"
+@using EXONLOG.Model.Shared
+@inject MaterialService MaterialService
+
+<h3>Materials List</h3>
+
+@if (materials == null)
+{
+    <p>Loading materials...</p>
+}
+else if (!materials.Any())
+{
+    <p>No materials found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Available Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var material in materials)
+            {
+                <tr>
+                    <td>@material.Name</td>
+                    <td>@material.Description</td>
+                    <td>@material.AvailableQuantity</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IQueryable<Material> materials;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch all materials with their related stocks and available quantities
+        materials = await MaterialService.GetAllMaterialsAsync();
+    }
+}

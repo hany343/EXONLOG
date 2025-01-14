@@ -96,3 +96,11 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+
+.server-name {
+    font-family: 'Arial', sans-serif;
+    color: #28a745; /* Bootstrap "success" green */
+    font-size: 1.0rem;
+    font-weight: bold;
+}

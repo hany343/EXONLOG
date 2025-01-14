@@ -1,5 +1,5 @@
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family:'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 a, .btn-link {
@@ -64,4 +64,17 @@ h1:focus {
     color: #007bff; /* Bootstrap primary color */
     font-weight: 500; /* Medium weight for a balanced look */
     margin: 0; /* Remove margin for better alignment */
+}
+
+.homepage {
+    min-height: calc(100vh - 100px); /* Adjust based on top content if needed */
+    margin: 0;
+    padding: 0;
+    background-image: url('exonlogo.png'); /* Replace with the path to your image */
+    background-size: contain; /* Ensures the image covers the entire page */
+    background-repeat: no-repeat; /* Prevents tiling of the image */
+    background-position: center; /* Centers the image */
+    height: 100%; /* Ensures the background takes up the full viewport height */
+    width: 100%; /* Ensures the background takes up the full viewport width */
+    overflow: hidden; /* Prevents scrolling */
 }
