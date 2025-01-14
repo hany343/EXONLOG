@@ -9,7 +9,13 @@
         {
             try
             {
-                using var connection = new SqlConnection(connectionString);
+                // Create a connection string builder to parse and modify the connection string
+                var builder = new SqlConnectionStringBuilder(connectionString)
+                {
+                    InitialCatalog = "" // Remove the database name to test connection to the server
+                };
+
+                using var connection = new SqlConnection(builder.ConnectionString);
                 await connection.OpenAsync();
                 return true;
             }

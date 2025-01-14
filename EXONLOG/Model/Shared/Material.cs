@@ -32,6 +32,9 @@
         public int UserID { get; set; } // Foreign Key to the User who created the material
         public User? User { get; set; } // Navigation Property for User
 
+        [Required]
+        public int MaterialTypeId { get; set; } // Foreign Key to the User who created the material
+        public MaterialType? MaterialType { get; set; } // Navigation Property for User
 
         // One-to-many relationship with Stock
         public ICollection<Stock> Stocks { get; set; } = new List<Stock>(); // A material can have multiple stock entries

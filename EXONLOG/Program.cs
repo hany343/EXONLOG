@@ -1,5 +1,6 @@
 using EXONLOG;
 using EXONLOG.Components;
+using EXONLOG.Components.Shared;
 using EXONLOG.Components.Shared.MaterialPages;
 using EXONLOG.Data;
 using EXONLOG.Model.Account;
@@ -52,6 +53,7 @@ builder.Services.AddSingleton(new ConnectionStringService
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddScoped<MaterialTypeService>();
 
 var app = builder.Build();
 
@@ -76,14 +78,14 @@ using (var scope = app.Services.CreateScope())
         dbContext.SaveChanges();
     }
 
-        // Helper function to hash passwords
-  string HashPassword(string password)
-{
-    var passwordHasher = new PasswordHasher<User>();
-    return passwordHasher.HashPassword(null, password);
-}
-// Seed users
-if (!dbContext.Users.Any())
+    // Helper function to hash passwords
+    string HashPassword(string password)
+    {
+        var passwordHasher = new PasswordHasher<User>();
+        return passwordHasher.HashPassword(null, password);
+    }
+    // Seed users
+    if (!dbContext.Users.Any())
     {
         dbContext.Users.Add(new User
         {

@@ -1,0 +1,63 @@
+﻿@page "/Materials/MaterialTypeCreate"
+@inject MaterialTypeService MaterialTypeService
+@inject NavigationManager NavigationManager
+@using EXONLOG.Model.Shared
+
+<EditForm Model="newMaterialType" OnValidSubmit="HandleValidSubmit">
+    <h3>Create Material Type</h3>
+    <div class="form-group">
+        <label for="materialTypeName">Material Type Name</label>
+        <InputText id="materialTypeName" class="form-control" @bind-Value="newMaterialType.MaterialTypeName" />
+        <ValidationMessage For="@(() => newMaterialType.MaterialTypeName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <InputText id="description" class="form-control" @bind-Value="newMaterialType.Description" />
+        <ValidationMessage For="@(() => newMaterialType.Description)" />
+    </div>
+
+    <div class="form-group">
+        <label for="notes">Notes</label>
+        <InputText id="notes" class="form-control" @bind-Value="newMaterialType.Notes" />
+        <ValidationMessage For="@(() => newMaterialType.Notes)" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Create</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+</EditForm>
+
+@code {
+    private MaterialType newMaterialType = new MaterialType
+    {
+        CreateDate = DateTime.UtcNow,
+        UserID = 1 // Set this dynamically based on the logged-in user
+    };
+
+    [Parameter] public EventCallback OnMaterialTypeCreated { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        await MaterialTypeService.AddMaterialTypeAsync(newMaterialType);
+        if (OnMaterialTypeCreated.HasDelegate)
+        {
+            await OnMaterialTypeCreated.InvokeAsync();
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/materialtypes/list");
+        }
+    }
+
+    private void Cancel()
+    {
+        if (OnMaterialTypeCreated.HasDelegate)
+        {
+            OnMaterialTypeCreated.InvokeAsync();
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/materialtypes/list");
+        }
+    }
+}

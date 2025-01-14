@@ -17,6 +17,27 @@
         <InputText id="name" @bind-Value="material.Name" />
     </div>
 
+    <div class="form-group">
+        <label for="materialType">Material Type</label>
+        @if (MaterialTypes.Count > 0)
+        {
+            <InputSelect id="materialType" class="form-control" @bind-Value="material.MaterialTypeId">
+                <option value="">-- Select Material Type --</option>
+                @foreach (var type in MaterialTypes)
+                {
+                    <option value="@type.MaterialTypeID">@type.MaterialTypeName</option>
+                }
+            </InputSelect>
+        }
+        else
+        {
+            <div>
+                <p>No material types available.</p>
+                <button type="button" class="btn btn-primary" @onclick="ShowAddMaterialTypeModal">Add Material Type</button>
+            </div>
+        }
+    </div>
+
     <div>
         <label for="description">Description</label>
         <InputText id="description" @bind-Value="material.Description" />
@@ -33,9 +54,25 @@
     </div>
 </EditForm>
 
+
+
+<MaterialTypeCreate Show="showAddMaterialTypeModal" OnClose="CloseAddMaterialTypeModal">
+    <MaterialTypeCreate OnMaterialTypeAdded="RefreshMaterialTypes" />
+</MaterialTypeCreate>
+
 @code {
     [SupplyParameterFromForm(FormName = "Create")]
     private Material material { set; get; } = new Material();
+    private MaterialTypeService typeService;
+    private List<MaterialType> MaterialTypes = new();
+    private bool showAddMaterialTypeModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch available material types
+        MaterialTypes = await typeService.GetMaterialTypesAsync() ?? new List<MaterialType>();
+
+    }
 
     private async Task HandleValidSubmit()
     {
@@ -62,6 +99,15 @@
 
 
         return isValid;
+    }
+    private void ShowAddMaterialTypeModal()
+    {
+        showAddMaterialTypeModal = true;
+    }
+
+    private void CloseAddMaterialTypeModal()
+    {
+        showAddMaterialTypeModal = false;
     }
 
     private int GetCurrentUserId()

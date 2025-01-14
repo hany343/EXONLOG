@@ -14,9 +14,10 @@
         /// Shared Models
         /// </summary>
         public DbSet<Material> Materials { get; set; }
+        public DbSet<MaterialType> MaterialTypes { get; set; }
         public DbSet<Stock> Stocks { get; set; }
         public DbSet<StockMovement> StockMovements { get; set; }
-
+        
 
         /// <summary>
         /// Account Models
@@ -76,6 +77,12 @@
                 .HasOne(m => m.User)
                 .WithMany() // One User can create many materials
                 .HasForeignKey(m => m.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Material>()
+                .HasOne(m => m.MaterialType)
+                .WithMany() // One User can create many materials
+                .HasForeignKey(m => m.MaterialTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Customer>()
