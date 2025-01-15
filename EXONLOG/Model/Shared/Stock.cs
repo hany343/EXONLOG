@@ -14,6 +14,7 @@
         [MaxLength(100)]
         [Column(TypeName = "nvarchar(100)")]
         public string Name { get; set; } // Stock Name (e.g., Warehouse A)
+        
 
         [MaxLength(250)]
         [Column(TypeName = "nvarchar(100)")]

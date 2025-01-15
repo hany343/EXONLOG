@@ -17,7 +17,7 @@
         public DbSet<MaterialType> MaterialTypes { get; set; }
         public DbSet<Stock> Stocks { get; set; }
         public DbSet<StockMovement> StockMovements { get; set; }
-        
+
 
         /// <summary>
         /// Account Models
@@ -34,7 +34,7 @@
         public DbSet<Importer> Importers { get; set; }
         public DbSet<Port> Ports { get; set; }
         public DbSet<OutLading> OutLadings { get; set; } // DbSet for Lading
-       
+
         /// <summary>
         /// Transportation models
         /// </summary>
@@ -72,50 +72,24 @@
             }
 
 
-            #region User
-            modelBuilder.Entity<User>()
-               .HasOne(m => m.Role)
-               .WithMany() // One User can create many materials
-               .HasForeignKey(m => m.RoleId)
-               .OnDelete(DeleteBehavior.Restrict);
+            // Example: Configure relationships with User
+            modelBuilder.Entity<Material>()
+                .HasOne(m => m.User)
+                .WithMany() // One User can create many materials
+                .HasForeignKey(m => m.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Material>()
-               .HasOne(m => m.User)
-               .WithMany() // One User can create many materials
-               .HasForeignKey(m => m.UserID)
-               .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MaterialType>()
-              .HasOne(m => m.User)
-              .WithMany() // One User can create many materials
-              .HasForeignKey(m => m.UserID)
-              .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Stock>()
-              .HasOne(m => m.User)
-              .WithMany() // One User can create many materials
-              .HasForeignKey(m => m.UserID)
-              .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<StockMovement>()
-              .HasOne(m => m.User)
-              .WithMany() // One User can create many materials
-              .HasForeignKey(m => m.UserID)
-              .OnDelete(DeleteBehavior.Restrict);
-
-
+                .HasOne(m => m.MaterialType)
+                .WithMany() // One User can create many materials
+                .HasForeignKey(m => m.MaterialTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Customer>()
                 .HasOne(c => c.User)
                 .WithMany() // One User can create many customers
                 .HasForeignKey(c => c.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Contract>()
-               .HasOne(u => u.User)
-               .WithMany()
-               .HasForeignKey(c => c.UserID)
-               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Importer>()
                 .HasOne(i => i.User)
@@ -129,7 +103,18 @@
                 .HasForeignKey(p => p.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-         
+            // User-Entity Relationships
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Materials)
+                .WithOne(m => m.User)
+                .HasForeignKey(m => m.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Customers)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Importers)
@@ -143,72 +128,11 @@
                 .HasForeignKey(p => p.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-           
-            #endregion
-            #region
-
-            #region Materials
-
-            modelBuilder.Entity<Material>()
-                .HasOne(m => m.MaterialType)
-                .WithMany() // One User can create many materials
-                .HasForeignKey(m => m.MaterialTypeId)
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Contracts)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            #endregion Stocks
-
-            modelBuilder.Entity<Stock>()
-                .HasOne(m => m.Material)
-                .WithMany() // One User can create many materials
-                .HasForeignKey(m => m.MaterialID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-
-
 
             // Customer-Contract relationship: One Customer can have many Contracts
             modelBuilder.Entity<Customer>()
@@ -224,7 +148,7 @@
                 .HasForeignKey(o => o.ContractID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-          
+
             modelBuilder.Entity<Truck>()
                .HasIndex(t => new { t.TruckNumber, t.TrailerNumber })
                .IsUnique()
