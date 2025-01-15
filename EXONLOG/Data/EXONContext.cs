@@ -103,8 +103,6 @@
               .HasForeignKey(m => m.UserID)
               .OnDelete(DeleteBehavior.Restrict);
 
-
-
             modelBuilder.Entity<Customer>()
                 .HasOne(c => c.User)
                 .WithMany() // One User can create many customers
@@ -117,6 +115,33 @@
                .HasForeignKey(c => c.UserID)
                .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Order>()
+               .HasOne(p => p.User)
+               .WithMany() // One User can create many ports
+               .HasForeignKey(p => p.UserID)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure the relationships for FirstWeigher and SecondWeigher
+            modelBuilder.Entity<OutLading>()
+                .HasOne(l => l.User)  // First weigher as a user
+                .WithMany()  // Assuming each User can be the first weigher in many ladings
+                .HasForeignKey(l => l.UserID)
+                .OnDelete(DeleteBehavior.Restrict);  // Handle delete behavior
+
+            modelBuilder.Entity<OutLading>()
+               .HasOne(l => l.FirstWeigher)  // First weigher as a user
+               .WithMany()  // Assuming each User can be the first weigher in many ladings
+               .HasForeignKey(l => l.FirstWeigherID)
+               .OnDelete(DeleteBehavior.Restrict);  // Handle delete behavior
+
+            modelBuilder.Entity<OutLading>()
+                .HasOne(l => l.SecondWeigher) // Second weigher as a user
+                .WithMany()
+                .HasForeignKey(l => l.SecondWeigherID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //////////////// User Outbound relations///////////////////////
+            ///
             modelBuilder.Entity<Importer>()
                 .HasOne(i => i.User)
                 .WithMany() // One User can create many importers
@@ -128,8 +153,6 @@
                 .WithMany() // One User can create many ports
                 .HasForeignKey(p => p.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
-
-         
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Importers)
@@ -179,36 +202,9 @@
             #endregion
             #region
 
-            #endregion
-            #region
+           
 
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-            #region
-
-            #endregion
-
-
+            #region Outbound
 
             // Customer-Contract relationship: One Customer can have many Contracts
             modelBuilder.Entity<Customer>()
@@ -224,24 +220,14 @@
                 .HasForeignKey(o => o.ContractID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-          
-            modelBuilder.Entity<Truck>()
-               .HasIndex(t => new { t.TruckNumber, t.TrailerNumber })
-               .IsUnique()
-               .HasDatabaseName("IX_Truck_TruckNumber_TrailerNumber"); // Optional: Name the index
+            // Configure the one-to-many relationship between Order and OutLading
+            modelBuilder.Entity<Order>()
+                .HasMany(o => o.OutLadings) // An Order has many OutLadings
+                .WithOne(ol => ol.Order) // Each OutLading is linked to one Order
+                .HasForeignKey(ol => ol.OrderID) // Foreign key in OutLading referring to Order
+                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of Order if OutLading exists
 
-            // Configure the relationships for FirstWeigher and SecondWeigher
-            modelBuilder.Entity<OutLading>()
-                .HasOne(l => l.FirstWeigher)  // First weigher as a user
-                .WithMany()  // Assuming each User can be the first weigher in many ladings
-                .HasForeignKey(l => l.FirstWeigherID)
-                .OnDelete(DeleteBehavior.Restrict);  // Handle delete behavior
-
-            modelBuilder.Entity<OutLading>()
-                .HasOne(l => l.SecondWeigher) // Second weigher as a user
-                .WithMany()
-                .HasForeignKey(l => l.SecondWeigherID)
-                .OnDelete(DeleteBehavior.Restrict);
+            
             // Configure other fields, such as constraints and defaults
             modelBuilder.Entity<OutLading>()
                 .Property(l => l.WeightStatus)
@@ -261,12 +247,18 @@
                 .Property(l => l.CreateDate)
                 .HasDefaultValueSql("GETDATE()"); // Set default date to current date
 
-            // Configure the one-to-many relationship between Order and OutLading
-            modelBuilder.Entity<Order>()
-                .HasMany(o => o.OutLadings) // An Order has many OutLadings
-                .WithOne(ol => ol.Order) // Each OutLading is linked to one Order
-                .HasForeignKey(ol => ol.OrderID) // Foreign key in OutLading referring to Order
-                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of Order if OutLading exists
+            #endregion
+
+
+
+            #region Trans
+
+            modelBuilder.Entity<Truck>()
+              .HasIndex(t => new { t.TruckNumber, t.TrailerNumber })
+              .IsUnique()
+              .HasDatabaseName("IX_Truck_TruckNumber_TrailerNumber"); // Optional: Name the index
+            #endregion
+
 
 
             // Add more relationships as needed
