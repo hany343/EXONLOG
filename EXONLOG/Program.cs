@@ -33,6 +33,7 @@ else
     throw new Exception("Both connection strings failed to connect to the database.");
 }
 
+
 builder.Services.AddDbContext<EXONContext>(options =>
     options.UseSqlServer(activeConnectionString));
 
@@ -53,6 +54,7 @@ builder.Services.AddSingleton(new ConnectionStringService
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
 builder.Services.AddScoped<MaterialTypeService>();
 
 var app = builder.Build();

@@ -328,11 +328,21 @@ namespace EXONLOG.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShipmentStatusId"));
 
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(0)")
+                        .HasDefaultValueSql("GETDATE()");
+
                     b.Property<string>("StatusName")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
                     b.HasKey("ShipmentStatusId");
+
+                    b.HasIndex("UserID");
 
                     b.ToTable("ShipmentStatuses");
                 });
@@ -392,8 +402,8 @@ namespace EXONLOG.Migrations
                     b.Property<int>("CustomerID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Deadline")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("Deadline")
+                        .HasColumnType("datetime2(0)");
 
                     b.Property<int>("MaterialID")
                         .HasColumnType("int");
@@ -404,23 +414,18 @@ namespace EXONLOG.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(250)");
-
-                    b.Property<int>("PortID")
-                        .HasColumnType("int");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
                     b.Property<string>("RefNumber")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2(0)");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
@@ -430,8 +435,6 @@ namespace EXONLOG.Migrations
                     b.HasIndex("CustomerID");
 
                     b.HasIndex("MaterialID");
-
-                    b.HasIndex("PortID");
 
                     b.HasIndex("UserID");
 
@@ -693,9 +696,6 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("MaterialTypeID")
-                        .HasColumnType("int");
-
                     b.Property<int>("MaterialTypeId")
                         .HasColumnType("int");
 
@@ -711,8 +711,6 @@ namespace EXONLOG.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("MaterialID");
-
-                    b.HasIndex("MaterialTypeID");
 
                     b.HasIndex("MaterialTypeId");
 
@@ -770,13 +768,13 @@ namespace EXONLOG.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<DateTime?>("LastUpdated")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2(0)");
 
                     b.Property<string>("Location")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("MaterialID")
+                    b.Property<int>("MaterialId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -795,7 +793,7 @@ namespace EXONLOG.Migrations
 
                     b.HasKey("StockID");
 
-                    b.HasIndex("MaterialID");
+                    b.HasIndex("MaterialId");
 
                     b.HasIndex("UserID");
 
@@ -823,14 +821,14 @@ namespace EXONLOG.Migrations
                     b.Property<int>("StockId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("StockMovementId");
 
                     b.HasIndex("StockId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserID");
 
                     b.ToTable("StockMovements");
                 });
@@ -928,6 +926,8 @@ namespace EXONLOG.Migrations
 
                     b.HasKey("TransCompanyID");
 
+                    b.HasIndex("UserID");
+
                     b.ToTable("TransCompanies");
                 });
 
@@ -981,7 +981,12 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
                     b.HasKey("TruckID");
+
+                    b.HasIndex("UserID");
 
                     b.HasIndex("TruckNumber", "TrailerNumber")
                         .IsUnique()
@@ -993,9 +998,9 @@ namespace EXONLOG.Migrations
             modelBuilder.Entity("EXONLOG.Model.Account.User", b =>
                 {
                     b.HasOne("EXONLOG.Model.Account.Role", "Role")
-                        .WithMany("Users")
+                        .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Role");
@@ -1012,7 +1017,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Shipment");
@@ -1023,7 +1028,7 @@ namespace EXONLOG.Migrations
             modelBuilder.Entity("EXONLOG.Model.Inbound.Importer", b =>
                 {
                     b.HasOne("EXONLOG.Model.Account.User", "User")
-                        .WithMany("Importers")
+                        .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1072,7 +1077,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Batch");
@@ -1101,19 +1106,19 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Shared.Material", "Material")
                         .WithMany()
                         .HasForeignKey("MaterialID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Outbound.Port", "Port")
                         .WithMany()
                         .HasForeignKey("PortID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Inbound.ShipmentStatus", "ShipmentStatus")
                         .WithMany("Shipments")
                         .HasForeignKey("ShipmentStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Inbound.Supplier", "Supplier")
@@ -1125,7 +1130,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Importer");
@@ -1141,12 +1146,23 @@ namespace EXONLOG.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EXONLOG.Model.Inbound.ShipmentStatus", b =>
+                {
+                    b.HasOne("EXONLOG.Model.Account.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EXONLOG.Model.Inbound.Supplier", b =>
                 {
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1163,17 +1179,11 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Shared.Material", "Material")
                         .WithMany()
                         .HasForeignKey("MaterialID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EXONLOG.Model.Outbound.Port", "Port")
-                        .WithMany()
-                        .HasForeignKey("PortID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "User")
-                        .WithMany("Contracts")
+                        .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1182,15 +1192,13 @@ namespace EXONLOG.Migrations
 
                     b.Navigation("Material");
 
-                    b.Navigation("Port");
-
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Outbound.Customer", b =>
                 {
                     b.HasOne("EXONLOG.Model.Account.User", "User")
-                        .WithMany("Customers")
+                        .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1209,7 +1217,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Contract");
@@ -1222,7 +1230,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Trans.Driver", "Driver")
                         .WithMany()
                         .HasForeignKey("DriverID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "FirstWeigher")
@@ -1250,13 +1258,13 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Trans.Truck", "Truck")
                         .WithMany()
                         .HasForeignKey("TruckID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Driver");
@@ -1277,7 +1285,7 @@ namespace EXONLOG.Migrations
             modelBuilder.Entity("EXONLOG.Model.Outbound.Port", b =>
                 {
                     b.HasOne("EXONLOG.Model.Account.User", "User")
-                        .WithMany("Ports")
+                        .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1287,18 +1295,14 @@ namespace EXONLOG.Migrations
 
             modelBuilder.Entity("EXONLOG.Model.Shared.Material", b =>
                 {
-                    b.HasOne("EXONLOG.Model.Shared.MaterialType", null)
-                        .WithMany("Materials")
-                        .HasForeignKey("MaterialTypeID");
-
                     b.HasOne("EXONLOG.Model.Shared.MaterialType", "MaterialType")
-                        .WithMany()
+                        .WithMany("Materials")
                         .HasForeignKey("MaterialTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "User")
-                        .WithMany("Materials")
+                        .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1313,7 +1317,7 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1323,14 +1327,14 @@ namespace EXONLOG.Migrations
                 {
                     b.HasOne("EXONLOG.Model.Shared.Material", "Material")
                         .WithMany("Stocks")
-                        .HasForeignKey("MaterialID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Material");
@@ -1341,15 +1345,15 @@ namespace EXONLOG.Migrations
             modelBuilder.Entity("EXONLOG.Model.Shared.StockMovement", b =>
                 {
                     b.HasOne("EXONLOG.Model.Shared.Stock", "Stock")
-                        .WithMany()
+                        .WithMany("StockMovements")
                         .HasForeignKey("StockId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Stock");
@@ -1362,28 +1366,32 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Account.Role", b =>
+            modelBuilder.Entity("EXONLOG.Model.Trans.TransCompany", b =>
                 {
-                    b.Navigation("Users");
+                    b.HasOne("EXONLOG.Model.Account.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Account.User", b =>
+            modelBuilder.Entity("EXONLOG.Model.Trans.Truck", b =>
                 {
-                    b.Navigation("Contracts");
+                    b.HasOne("EXONLOG.Model.Account.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("Customers");
-
-                    b.Navigation("Importers");
-
-                    b.Navigation("Materials");
-
-                    b.Navigation("Ports");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.Batch", b =>
@@ -1434,6 +1442,11 @@ namespace EXONLOG.Migrations
             modelBuilder.Entity("EXONLOG.Model.Shared.MaterialType", b =>
                 {
                     b.Navigation("Materials");
+                });
+
+            modelBuilder.Entity("EXONLOG.Model.Shared.Stock", b =>
+                {
+                    b.Navigation("StockMovements");
                 });
 #pragma warning restore 612, 618
         }

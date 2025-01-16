@@ -46,15 +46,11 @@
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the User was Created
 
+        [Required]
         public int RoleId { get; set; }
-        public Role Role { get; set; }// Role of the user (e.g., "Admin", "StockManager", etc.)
+        public Role? Role { get; set; }// Role of the user (e.g., "Admin", "StockManager", etc.)
 
-        // Navigation Properties
-        public ICollection<Material> Materials { get; set; } // Materials created by the User
-        public ICollection<Customer> Customers { get; set; } // Customers created by the User
-        public ICollection<Importer> Importers { get; set; } // Importers created by the User
-        public ICollection<Port> Ports { get; set; } // Ports created by the User
-        public ICollection<Contract> Contracts { get; set; } // Contracts created by the User
+        
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EXONLOG.Model.Account;
+using System.ComponentModel.DataAnnotations;
 
 namespace EXONLOG.Model.Trans
 {
@@ -22,7 +23,9 @@ namespace EXONLOG.Model.Trans
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the company was added
 
-        public int UserID { get; set; } // Foreign Key to User who created the record
+        [Required]
+        public int UserID { get; set; } // Foreign Key to the User who created the material
+        public User? User { get; set; } // Navigation Property for User
     }
 
 }

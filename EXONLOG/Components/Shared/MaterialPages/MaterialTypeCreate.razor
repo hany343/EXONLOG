@@ -1,9 +1,12 @@
 ﻿@page "/Materials/MaterialTypeCreate"
 @inject MaterialTypeService MaterialTypeService
 @inject NavigationManager NavigationManager
+
+@using Microsoft.EntityFrameworkCore
 @using EXONLOG.Model.Shared
 
-<EditForm Model="newMaterialType" OnValidSubmit="HandleValidSubmit">
+
+<EditForm Model="newMaterialType" OnValidSubmit="HandleValidSubmit" FormName="MaterialTypeForm">
     <h3>Create Material Type</h3>
     <div class="form-group">
         <label for="materialTypeName">Material Type Name</label>
@@ -27,33 +30,45 @@
     <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
 </EditForm>
 
-@code {
-    private MaterialType newMaterialType = new MaterialType
-    {
-        CreateDate = DateTime.UtcNow,
-        UserID = 1 // Set this dynamically based on the logged-in user
-    };
 
+@code {
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnMaterialTypeCreated { get; set; }
+
+    [SupplyParameterFromForm(FormName = "MaterialTypeForm")]
+    private MaterialType newMaterialType { set; get; } = new MaterialType();
+
+
 
     private async Task HandleValidSubmit()
     {
-        await MaterialTypeService.AddMaterialTypeAsync(newMaterialType);
-        if (OnMaterialTypeCreated.HasDelegate)
+        try
         {
-            await OnMaterialTypeCreated.InvokeAsync();
+            newMaterialType.CreateDate = DateTime.UtcNow;
+            newMaterialType.UserID = 1;// Replace with dynamic logic
+            await MaterialTypeService.AddMaterialTypeAsync(newMaterialType);
+
+            if (OnMaterialTypeCreated.HasDelegate)
+            {
+                await OnMaterialTypeCreated.InvokeAsync();
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/materialtypes/list");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            NavigationManager.NavigateTo("/materialtypes/list");
+            Console.WriteLine(ex.Message); // Log error
         }
     }
 
-    private void Cancel()
+    private async Task Cancel()
     {
-        if (OnMaterialTypeCreated.HasDelegate)
+        if (OnClose.HasDelegate)
         {
-            OnMaterialTypeCreated.InvokeAsync();
+            await OnClose.InvokeAsync();
         }
         else
         {

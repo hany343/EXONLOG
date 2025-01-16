@@ -8,6 +8,10 @@ namespace EXONLOG.Components.Shared
     {
         private readonly EXONContext _context;
 
+        public MaterialTypeService(EXONContext context)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
         public async Task AddMaterialTypeAsync(MaterialType materialType)
         {
             _context.MaterialTypes.Add(materialType);

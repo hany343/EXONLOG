@@ -11,7 +11,8 @@ namespace EXONLOG.Model.Shared
 
         [Required]
         public int StockId { get; set; }
-        
+        public Stock? Stock { get; set; }
+
         [Column(TypeName = "nvarchar(100)")]
         public string MovementType { get; set; } // Inbound or Outbound
 
@@ -24,7 +25,7 @@ namespace EXONLOG.Model.Shared
         public int UserID { get; set; } // User who created or updated the Stock
         public User? User { get; set; } // Navigation Property for User
 
-        public Stock Stock { get; set; }
+        
 
     }
 

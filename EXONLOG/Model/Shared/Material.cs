@@ -37,7 +37,7 @@
         public MaterialType? MaterialType { get; set; } // Navigation Property for User
 
         // One-to-many relationship with Stock
-        public ICollection<Stock> Stocks { get; set; } = new List<Stock>(); // A material can have multiple stock entries
+        public ICollection<Stock>? Stocks { get; set; } = new List<Stock>(); // A material can have multiple stock entries
 
         // Computed Property for Available Quantity (from all Stock entries)
         [NotMapped]

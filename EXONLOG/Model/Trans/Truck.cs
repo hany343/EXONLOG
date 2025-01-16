@@ -1,5 +1,6 @@
 ﻿namespace EXONLOG.Model.Trans
 {
+    using EXONLOG.Model.Account;
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
@@ -35,6 +36,10 @@
         public string Notes { get; set; } // Additional notes about the truck
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Record creation date
+
+        [Required]
+        public int UserID { get; set; } // Foreign Key to the User who created the material
+        public User? User { get; set; } // Navigation Property for User
     }
 
 }

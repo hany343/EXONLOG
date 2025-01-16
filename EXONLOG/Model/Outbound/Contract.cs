@@ -12,10 +12,10 @@
         [Key]
         public int ID { get; set; } // Primary Key
 
-        [Required]
+        
         [MaxLength(50)]
         [Column(TypeName = "nvarchar(100)")]
-        public string RefNumber { get; set; } // Unique Reference Number for the Contract
+        public string? RefNumber { get; set; } // Unique Reference Number for the Contract
 
         [Required]
         [MaxLength(100)]
@@ -23,24 +23,16 @@
         public string Name { get; set; } // Name or Title of the Contract
 
         [Required]
-        [ForeignKey("User")]
         public int UserID { get; set; } // Foreign Key to User (creator of the contract)
-        public User User { get; set; } // Navigation Property for the User who created the contract
+        public User? User { get; set; } // Navigation Property for the User who created the contract
 
         [Required]
-        [ForeignKey("Material")]
         public int MaterialID { get; set; } // Foreign Key to Material
-        public Material Material { get; set; } // Navigation Property
+        public Material? Material { get; set; } // Navigation Property
 
         [Required]
-        [ForeignKey("Port")]
-        public int PortID { get; set; } // Foreign Key to Port
-        public Port Port { get; set; } // Navigation Property for the Port
-
-        [Required]
-        [ForeignKey("Customer")]
         public int CustomerID { get; set; } // Foreign Key to Customer
-        public Customer Customer { get; set; } // Navigation Property for Customer
+        public Customer? Customer { get; set; } // Navigation Property for Customer
 
         [Required]
         [Column(TypeName = "datetime2(0)")]
@@ -49,18 +41,18 @@
         [Required]
         public double Quantity { get; set; } // Quantity of Material Required
 
-        [Required]
-        public DateTime StartDate { get; set; } // Contract Start Date
+        [Column(TypeName = "datetime2(0)")]
+        public DateTime? StartDate { get; set; } // Contract Start Date
 
-        [Required]
-        public DateTime Deadline { get; set; } // Contract Deadline
+        [Column(TypeName = "datetime2(0)")]
+        public DateTime? Deadline { get; set; } // Contract Deadline
 
         [MaxLength(500)]
         [Column(TypeName = "nvarchar(250)")]
-        public string Notes { get; set; } // Additional Notes or Comments about the Contract
+        public string? Notes { get; set; } // Additional Notes or Comments about the Contract
 
         // Navigation Property for Orders
-        public ICollection<Order> Orders { get; set; } // A contract can have many orders
+        public ICollection<Order>? Orders { get; set; } // A contract can have many orders
 
     }
 
