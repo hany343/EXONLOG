@@ -61,7 +61,7 @@ namespace EXONLOG.Model.Outbound
         public int? ApprovedUserID { get; set; } // User who approves the lading
 
         [Column(TypeName = "nvarchar(100)")]
-        public string? RepresentativeName { get; set; } // Name of the representative for the shipment
+        public string? RepresentativeName { get; set; } // MaterialName of the representative for the shipment
         [Column(TypeName = "nvarchar(250)")]
         public string? WeighNotes { get; set; } // Additional notes related to the weigh process
 

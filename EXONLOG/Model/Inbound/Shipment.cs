@@ -35,7 +35,7 @@ namespace EXONLOG.Model.Inbound
 
         // Navigation Properties
         public int ShipmentStatusId { get; set; }
-        public ShipmentStatus ShipmentStatus { get; set; }
+        public ShipmentStatus? ShipmentStatus { get; set; }
         public Material? Material { get; set; } // Related Material
         public Port? Port { get; set; } // Related Port
         public Supplier? Supplier { get; set; } // Related Supplier
@@ -45,7 +45,7 @@ namespace EXONLOG.Model.Inbound
         [Required]
         [ForeignKey("Importer")]
         public int ImporterID { get; set; } // Foreign Key to Importer
-        public Importer Importer { get; set; } // Navigation Property for Importer
+        public Importer? Importer { get; set; } // Navigation Property for Importer
 
     }
 

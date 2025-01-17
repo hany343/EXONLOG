@@ -16,7 +16,7 @@ else
 {
     <div>
         <h4>Customer Information</h4>
-        <p><strong>Name:</strong> @Customer.Name</p>
+        <p><strong>Name:</strong> @Customer.CustomerName</p>
         <p><strong>Mobile:</strong> @Customer.ContactNumber</p>
         <p><strong>Address:</strong> @Customer.Address</p>
     </div>
@@ -38,7 +38,7 @@ else
                 {
                     <tr>
                         <td>@contract.RefNumber</td>
-                        <td>@contract.Material.Name</td>
+                        <td>@contract.Material.MaterialName</td>
                         <td>@contract.Quantity</td>
                         <td>@contract.StartDate.ToString()</td>
                         <td>@contract.Deadline.ToString()</td>

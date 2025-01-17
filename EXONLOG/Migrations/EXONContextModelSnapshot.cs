@@ -101,7 +101,7 @@ namespace EXONLOG.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<string>("BatchRef")
+                    b.Property<string>("BatchNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)");
 
@@ -140,12 +140,10 @@ namespace EXONLOG.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ImporterID"));
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("ContactNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreateDate")
@@ -154,16 +152,14 @@ namespace EXONLOG.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("ImporterName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<int>("UserID")
@@ -394,6 +390,11 @@ namespace EXONLOG.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
+                    b.Property<string>("ContractNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2(0)")
@@ -402,30 +403,29 @@ namespace EXONLOG.Migrations
                     b.Property<int>("CustomerID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("Deadline")
-                        .HasColumnType("datetime2(0)");
+                    b.Property<DateTime>("Deadline")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("MaterialID")
                         .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<int>("PortID")
+                        .HasColumnType("int");
+
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
                     b.Property<string>("RefNumber")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime2(0)");
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
@@ -435,6 +435,8 @@ namespace EXONLOG.Migrations
                     b.HasIndex("CustomerID");
 
                     b.HasIndex("MaterialID");
+
+                    b.HasIndex("PortID");
 
                     b.HasIndex("UserID");
 
@@ -461,12 +463,12 @@ namespace EXONLOG.Migrations
                         .HasColumnType("datetime2(0)")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Email")
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Notes")
@@ -499,7 +501,6 @@ namespace EXONLOG.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTime>("OrderDate")
@@ -660,14 +661,13 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("PortName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
@@ -696,16 +696,21 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("MaterialTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("MaterialName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("MaterialTypeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Prefix")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
@@ -777,16 +782,16 @@ namespace EXONLOG.Migrations
                     b.Property<int>("MaterialId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
+
+                    b.Property<string>("StockName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
@@ -856,6 +861,11 @@ namespace EXONLOG.Migrations
                         .HasColumnType("datetime2(0)")
                         .HasDefaultValueSql("GETDATE()");
 
+                    b.Property<string>("DriverName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<byte[]>("Image")
                         .HasColumnType("varbinary(max)");
 
@@ -864,18 +874,12 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("NationalID")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<int>("UserID")
@@ -953,7 +957,6 @@ namespace EXONLOG.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OwnerName")
@@ -1182,6 +1185,12 @@ namespace EXONLOG.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("EXONLOG.Model.Outbound.Port", "Port")
+                        .WithMany()
+                        .HasForeignKey("PortID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
@@ -1191,6 +1200,8 @@ namespace EXONLOG.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Material");
+
+                    b.Navigation("Port");
 
                     b.Navigation("User");
                 });

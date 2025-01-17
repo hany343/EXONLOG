@@ -1,4 +1,5 @@
-﻿using EXONLOG.Model.Shared;
+﻿using EXONLOG.Data;
+using EXONLOG.Model.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,11 +8,11 @@ namespace EXONLOG.Components.Shared
 {
     public class MaterialService
     {
-        private readonly DbContext _context;
+        private readonly EXONContext _context;
 
-        public MaterialService(DbContext context)
+        public MaterialService(EXONContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         // Method to get the available quantity of a material
@@ -21,7 +22,7 @@ namespace EXONLOG.Components.Shared
                                           .Include(m => m.Stocks) // Ensure related Stocks are loaded
                                           .FirstOrDefaultAsync(m => m.MaterialID == materialId);
 
-            return material?.AvailableQuantity ?? 0; // Return available quantity or 0 if not found
+            return material?.TotalQuantityInStock ?? 0; // Return available quantity or 0 if not found
         }
 
         // Method to get a specific material's details
@@ -35,11 +36,24 @@ namespace EXONLOG.Components.Shared
         }
 
         // Method to get all materials
-        public async Task<IQueryable<Material>> GetAllMaterialsAsync()
+        public async Task<List<Material>> GetMaterialsAsync()
         {
-            return _context.Set<Material>().AsQueryable();
+            return await _context.Materials.ToListAsync();
         }
 
+        public async Task<List<Material>> GetMaterialsWithStockTotalsAsync()
+        {
+            return await _context.Materials
+                .Select(material => new Material
+                {
+                    MaterialID = material.MaterialID,
+                    MaterialName = material.MaterialName,
+                    Prefix = material.Prefix,
+                    Description = material.Description,
+                    TotalQuantityInStock = material.Stocks.Sum(stock => stock.Quantity) // Sum of all stocks for this material
+                })
+                .ToListAsync();
+        }
         // Method to add a new material
         public async Task AddMaterialAsync(Material material)
         {

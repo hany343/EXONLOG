@@ -2,6 +2,7 @@ using EXONLOG;
 using EXONLOG.Components;
 using EXONLOG.Components.Shared;
 using EXONLOG.Components.Shared.MaterialPages;
+using EXONLOG.Components.Shared.StockPages;
 using EXONLOG.Data;
 using EXONLOG.Model.Account;
 using Microsoft.AspNetCore.Identity;
@@ -56,6 +57,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddScoped<MaterialTypeService>();
+builder.Services.AddScoped<MaterialService>();
+builder.Services.AddScoped<StockService>();
+
 
 var app = builder.Build();
 
@@ -74,7 +78,7 @@ using (var scope = app.Services.CreateScope())
             new Role
             {
 
-                RoleName = "Admin" // Assuming the Role model has a Name property },
+                RoleName = "Admin" // Assuming the Role model has a MaterialName property },
             }
         );
         dbContext.SaveChanges();
@@ -93,7 +97,7 @@ using (var scope = app.Services.CreateScope())
         {
 
             Username = "admin",
-            FullName = "Admin", // Name of the user
+            FullName = "Admin", // MaterialName of the user
             Email = "admin@exonlog.com", // Admin email
             PasswordHash = HashPassword("admin"), // Use a secure hashed password
             MobileNumber = "01102090157",

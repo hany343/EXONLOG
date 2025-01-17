@@ -17,7 +17,13 @@
         [Required]
         [MaxLength(100)]
         [Column(TypeName = "nvarchar(100)")]
-        public string Name { get; set; } // Material Name
+        public string MaterialName { get; set; } // Material MaterialName
+
+        [Required]
+        [MaxLength(100)]
+        [Column(TypeName = "nvarchar(100)")]
+        public string Prefix { get; set; } // Material MaterialName
+
 
         [MaxLength(500)]
         [Column(TypeName = "nvarchar(100)")]
@@ -41,14 +47,15 @@
 
         // Computed Property for Available Quantity (from all Stock entries)
         [NotMapped]
-        public double AvailableQuantity
-        {
-            get
-            {
-                // Sum the quantity of all related stock entries
-                return Stocks?.Sum(s => s.Quantity) ?? 0;
-            }
-        }
+        public double TotalQuantityInStock { get; set; }
+        //public double AvailableQuantity
+        //{
+        //    get
+        //    {
+        //        // Sum the quantity of all related stock entries
+        //        return Stocks.Sum(s => s.Quantity) ?? 0;
+        //    }
+        //}
 
         //public double GetAvailableQuantity(int materialId)
         //{

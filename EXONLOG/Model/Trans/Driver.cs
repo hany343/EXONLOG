@@ -13,7 +13,7 @@
         [Required]
         [MaxLength(100)]
         [Column(TypeName = "nvarchar(100)")]
-        public string Name { get; set; } // Driver's name
+        public string DriverName { get; set; } // Driver's name
 
         [MaxLength(15)]
         [Column(TypeName = "nvarchar(100)")]
@@ -28,14 +28,14 @@
 
         [Required]
         public int UserID { get; set; } // User who created or registered the driver
-        public User User { get; set; } // Navigation property for User
+        public User? User { get; set; } // Navigation property for User
 
         [MaxLength(250)]
         [Column(TypeName = "nvarchar(250)")]
         public string Address { get; set; } // Driver's address
 
         [Column(TypeName = "nvarchar(250)")]
-        public string Notes { get; set; } // Additional notes about the driver
+        public string? Notes { get; set; } // Additional notes about the driver
 
         public byte[]? Image { get; set; } // Optional image for the driver (stored as byte array)
 

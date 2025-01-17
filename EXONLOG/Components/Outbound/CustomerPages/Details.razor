@@ -20,7 +20,7 @@ else
     <div class="card mb-3">
         <div class="card-header bg-primary text-white">Customer Information</div>
         <div class="card-body">
-            <p><strong>Name:</strong> @customer.Name</p>
+            <p><strong>Name:</strong> @customer.CustomerName</p>
             <p><strong>Address:</strong> @customer.Address</p>
             <p><strong>Contact Number:</strong> @customer.ContactNumber</p>
             <p><strong>Email:</strong> @customer.Email</p>
@@ -56,7 +56,7 @@ else
                         {
                             <tr>
                                 <td>@contract.RefNumber</td>
-                                <td>@contract.Material?.Name</td>
+                                <td>@contract.Material?.MaterialName</td>
                                 <td>@contract.Quantity</td>
                                 <td>@contract.StartDate.ToString()</td>
                                 <td>@contract.Deadline.ToString()</td>

@@ -8,7 +8,7 @@ namespace EXONLOG.Model.Inbound
         public int ID { get; set; } // Primary Key
 
         [Column(TypeName = "nvarchar(100)")]
-        public string BatchRef { get; set; } = string.Empty; // Unique reference for the batch
+        public string BatchNumber { get; set; } = string.Empty; // Unique reference for the batch
 
         public int ShipmentID { get; set; } // Foreign key to the shipment
 

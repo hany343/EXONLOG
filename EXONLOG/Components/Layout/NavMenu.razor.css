@@ -122,7 +122,7 @@ mainNav {
 ul {
     border-radius: 20px;
 }
-li a {
-
+a .active{
+    background-color:darkcyan;
 }
 

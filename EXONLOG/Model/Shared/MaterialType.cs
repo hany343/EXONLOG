@@ -13,7 +13,7 @@ namespace EXONLOG.Model.Shared
         [Required]
         [MaxLength(100)]
         [Column(TypeName = "nvarchar(100)")]
-        public string MaterialTypeName { get; set; } // Material Name
+        public string MaterialTypeName { get; set; } // Material MaterialName
 
         [MaxLength(500)]
         [Column(TypeName = "nvarchar(100)")]
@@ -30,7 +30,7 @@ namespace EXONLOG.Model.Shared
 
 
         // One-to-many relationship with Stock
-        public ICollection<Material>? Materials { get; set; } = new List<Material>(); // A material can have multiple stock entries
+        public ICollection<Material> Materials { get; set; } = new List<Material>(); // A material can have multiple stock entries
 
     }
 }

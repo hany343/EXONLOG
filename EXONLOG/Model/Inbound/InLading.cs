@@ -41,7 +41,7 @@ namespace EXONLOG.Model.Inbound
         public int UserID { get; set; } // Foreign key to the user who created the record
 
         public int TransCompanyID { get; set; }  // Foreign key to TransCompany
-        public TransCompany TransCompany { get; set; }  // Navigation property
+        public TransCompany? TransCompany { get; set; }  // Navigation property
         // Navigation Properties
         public Batch? Batch { get; set; } // Related Batch
         public Truck? Truck { get; set; } // Related Truck

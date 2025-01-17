@@ -13,20 +13,20 @@
         [Required]
         [MaxLength(100)]
         [Column(TypeName = "nvarchar(100)")]
-        public string Name { get; set; } // Port Name
+        public string PortName { get; set; } // Port MaterialName
 
         [MaxLength(250)]
         [Column(TypeName = "nvarchar(100)")]
         public string Location { get; set; } // Port Location
 
         [Column(TypeName = "nvarchar(250)")]
-        public string Notes { get; set; } // Additional Notes
+        public string? Notes { get; set; } // Additional Notes
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the Port was Created
 
         [Required]
         public int UserID { get; set; } // Foreign Key to the User who created the port
-        public User User { get; set; } // Navigation Property for User
+        public User? User { get; set; } // Navigation Property for User
     }
 
 }

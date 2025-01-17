@@ -1,0 +1,62 @@
+﻿@page "/Materials/Details/{MaterialId:int}"
+@using EXONLOG.Model.Shared
+@inject MaterialService MaterialService
+@inject NavigationManager NavigationManager
+
+<h3>Material Details</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (material == null)
+{
+    <p>Material with ID @MaterialId could not be found. Please verify the ID or contact support.</p>
+}
+else
+{
+    <dl class="row">
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">@material.MaterialName</dd>
+
+        <dt class="col-sm-3">Available Quantity</dt>
+        <dd class="col-sm-9">@availableQuantity</dd>
+
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">@material.Description</dd>
+    </dl>
+
+}
+
+@code {
+    [Parameter]
+    public int MaterialId { get; set; }
+
+    private Material material;
+    private double availableQuantity;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            material = await MaterialService.GetMaterialDetailsAsync(MaterialId);
+            if (material == null)
+            {
+                NavigationManager.NavigateTo("/Materials");
+            }
+            else
+            {
+                availableQuantity = await MaterialService.GetAvailableQuantityAsync(MaterialId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading material details: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

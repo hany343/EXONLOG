@@ -208,13 +208,13 @@
 
             modelBuilder.Entity<Material>()
                 .HasOne(m => m.MaterialType)
-                .WithMany(t=>t.Materials) // One User can create many materials
+                .WithMany(t => t.Materials) // One User can create many materials
                 .HasForeignKey(m => m.MaterialTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Material>()
              .HasMany(s => s.Stocks)
-             .WithOne(m=>m.Material) // One User can create many materials
+             .WithOne(m => m.Material) // One User can create many materials
              .HasForeignKey(m => m.MaterialId)
              .OnDelete(DeleteBehavior.Restrict);
 
@@ -223,7 +223,7 @@
             .WithOne(m => m.Stock) // One User can create many materials
             .HasForeignKey(m => m.StockId)
             .OnDelete(DeleteBehavior.Restrict);
-            
+
             #endregion  Stocks & Materials
 
             #region Outbound
@@ -352,7 +352,7 @@
 
             modelBuilder.Entity<Shipment>()
                 .HasOne(l => l.ShipmentStatus)  // First weigher as a user
-                .WithMany(s=>s.Shipments)  // Assuming each User can be the first weigher in many ladings
+                .WithMany(s => s.Shipments)  // Assuming each User can be the first weigher in many ladings
                 .HasForeignKey(l => l.ShipmentStatusId)
                 .OnDelete(DeleteBehavior.Restrict);  // Handle delete behavior
 
@@ -418,6 +418,6 @@
             #endregion
 
         }
-    } 
+    }
 
 }

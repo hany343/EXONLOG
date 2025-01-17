@@ -10,7 +10,7 @@ namespace EXONLOG.Model.Trans
 
         [Required]
         [MaxLength(100)]
-        public string CompanyName { get; set; } // Name of the transport company
+        public string CompanyName { get; set; } // MaterialName of the transport company
 
         [MaxLength(200)]
         public string Address { get; set; } // Address of the transport company
@@ -23,9 +23,9 @@ namespace EXONLOG.Model.Trans
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the company was added
 
-        [Required]
-        public int UserID { get; set; } // Foreign Key to the User who created the material
+        public int UserID { get; set; } // Foreign Key to User who created the record
         public User? User { get; set; } // Navigation Property for User
+
     }
 
 }

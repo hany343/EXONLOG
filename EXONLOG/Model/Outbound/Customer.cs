@@ -13,7 +13,7 @@
         [Required]
         [MaxLength(100)]
         [Column(TypeName = "nvarchar(100)")]
-        public string Name { get; set; } // Customer Name
+        public string CustomerName { get; set; } // Customer MaterialName
 
         [MaxLength(100)]
         [Column(TypeName = "nvarchar(100)")]

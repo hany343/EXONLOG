@@ -21,7 +21,7 @@
         [Required]
         [MaxLength(100)]
         [Column(TypeName = "nvarchar(100)")]
-        public string FullName { get; set; } // Full Name of the User
+        public string FullName { get; set; } // Full MaterialName of the User
 
         [Required]
         [EmailAddress]

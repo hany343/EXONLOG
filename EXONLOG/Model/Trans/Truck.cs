@@ -33,7 +33,7 @@
 
         public double? Capacity { get; set; } // Maximum load capacity of the truck
 
-        public string Notes { get; set; } // Additional notes about the truck
+        public string? Notes { get; set; } // Additional notes about the truck
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Record creation date
 
