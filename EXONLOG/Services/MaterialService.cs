@@ -97,13 +97,15 @@ namespace EXONLOG.Services
                 await _context.SaveChangesAsync();
             }
         }
-        public double GetAvailableQuantity(int materialId)
+        public double GetFreeQuantity(int materialId)
         {
             var material = _context.Materials
                                     .Include(m => m.Stocks) // Ensure related Stocks are loaded
                                     .FirstOrDefault(m => m.MaterialID == materialId);
-
-            return material?.Stocks.Sum(s => s.Quantity)??0; // Get available quantity or 0 if material not found
+            material.ReservedQuantity = material.Contracts?.Sum(contract => contract.Quantity) ?? 0;
+            material.TotalStockQuantity = material.Stocks?.Sum(stock => stock.Quantity) ?? 0;
+            material.FreeQuantityInStock = material.TotalStockQuantity - material.ReservedQuantity;
+            return material?.FreeQuantityInStock??0; // Get available quantity or 0 if material not found
         }
     }
 }

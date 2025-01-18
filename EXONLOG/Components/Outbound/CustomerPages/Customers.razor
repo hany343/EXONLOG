@@ -3,6 +3,8 @@
 @using EXONLOG.Model.Outbound
 
 @inject CustomerService CustomerService
+@rendermode InteractiveServer
+
 @inject IJSRuntime JSRuntime
 
 <h3>Customer Management</h3>
@@ -46,28 +48,37 @@
     </div>
 }
 
-<!-- Customer Table -->
-@if (customers == null)
-{
-    <p>Loading customers...</p>
-}
-else if (!customers.Any())
-{
-    <p>No customers found.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
+<table class="table table-striped">
+    
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <!-- Customer Table -->
+        @if (customers == null)
+        {
+
             <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Address</th>
-                <th>Actions</th>
+                <td colspan="5" class="text-center">Loading customers ...</td>
             </tr>
-        </thead>
-        <tbody>
+        }
+        else if (!customers.Any())
+        {
+            <tr>
+                <td colspan="5" class="text-center">No customers found.</td>
+            </tr>
+
+        }
+        else
+        {
+
             @foreach (var customer in customers)
             {
                 <tr>
@@ -81,9 +92,11 @@ else
                     </td>
                 </tr>
             }
-        </tbody>
+
+
+        }
+    </tbody>
     </table>
-}
 @code {
     private List<Customer> customers;
     private Customer newCustomer = new Customer();

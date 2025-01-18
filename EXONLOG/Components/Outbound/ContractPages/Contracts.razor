@@ -104,7 +104,8 @@
                         </div>
                         <div class="col-md-6">
                             <label for="newMaterialID" class="form-label">Material</label>
-                            <select id="newMaterialID" class="form-select"   @onchange="OnMaterialSelected">
+                            <select id="newMaterialID" class="form-select" @onchange="OnMaterialSelected">
+                                
                                 @foreach (var material in materials)
                                 {
                                     <option value="@material.MaterialID">@material.MaterialName</option>
@@ -112,13 +113,13 @@
                             </select>
                             @if (selectedMaterial != null)
                             {
-                                <small class="text-muted">Available Quantity: @QStock</small>
+                                <small class="text-muted">Available Quantity: @FreeQuantity</small>
                             }
                         </div>
                         <div class="col-md-6">
                             <label for="newQuantity" class="form-label">Quantity</label>
                             <input id="newQuantity" type="number" class="form-control" @bind="newContract.Quantity" @oninput="ValidateQuantity" />
-                            @if (newContract.Quantity > QStock)
+                            @if (newContract.Quantity > FreeQuantity)
                             {
                                 <small class="text-danger">Entered quantity exceeds available stock!</small>
                             }
@@ -150,8 +151,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseCreateContractModal">Cancel</button>
-                    <button type="button" class="btn btn-primary" @onclick="SaveContractAsync">Save</button>
-                </div>
+                    @if (newContract.Quantity <= FreeQuantity)
+                    {<button type="button" class="btn btn-primary" @onclick="SaveContractAsync">Save</button>
+                    }
+                    </div>
             </div>
         </div>
     </div>
@@ -163,7 +166,6 @@
     private List<Contract> filteredContracts;
     private List<Material> materials;
     private List<Customer> customers;
-    private List<Port> ports;
     private bool isCreateContractModalOpen = false;
     private Contract newContract = new Contract();
     private string filterRefNumber;
@@ -181,13 +183,13 @@
         ApplyFilters();
     }
 
-    private void OpenCreateContractModal() => isCreateContractModalOpen = true;
+    //private void OpenCreateContractModal() => isCreateContractModalOpen = true;
     private void CloseCreateContractModal() => isCreateContractModalOpen = false;
 
     private async Task SaveContractAsync()
     {
-        QStock = materialService.GetAvailableQuantity(selectedMaterial.MaterialID);
-        if (newContract.Quantity > QStock)
+        FreeQuantity = materialService.GetFreeQuantity(selectedMaterial.MaterialID);
+        if (newContract.Quantity > FreeQuantity)
         {
             Console.WriteLine("Cannot save. Entered quantity exceeds available stock.");
             return;
@@ -197,8 +199,11 @@
         await contractService.AddContractAsync(newContract);
         contracts = await contractService.GetAllContractsAsync();
         ApplyFilters();
-        CloseCreateContractModal();
+
+        ResetCreateContractForm(); // Reset the form
+        CloseCreateContractModal(); // Close the modal
     }
+
 
     private void ApplyFilters()
     {
@@ -212,37 +217,81 @@
     }
 
     private Material selectedMaterial;
-    double QStock =0;
+    double FreeQuantity = 0;
 
     private void OnMaterialSelected(ChangeEventArgs e)
     {
         try
         {
-            var materialId = int.Parse(e.Value.ToString() ?? "0");
-            QStock = materialService.GetAvailableQuantity(materialId);
-            selectedMaterial = materials.FirstOrDefault(m => m.MaterialID == materialId);
-            newContract.Quantity = 0; // Reset quantity on material change
+            if (int.TryParse(e.Value?.ToString(), out int materialId) && materialId > 0)
+            {
+                selectedMaterial = materials.FirstOrDefault(m => m.MaterialID == materialId);
+                FreeQuantity = selectedMaterial != null ? materialService.GetFreeQuantity(materialId) : 0;
+                newContract.MaterialID = materialId; // Update the contract's MaterialID
+                newContract.Quantity = 0; // Reset quantity on material change
+            }
+            else
+            {
+                selectedMaterial = null;
+                FreeQuantity = 0; // Reset stock
+                newContract.MaterialID = 0; // Clear MaterialID
+            }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-
+            Console.WriteLine($"Error in OnMaterialSelected: {ex.Message}");
         }
-
     }
+
 
     private void ValidateQuantity(ChangeEventArgs e)
     {
-
-        var enteredQuantity = double.Parse(e.Value.ToString() ?? "0");
-
-        if (selectedMaterial != null && enteredQuantity > QStock)
+        try
         {
-            newContract.Quantity = QStock; // Cap to available stock
-                                           // Optional: Display alert or notify the user
-            Console.WriteLine("Entered quantity exceeds available stock.");
+            if (double.TryParse(e.Value?.ToString(), out double enteredQuantity))
+            {
+                if (enteredQuantity > FreeQuantity)
+                {
+                    newContract.Quantity = FreeQuantity; // Cap to available stock
+                    Console.WriteLine("Entered quantity exceeds available stock.");
+                }
+                else
+                {
+                    newContract.Quantity = enteredQuantity;
+                }
+            }
+            else
+            {
+                newContract.Quantity = 0; // Reset to 0 if input is invalid
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in ValidateQuantity: {ex.Message}");
         }
     }
 
+
+    private void OpenCreateContractModal()
+    {
+        ResetCreateContractForm(); // Reset the form on opening
+        isCreateContractModalOpen = true;
+
+        if (materials != null && materials.Any())
+        {
+            var defaultMaterial = materials.First();
+            selectedMaterial = defaultMaterial;
+            FreeQuantity = materialService.GetFreeQuantity(defaultMaterial.MaterialID);
+            newContract.MaterialID = defaultMaterial.MaterialID;
+        }
+    }
+
+    private void ResetCreateContractForm()
+    {
+        newContract = new Contract();
+        //selectedMaterial = null;
+        FreeQuantity = 0;
+    }
 
 
 }
