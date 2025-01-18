@@ -1,4 +1,4 @@
-﻿@page "/Customer/Details/{customerId:int}"
+﻿@page "/Customer/Details/{CustomerID:int}"
 @using EXONLOG.Model.Outbound
 @using EXONLOG.Data
 @using Microsoft.EntityFrameworkCore
@@ -73,7 +73,7 @@ else
 
 @code {
     [Parameter]
-    public int customerId { get; set; }
+    public int CustomerID { get; set; }
 
     private Customer? customer;
     private List<Contract>? contracts;
@@ -85,13 +85,13 @@ else
         {
             customer = await DbContext.Customers
                 .Include(c => c.User) // Load related user
-                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
+                .FirstOrDefaultAsync(c => c.CustomerID == CustomerID);
 
             if (customer != null)
             {
                 contracts = await DbContext.Contracts
                     .Include(c => c.Material) // Load related material
-                    .Where(c => c.CustomerID == customerId)
+                    .Where(c => c.CustomerID == CustomerID)
                     .ToListAsync();
             }
         }

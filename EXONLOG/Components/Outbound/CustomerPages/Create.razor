@@ -1,100 +1,148 @@
-﻿@page "/Customer/Create"
+﻿@page "/Customers"
+@using EXONLOG.Services
 @using EXONLOG.Model.Outbound
-@using EXONLOG.Data
-@using Microsoft.EntityFrameworkCore
-@inject NavigationManager Navigation
-@inject EXONContext DbContext
 
-<h4 class="styled-title border-bottom mb-2">Create New Customer</h4>
+@inject CustomerService CustomerService
+@inject IJSRuntime JSRuntime
 
-<EditForm Model="customer" OnValidSubmit="HandleValidSubmit" FormName="Create">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<h3>Customer Management</h3>
 
-    <div class="form-group mb-2">
-        <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-        <InputText id="name" class="form-control" @bind-Value="customer.CustomerName" />
-        <ValidationMessage For="() => customer.CustomerName" class="text-danger" />
+<!-- Header with Create Button -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <button class="btn btn-primary" @onclick="ShowCreateForm">Create New Customer</button>
+
+    <!-- Filter Section -->
+    <div class="d-flex align-items-center">
+        <input class="form-control me-2" type="text" placeholder="Search by Name" @bind="SearchTerm" />
+        <button class="btn btn-secondary" @onclick="ApplyFilter">Search</button>
     </div>
-    <div class="form-group mb-2">
-        <label for="email" class="form-label">Email</label>
-        <InputText id="email" class="form-control" @bind-Value="customer.Email" />
-        <ValidationMessage For="() => customer.Email" class="text-danger" />
+</div>
+
+<!-- Create Customer Form -->
+@if (ShowForm)
+{
+    <div class="card p-3 mb-4">
+        <h5>Create New Customer</h5>
+        <EditForm Model="@newCustomer" OnValidSubmit="CreateCustomer">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input id="name" class="form-control" @bind="newCustomer.CustomerName" />
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input id="email" class="form-control" @bind="newCustomer.Email" />
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">Phone</label>
+                <input id="phone" class="form-control" @bind="newCustomer.ContactNumber" />
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <textarea id="address" class="form-control" @bind="newCustomer.Address"></textarea>
+            </div>
+            <button class="btn btn-success" type="submit">Save</button>
+            <button class="btn btn-secondary" type="button" @onclick="CancelForm">Cancel</button>
+        </EditForm>
     </div>
+}
 
-    <div class="form-group mb-2">
-        <label for="contactNumber" class="form-label">Contact Number</label>
-        <InputText id="contactNumber" class="form-control" @bind-Value="customer.ContactNumber" />
-        <ValidationMessage For="() => customer.ContactNumber" class="text-danger" />
-    </div>
-
-    <div class="form-group mb-2">
-        <label for="address" class="form-label">Address</label>
-        <InputText id="address" class="form-control" @bind-Value="customer.Address" />
-        <ValidationMessage For="() => customer.Address" class="text-danger" />
-    </div>
-
-    <div class="form-group mb-2">
-        <label for="notes" class="form-label">Notes</label>
-        <InputTextArea id="notes" class="form-control" @bind-Value="customer.Notes" />
-        <ValidationMessage For="() => customer.Notes" class="text-danger" />
-    </div>
-    <div class="d-flex justify-content-end">
-        <button type="submit" class="btn btn-primary m-1">Save</button>
-        <button type="button" class="btn btn-secondary m-1" @onclick="NavigateBack">Cancel</button>
-    </div>
-
-
-</EditForm>
-
+<!-- Customer Table -->
+@if (customers == null)
+{
+    <p>Loading customers...</p>
+}
+else if (!customers.Any())
+{
+    <p>No customers found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var customer in customers)
+            {
+                <tr>
+                    <td>@customer.CustomerName</td>
+                    <td>@customer.Email</td>
+                    <td>@customer.ContactNumber</td>
+                    <td>@customer.Address</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => EditCustomer(customer)">Edit</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteCustomer(customer.CustomerID)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 @code {
-    [SupplyParameterFromForm (FormName ="Create")]
-    private Customer customer { set; get; } = new Customer();
+    private List<Customer> customers;
+    private Customer newCustomer = new Customer();
+    private bool ShowForm = false;
+    private string SearchTerm = "";
 
-    private async Task HandleValidSubmit()
+    protected override async Task OnInitializedAsync()
     {
-        if (ValidateCustomer())
-        {
-            //customer.CreateDate = DateTime.UtcNow;
-            customer.UserID = GetCurrentUserId(); // Replace with actual method to get current user ID
+        // Load customers on initialization
+        await LoadCustomers();
+    }
 
-            DbContext.Customers.Add(customer);
-            await DbContext.SaveChangesAsync();
-            int newCustomerId = customer.CustomerID;
-            Navigation.NavigateTo($"/Customer/Details/{newCustomerId}");
+    private async Task LoadCustomers()
+    {
+        customers = await CustomerService.GetCustomersAsync();
+    }
+
+    private void ShowCreateForm()
+    {
+        newCustomer = new Customer(); // Reset the form
+        ShowForm = true;
+    }
+
+    private void CancelForm()
+    {
+        ShowForm = false;
+    }
+
+    private async Task CreateCustomer()
+    {
+        newCustomer.UserID = 1;
+        await CustomerService.AddCustomerAsync(newCustomer);
+        ShowForm = false;
+        await LoadCustomers();
+    }
+
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            customers = customers; // Reset filter if search term is empty
+        }
+        else
+        {
+            customers = customers
+                .Where(c => c.CustomerName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
     }
 
-    private bool ValidateCustomer()
+    private void EditCustomer(Customer customer)
     {
-        bool isValid = true;
-
-        if (string.IsNullOrWhiteSpace(customer.CustomerName))
-        {
-            isValid = false;
-        }
-
-        if (string.IsNullOrWhiteSpace(customer.Email))
-        {
-            isValid = false;
-        }
-
-        if (string.IsNullOrWhiteSpace(customer.ContactNumber) )
-        {
-            isValid = false;
-        }
-
-        return isValid;
+        newCustomer = customer; // Preload customer into form
+        ShowForm = true;
     }
 
-    private int GetCurrentUserId()
+    private async Task DeleteCustomer(int customerId)
     {
-        // TODO: Implement logic to retrieve the current user's ID
-        return 1; // Placeholder for the default admin user
-    }
-
-    private void NavigateBack()
-    {
-        Navigation.NavigateTo("/customers");
+        await CustomerService.DeleteCustomerAsync(customerId);
+        await LoadCustomers();
     }
 }

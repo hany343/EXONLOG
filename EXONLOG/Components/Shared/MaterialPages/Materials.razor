@@ -1,0 +1,227 @@
+﻿@page "/Materials"
+@using EXONLOG.Model.Stocks
+@using EXONLOG.Services
+@inject MaterialService materialService
+@inject CustomerService customerService
+@inject MaterialTypeService typeService
+@rendermode InteractiveServer
+
+<h3>Material Management</h3>
+
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <button class="btn btn-primary" @onclick="OpenCreateMaterialModal">Create New Material</button>
+    <input class="form-control w-25" placeholder="Search by Material Name" @bind="filterMaterialName" />
+</div>
+
+<!-- Filters -->
+<div class="mb-3">
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label for="filterDescription" class="form-label">Description</label>
+            <input id="filterDescription" type="text" class="form-control" @bind="filterDescription" />
+        </div>
+        <div class="col-md-3">
+            <label for="filterMinQuantity" class="form-label">Min Quantity</label>
+            <input id="filterMinQuantity" type="number" class="form-control" @bind="filterMinQuantity" />
+        </div>
+        <div class="col-md-3">
+            <label for="filterMaxQuantity" class="form-label">Max Quantity</label>
+            <input id="filterMaxQuantity" type="number" class="form-control" @bind="filterMaxQuantity" />
+        </div>
+    </div>
+</div>
+
+<!-- Material Table -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Material Name</th>
+            <th>Description</th>
+            <th>Stock Quantity</th>
+            <th>Reserved Quantity</th>
+            <th>Available Quantity</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (filteredMaterials == null)
+        {
+            <tr>
+                <td colspan="6" class="text-center">Loading materials...</td>
+            </tr>
+        }
+        else if (!filteredMaterials.Any())
+        {
+            <tr>
+                <td colspan="6" class="text-center">No materials found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var material in filteredMaterials)
+            {
+                <tr>
+                    <td>@material.MaterialName</td>
+                    <td>@material.Description</td>
+                    <td>@material.TotalStockQuantity</td>
+                    <td>@material.ReservedQuantity</td>
+                    <td>@material.FreeQuantityInStock</td>
+                    <td>
+                        <!-- Add buttons for editing or deleting -->
+                        <button class="btn btn-secondary" @onclick="() => EditMaterial(material.MaterialID)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteMaterial(material.MaterialID)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Create Material Modal -->
+@if (isCreateMaterialModalOpen)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Material</h5>
+                    <button type="button" class="btn-close" @onclick="CloseCreateMaterialModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="newMaterialName" class="form-label">Material Name</label>
+                            <input id="newMaterialName" class="form-control" @bind="newMaterial.MaterialName" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newPrefix" class="form-label">Prefix</label>
+                            <input id="newPrefix" class="form-control" @bind="newMaterial.Prefix" />
+                        </div>
+                        <div class="form-group my-2">
+                            <label for="materialType">Material Type</label>
+
+                            <div class="d-flex justify-content-between">
+                                <div class="input-group">
+                                    <InputSelect id="materialType" class="form-select" @bind-Value="newMaterial.MaterialTypeId">
+                                        <option value="">-- Select Material Type --</option>
+                                        @foreach (var type in MaterialTypes)
+                                        {
+                                            <option value="@type.MaterialTypeID">@type.MaterialTypeName</option>
+                                        }
+                                    </InputSelect>
+
+                                </div>
+                                <div>
+                                    @if (MaterialTypes.Count == 0)
+                                    {
+                                        <button type="button" class="btn btn-primary" @onclick="ShowAddMaterialTypeModal">Add Type</button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newDescription" class="form-label">Description</label>
+                            <input id="newDescription" class="form-control" @bind="newMaterial.Description" />
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseCreateMaterialModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveMaterialAsync">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (showAddTypeModal)
+    {
+        <MaterialTypeCreate Show="true" OnClose="CloseAddMaterialTypeModal" OnMaterialTypeCreated="RefreshMaterialTypes" />
+    }
+}
+
+@code {
+
+    private List<Material> materials;
+    private List<Material> filteredMaterials;
+    private List<MaterialType> MaterialTypes = new();
+
+    private string filterMaterialName;
+    private string filterDescription;
+    private double? filterMinQuantity;
+    private double? filterMaxQuantity;
+
+    private Material newMaterial = new Material();
+    private bool isCreateMaterialModalOpen = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        materials = await materialService.GetMaterialsWithQuantitiesAsync();
+        MaterialTypes = await typeService.GetMaterialTypesAsync() ?? new List<MaterialType>();
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        filteredMaterials = materials
+            .Where(m => string.IsNullOrWhiteSpace(filterMaterialName) || m.MaterialName.Contains(filterMaterialName, StringComparison.OrdinalIgnoreCase))
+            .Where(m => string.IsNullOrWhiteSpace(filterDescription) || m.Description.Contains(filterDescription, StringComparison.OrdinalIgnoreCase))
+            .Where(m => !filterMinQuantity.HasValue || m.TotalStockQuantity >= filterMinQuantity)
+            .Where(m => !filterMaxQuantity.HasValue || m.TotalStockQuantity <= filterMaxQuantity)
+            .ToList();
+    }
+
+    private void OpenCreateMaterialModal() => isCreateMaterialModalOpen = true;
+
+    private void CloseCreateMaterialModal() => isCreateMaterialModalOpen = false;
+
+    private async Task SaveMaterialAsync()
+    {
+        await materialService.AddMaterialAsync(newMaterial);
+        materials = await materialService.GetMaterialsAsync();
+        ApplyFilters();
+        CloseCreateMaterialModal();
+    }
+
+    private async Task EditMaterial(int materialId)
+    {
+        // Add the logic to open an edit modal and populate material details
+        var materialToEdit = materials.FirstOrDefault(m => m.MaterialID == materialId);
+        if (materialToEdit != null)
+        {
+            newMaterial = materialToEdit;
+            OpenCreateMaterialModal();
+        }
+    }
+
+    private async Task DeleteMaterial(int materialId)
+    {
+        // Add the logic to delete the material from the database
+        await materialService.DeleteMaterialAsync(materialId);
+        materials = await materialService.GetMaterialsAsync();
+        ApplyFilters();
+    }
+
+
+    private bool showAddTypeModal;
+
+    private void ShowAddMaterialTypeModal()
+    {
+        showAddTypeModal = true;
+    }
+
+    private async Task CloseAddMaterialTypeModal()
+    {
+        showAddTypeModal = false;
+        await RefreshMaterialTypes(); // Optional: refresh data after closing modal
+    }
+
+    private async Task RefreshMaterialTypes()
+    {
+        // Fetch updated material types
+        MaterialTypes = await typeService.GetMaterialTypesAsync();
+        showAddTypeModal = false;
+
+
+    }
+}

@@ -218,6 +218,19 @@
              .HasForeignKey(m => m.MaterialId)
              .OnDelete(DeleteBehavior.Restrict);
 
+            //// Define computed columns using the HasComputedColumnSql method
+            //modelBuilder.Entity<Material>()
+            //    .Property(m => m.ReservedQuantity)
+            //    .HasComputedColumnSql("ISNULL((SELECT SUM(Quantity) FROM Contracts WHERE Contracts.MaterialID = Materials.MaterialID), 0)", stored: true);
+
+            //modelBuilder.Entity<Material>()
+            //    .Property(m => m.TotalStockQuantity)
+            //    .HasComputedColumnSql("ISNULL((SELECT SUM(Quantity) FROM Stocks WHERE Stocks.MaterialID = Materials.MaterialID), 0)", stored: true);
+
+            //modelBuilder.Entity<Material>()
+            //    .Property(m => m.FreeQuantityInStock)
+            //    .HasComputedColumnSql("TotalStockQuantity - ReservedQuantity", stored: true);
+
             modelBuilder.Entity<Stock>()
             .HasMany(s => s.StockMovements)
             .WithOne(m => m.Stock) // One User can create many materials
@@ -244,8 +257,8 @@
 
             // Contract-Order relationship: One Contract can have many Orders
             modelBuilder.Entity<Contract>()
-                .HasOne(c => c.Material)
-                .WithMany()
+                .HasOne(m => m.Material)
+                .WithMany(c=>c.Contracts)
                 .HasForeignKey(o => o.MaterialID)
                 .OnDelete(DeleteBehavior.Restrict);
 

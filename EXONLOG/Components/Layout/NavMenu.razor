@@ -1,5 +1,5 @@
 ﻿
-
+@rendermode InteractiveServer
 <mainNav>
 
 
@@ -12,62 +12,115 @@
             @*<span class=" logo-text">EXONLOG</span>*@
         </a>
 
-            <ul class="list-unstyled ps-0">
-                <li class="mb-1">
-                    <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="true">
-                        Customers
-                    </button>
-                    <div class="collapse show" id="home-collapse">
-                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                            <li><a href="Customer/Create/" class="link-dark rounded">Create</a></li>
-                            <li><a href="Customers" class="link-dark rounded">List</a></li>
+        <ul class="list-unstyled ps-0">
 
-                            <li><a href="Customer/Details/" class="link-dark rounded">Report</a></li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="mb-1">
-                    <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false" aria-controls="dashboard-collapse">
-                        Materials
-                    </button>
-                    
-                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small collapse" id="dashboard-collapse">
-                           
-                            <li> <a href="/Materials/Create" class="link-dark rounded "> <i class="bi bi-plus-circle fs-5"></i>Create</a></li>
-                            <li><a href="/Materials/List" class="link-dark rounded">List</a></li>
-                            <li><a href="#" class="link-dark rounded">Monthly</a></li>
-                            <li><a href="#" class="link-dark rounded">Annually</a></li>
-                        </ul>
-                    
-                </li>
-                <li class="mb-1">
-                    <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false"  aria-controls="orders-collapse">
-                        Orders
-                    </button>
-                    <div class="collapse" id="orders-collapse">
-                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                            <li><a href="#" class="link-dark rounded">New</a></li>
-                            <li><a href="#" class="link-dark rounded">Processed</a></li>
-                            <li><a href="#" class="link-dark rounded">Shipped</a></li>
-                            <li><a href="#" class="link-dark rounded">Returned</a></li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="border-top my-1"></li>
-                <li class="mb-1">
-                    <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
-                        Account
-                    </button>
-                    <div class="collapse" id="account-collapse">
-                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                            <li><a href="#" class="link-dark rounded">New...</a></li>
-                            <li><a href="#" class="link-dark rounded">Profile</a></li>
-                            <li><a href="#" class="link-dark rounded">Settings</a></li>
-                            <li><a href="#" class="link-dark rounded">Sign out</a></li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
+            <li class="mb-1">
+                <button id="parent-element" class="btn btn-toggle align-items-center rounded " @onclick="() => setactive(1)" aria-expanded="@((addactive==1)?"true":"false")">
+                    Dashboard
+                </button>
+                <div class="@((addactive==1)?"":"collapse")" id="Dashboard-collapse" data-bs-parent="#parent-element">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a href="/Contracts" class="link-dark rounded">Create</a></li>
+                        <li><a href="/Contracts" class="link-dark rounded">List</a></li>
+
+
+                    </ul>
+                </div>
+            </li>
+            <li class="mb-1">
+
+                <button class="btn btn-toggle align-items-center rounded collapsed" @onclick="() => setactive(2)" aria-expanded="@((addactive==2)?"true":"false")">
+                    Outbound
+                </button>
+                <div class="@((addactive==2)?"":"collapse") " id="Customers-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a href="/Customers" class="link-dark rounded">Customers</a></li>
+                        <li><a href="/Contracts" class="link-dark rounded">Contracts</a></li>
+                        <li><a href="/Orders" class="link-dark rounded">Orders</a></li>
+                        <li><a href="/Outladings" class="link-dark rounded">OutLadings</a></li>
+                        <li><a href="/Contracts" class="link-dark rounded">Reports</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li class="mb-1">
+                <button class=" btn btn-toggle align-items-center rounded collapsed" @onclick="() => setactive(3)" aria-expanded="@((addactive==3)?"true":"false")">
+                    Inbound
+                </button>
+                <div class="collapse@((addactive==3)?"e":"")" id="Contracts-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a href="/Suppliers" class="link-dark rounded">Suppliers</a></li>
+                        <li><a href="/Shipments" class="link-dark rounded">Shipments</a></li>
+                        <li><a href="/Batches" class="link-dark rounded">Batches</a></li>
+                        <li><a href="/Intladings" class="link-dark rounded">IntLadings</a></li>
+                        <li><a href="/Contracts" class="link-dark rounded">Reports</a></li>
+                    </ul>
+                </div>
+            </li>
+
+
+            <li class="mb-1">
+                <button class="btn btn-toggle align-items-center rounded collapsed" @onclick="() => setactive(5)" aria-expanded="@((addactive==5)?"true":"false")">
+                    Inventory
+                </button>
+                <div class="@((addactive==5)?"":"collapse")" id="Orders-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small" id="dashboard-collapse">
+                        <li> <a href="/Materials" class="link-dark rounded "> Materials</a></li>
+                        <li><a href="/Stocks" class="link-dark rounded">Stocks</a></li>
+                        <li><a href="#" class="link-dark rounded">Monthly</a></li>
+                        <li><a href="#" class="link-dark rounded">Annually</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="mb-1">
+                <button class="btn btn-toggle align-items-center rounded collapsed" @onclick="() => setactive(4)" aria-expanded="@((addactive==4)?"true":"false")">
+                    Trans
+                </button>
+                <div class="collapse@((addactive==4)?"e":"")" id="Orders-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a href="#" class="link-dark rounded">Trucks</a></li>
+                        <li><a href="#" class="link-dark rounded">Drivers</a></li>
+                        <li><a href="#" class="link-dark rounded">Companies</a></li>
+                        <li><a href="#" class="link-dark rounded">Returned</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li class="border-top my-1"></li>
+            <li class="mb-1">
+                <button class="btn btn-toggle align-items-center rounded collapsed" @onclick="() => setactive(6)" aria-expanded="@((addactive==6)?"true":"false")">
+                    Users
+                </button>
+                <div class="@((addactive==6)?"":"collapse")" id="account-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a href="#" class="link-dark rounded">New...</a></li>
+                        <li><a href="#" class="link-dark rounded">Profile</a></li>
+                        <li><a href="#" class="link-dark rounded">Settings</a></li>
+                        <li><a href="#" class="link-dark rounded">Sign out</a></li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
         </div>
 
 </mainNav>
+
+@code{
+    private int addactive = 0;
+    private string col = "collapse";
+
+    private void setactive(int eid)
+    {
+        if(addactive == eid)
+        {
+            addactive = 0;
+        }
+        else
+        {
+            addactive = eid;
+        }
+
+
+
+
+    }
+}

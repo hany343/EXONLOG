@@ -104,12 +104,24 @@
                         </div>
                         <div class="col-md-6">
                             <label for="newMaterialID" class="form-label">Material</label>
-                            <select id="newMaterialID" class="form-select" @bind="newContract.MaterialID">
+                            <select id="newMaterialID" class="form-select"   @onchange="OnMaterialSelected">
                                 @foreach (var material in materials)
                                 {
                                     <option value="@material.MaterialID">@material.MaterialName</option>
                                 }
                             </select>
+                            @if (selectedMaterial != null)
+                            {
+                                <small class="text-muted">Available Quantity: @QStock</small>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newQuantity" class="form-label">Quantity</label>
+                            <input id="newQuantity" type="number" class="form-control" @bind="newContract.Quantity" @oninput="ValidateQuantity" />
+                            @if (newContract.Quantity > QStock)
+                            {
+                                <small class="text-danger">Entered quantity exceeds available stock!</small>
+                            }
                         </div>
                         <div class="col-md-6">
                             <label for="newCustomerID" class="form-label">Customer</label>
@@ -121,10 +133,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6">
-                            <label for="newQuantity" class="form-label">Quantity</label>
-                            <input id="newQuantity" type="number" class="form-control" @bind="newContract.Quantity" />
-                        </div>
+                       
                         <div class="col-md-6">
                             <label for="newStartDate" class="form-label">Start Date</label>
                             <input id="newStartDate" type="date" class="form-control" @bind="newContract.StartDate" />
@@ -149,6 +158,7 @@
 }
 
 @code {
+
     private List<Contract> contracts;
     private List<Contract> filteredContracts;
     private List<Material> materials;
@@ -176,6 +186,14 @@
 
     private async Task SaveContractAsync()
     {
+        QStock = materialService.GetAvailableQuantity(selectedMaterial.MaterialID);
+        if (newContract.Quantity > QStock)
+        {
+            Console.WriteLine("Cannot save. Entered quantity exceeds available stock.");
+            return;
+        }
+
+        newContract.UserID = 1; // Assign the current user ID here
         await contractService.AddContractAsync(newContract);
         contracts = await contractService.GetAllContractsAsync();
         ApplyFilters();
@@ -192,4 +210,39 @@
             .Where(c => !filterMaxQuantity.HasValue || c.Quantity <= filterMaxQuantity)
             .ToList();
     }
+
+    private Material selectedMaterial;
+    double QStock =0;
+
+    private void OnMaterialSelected(ChangeEventArgs e)
+    {
+        try
+        {
+            var materialId = int.Parse(e.Value.ToString() ?? "0");
+            QStock = materialService.GetAvailableQuantity(materialId);
+            selectedMaterial = materials.FirstOrDefault(m => m.MaterialID == materialId);
+            newContract.Quantity = 0; // Reset quantity on material change
+        }
+        catch(Exception ex)
+        {
+
+        }
+
+    }
+
+    private void ValidateQuantity(ChangeEventArgs e)
+    {
+
+        var enteredQuantity = double.Parse(e.Value.ToString() ?? "0");
+
+        if (selectedMaterial != null && enteredQuantity > QStock)
+        {
+            newContract.Quantity = QStock; // Cap to available stock
+                                           // Optional: Display alert or notify the user
+            Console.WriteLine("Entered quantity exceeds available stock.");
+        }
+    }
+
+
+
 }

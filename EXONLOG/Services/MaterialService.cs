@@ -22,7 +22,7 @@ namespace EXONLOG.Services
                                           .Include(m => m.Stocks) // Ensure related Stocks are loaded
                                           .FirstOrDefaultAsync(m => m.MaterialID == materialId);
 
-            return material?.TotalQuantityInStock ?? 0; // Return available quantity or 0 if not found
+            return material?.FreeQuantityInStock ?? 0; // Return available quantity or 0 if not found
         }
 
         // Method to get a specific material's details
@@ -50,13 +50,32 @@ namespace EXONLOG.Services
                     MaterialName = material.MaterialName,
                     Prefix = material.Prefix,
                     Description = material.Description,
-                    TotalQuantityInStock = material.Stocks.Sum(stock => stock.Quantity) // Sum of all stocks for this material
+                   Stocks = material.Stocks
                 })
                 .ToListAsync();
+        }
+
+        public async Task<List<Material>> GetMaterialsWithQuantitiesAsync()
+        {
+            var materials = await _context.Materials
+                .Include(m => m.Stocks)
+                .Include(m => m.Contracts)
+                .ToListAsync();
+
+            // Calculate ReservedQuantity, TotalStockQuantity, FreeQuantityInStock in memory
+            foreach (var material in materials)
+            {
+                material.ReservedQuantity = material.Contracts?.Sum(contract => contract.Quantity) ?? 0;
+                material.TotalStockQuantity = material.Stocks?.Sum(stock => stock.Quantity) ?? 0;
+                material.FreeQuantityInStock = material.TotalStockQuantity - material.ReservedQuantity;
+            }
+
+            return materials;
         }
         // Method to add a new material
         public async Task AddMaterialAsync(Material material)
         {
+            material.UserID = 1;
             await _context.Set<Material>().AddAsync(material);
             await _context.SaveChangesAsync();
         }
@@ -77,6 +96,14 @@ namespace EXONLOG.Services
                 _context.Set<Material>().Remove(material);
                 await _context.SaveChangesAsync();
             }
+        }
+        public double GetAvailableQuantity(int materialId)
+        {
+            var material = _context.Materials
+                                    .Include(m => m.Stocks) // Ensure related Stocks are loaded
+                                    .FirstOrDefault(m => m.MaterialID == materialId);
+
+            return material?.Stocks.Sum(s => s.Quantity)??0; // Get available quantity or 0 if material not found
         }
     }
 }

@@ -2,11 +2,11 @@
 {
 
     using EXONLOG.Model.Account;
+    using EXONLOG.Model.Outbound;
     using Microsoft.EntityFrameworkCore;
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-
 
     public class Material
     {
@@ -44,27 +44,32 @@
 
         // One-to-many relationship with Stock
         public ICollection<Stock>? Stocks { get; set; } = new List<Stock>(); // A material can have multiple stock entries
+        public ICollection<Contract>? Contracts { get; set; } = new List<Contract>(); // A material can have multiple stock entries
 
         // Computed Property for Available Quantity (from all Stock entries)
+
+        //public double FreeQuantityInStock { get; set; }
+
+        // Dynamically calculate the total stock quantity
+
+        // These properties will be computed by SQL Server
         [NotMapped]
-        public double TotalQuantityInStock { get; set; }
-        //public double AvailableQuantity
-        //{
-        //    get
-        //    {
-        //        // Sum the quantity of all related stock entries
-        //        return Stocks.Sum(s => s.Quantity) ?? 0;
-        //    }
+        public double ReservedQuantity { get; set; }
+        [NotMapped]
+        public double TotalStockQuantity { get; set; }
+        [NotMapped]
+        public double FreeQuantityInStock { get; set; }
+
+           // public double ReservedQuantity => Contracts?.Sum(contract => contract.Quantity) ?? 0; // Reserved Quantity
+           // public double TotalStockQuantity => Stocks?.Sum(stock => stock.Quantity) ?? 0;
+
+           //// Dynamically calculate the available quantity
+           //public double FreeQuantityInStock => TotalStockQuantity - ReservedQuantity;
         //}
 
-        //public double GetAvailableQuantity(int materialId)
-        //{
-        //    var material = dbContext.Materials
-        //                            .Include(m => m.Stocks) // Ensure related Stocks are loaded
-        //                            .FirstOrDefault(m => m.MaterialID == materialId);
+       }
 
-        //    return material?.AvailableQuantity ?? 0; // Get available quantity or 0 if material not found
-        //}
+
     }
 
-}
+

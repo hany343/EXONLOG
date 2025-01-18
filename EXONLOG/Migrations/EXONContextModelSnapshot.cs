@@ -36,7 +36,7 @@ namespace EXONLOG.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Account.User", b =>
@@ -90,7 +90,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.Batch", b =>
@@ -128,7 +128,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Batches");
+                    b.ToTable("Batches", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.Importer", b =>
@@ -169,7 +169,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Importers");
+                    b.ToTable("Importers", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.InLading", b =>
@@ -248,7 +248,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("InLadings");
+                    b.ToTable("InLadings", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.Shipment", b =>
@@ -313,7 +313,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Shipments");
+                    b.ToTable("Shipments", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.ShipmentStatus", b =>
@@ -340,7 +340,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ShipmentStatuses");
+                    b.ToTable("ShipmentStatuses", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.Supplier", b =>
@@ -379,7 +379,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Suppliers");
+                    b.ToTable("Suppliers", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Outbound.Contract", b =>
@@ -435,7 +435,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Contracts");
+                    b.ToTable("Contracts", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Outbound.Customer", b =>
@@ -476,7 +476,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Customers");
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Outbound.Order", b =>
@@ -513,7 +513,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Outbound.OutLading", b =>
@@ -635,7 +635,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("OutLadings");
+                    b.ToTable("OutLadings", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Outbound.Port", b =>
@@ -671,7 +671,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Ports");
+                    b.ToTable("Ports", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Stocks.Material", b =>
@@ -716,7 +716,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Materials");
+                    b.ToTable("Materials", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Stocks.MaterialType", b =>
@@ -751,7 +751,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("MaterialTypes");
+                    b.ToTable("MaterialTypes", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Stocks.Stock", b =>
@@ -797,7 +797,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Stocks");
+                    b.ToTable("Stocks", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Stocks.StockMovement", b =>
@@ -830,7 +830,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("StockMovements");
+                    b.ToTable("StockMovements", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Trans.Driver", b =>
@@ -884,7 +884,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Drivers");
+                    b.ToTable("Drivers", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Trans.TransCompany", b =>
@@ -927,7 +927,7 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("TransCompanies");
+                    b.ToTable("TransCompanies", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Trans.Truck", b =>
@@ -990,7 +990,7 @@ namespace EXONLOG.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Truck_TruckNumber_TrailerNumber");
 
-                    b.ToTable("Trucks");
+                    b.ToTable("Trucks", (string)null);
                 });
 
             modelBuilder.Entity("EXONLOG.Model.Account.User", b =>

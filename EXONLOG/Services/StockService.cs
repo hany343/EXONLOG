@@ -18,7 +18,9 @@
 
         public async Task<List<Stock>> GetAllStocksAsync()
         {
-            return await _context.Stocks.Include(s => s.Material).Include(s => s.User).ToListAsync();
+
+            return await _context.Stocks.Include(s => s.Material).ToListAsync();
+
         }
 
         public async Task<Stock> GetStockDetailsAsync(int stockId)

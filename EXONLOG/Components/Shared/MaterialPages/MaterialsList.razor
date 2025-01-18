@@ -34,7 +34,7 @@ else
                     <td>@material.MaterialID</td>
                     <td>@material.MaterialName</td>
                     <td>@material.Prefix</td>
-                    <td>@material.TotalQuantityInStock</td>
+                    <td>@material.FreeQuantityInStock </td>
                     <td>@material.Description</td>
 
                 </tr>
@@ -49,6 +49,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         // Fetch all materials with their related stocks and available quantities
-        materials = await MaterialService.GetMaterialsWithStockTotalsAsync();
+        materials = await MaterialService.GetMaterialsWithQuantitiesAsync();
     }
 }
