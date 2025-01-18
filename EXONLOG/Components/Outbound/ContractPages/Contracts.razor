@@ -1,0 +1,195 @@
+﻿@page "/Contracts"
+@using EXONLOG.Model.Outbound
+@using EXONLOG.Model.Stocks
+@using EXONLOG.Services
+@inject ContractService contractService
+@inject MaterialService materialService
+@inject CustomerService customerService
+@rendermode InteractiveServer
+
+<h3>Contract Management</h3>
+
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <button class="btn btn-primary" @onclick="OpenCreateContractModal">Create New Contract</button>
+    <input class="form-control w-25" placeholder="Search by Ref Number" @bind="filterRefNumber" />
+</div>
+
+<!-- Filters -->
+<div class="mb-3">
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label for="filterStartDate" class="form-label">Start Date</label>
+            <input id="filterStartDate" type="date" class="form-control" @bind="filterStartDate" />
+        </div>
+        <div class="col-md-3">
+            <label for="filterEndDate" class="form-label">End Date</label>
+            <input id="filterEndDate" type="date" class="form-control" @bind="filterEndDate" />
+        </div>
+        <div class="col-md-3">
+            <label for="filterMinQuantity" class="form-label">Min Quantity</label>
+            <input id="filterMinQuantity" type="number" class="form-control" @bind="filterMinQuantity" />
+        </div>
+        <div class="col-md-3">
+            <label for="filterMaxQuantity" class="form-label">Max Quantity</label>
+            <input id="filterMaxQuantity" type="number" class="form-control" @bind="filterMaxQuantity" />
+        </div>
+    </div>
+</div>
+
+<!-- Contract Table -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Ref Number</th>
+            <th>Contract Number</th>
+            <th>Customer</th>
+            <th>Material</th>
+            <th>Quantity</th>
+            <th>Start Date</th>
+            <th>Deadline</th>
+            <th>Create Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (filteredContracts == null)
+        {
+            <tr>
+                <td colspan="9" class="text-center">Loading contracts...</td>
+            </tr>
+        }
+        else if (!filteredContracts.Any())
+        {
+            <tr>
+                <td colspan="9" class="text-center">No contracts found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var contract in filteredContracts)
+            {
+                <tr>
+                    <td>@contract.RefNumber</td>
+                    <td>@contract.ContractNumber</td>
+                    <td>@contract.Customer?.CustomerName</td>
+                    <td>@contract.Material?.MaterialName</td>
+                    <td>@contract.Quantity</td>
+                    <td>@contract.StartDate?.ToShortDateString()</td>
+                    <td>@contract.Deadline?.ToShortDateString()</td>
+                    <td>@contract.CreateDate.ToShortDateString()</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Create Contract Modal -->
+@if (isCreateContractModalOpen)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Contract</h5>
+                    <button type="button" class="btn-close" @onclick="CloseCreateContractModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="newRefNumber" class="form-label">Ref Number</label>
+                            <input id="newRefNumber" class="form-control" @bind="newContract.RefNumber" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newContractNumber" class="form-label">Contract Number</label>
+                            <input id="newContractNumber" class="form-control" @bind="newContract.ContractNumber" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newMaterialID" class="form-label">Material</label>
+                            <select id="newMaterialID" class="form-select" @bind="newContract.MaterialID">
+                                @foreach (var material in materials)
+                                {
+                                    <option value="@material.MaterialID">@material.MaterialName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newCustomerID" class="form-label">Customer</label>
+                            <select id="newCustomerID" class="form-select" @bind="newContract.CustomerID">
+                                @foreach (var customer in customers)
+                                {
+                                    <option value="@customer.CustomerID">@customer.CustomerName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="newQuantity" class="form-label">Quantity</label>
+                            <input id="newQuantity" type="number" class="form-control" @bind="newContract.Quantity" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newStartDate" class="form-label">Start Date</label>
+                            <input id="newStartDate" type="date" class="form-control" @bind="newContract.StartDate" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newDeadline" class="form-label">Deadline</label>
+                            <input id="newDeadline" type="date" class="form-control" @bind="newContract.Deadline" />
+                        </div>
+                        <div class="col-md-12">
+                            <label for="newNotes" class="form-label">Notes</label>
+                            <textarea id="newNotes" class="form-control" @bind="newContract.Notes"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseCreateContractModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveContractAsync">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Contract> contracts;
+    private List<Contract> filteredContracts;
+    private List<Material> materials;
+    private List<Customer> customers;
+    private List<Port> ports;
+    private bool isCreateContractModalOpen = false;
+    private Contract newContract = new Contract();
+    private string filterRefNumber;
+    private DateTime? filterStartDate;
+    private DateTime? filterEndDate;
+    private double? filterMinQuantity;
+    private double? filterMaxQuantity;
+
+    protected override async Task OnInitializedAsync()
+    {
+        contracts = await contractService.GetAllContractsAsync();
+        materials = await materialService.GetMaterialsAsync();
+        customers = await customerService.GetCustomersAsync();
+
+        ApplyFilters();
+    }
+
+    private void OpenCreateContractModal() => isCreateContractModalOpen = true;
+    private void CloseCreateContractModal() => isCreateContractModalOpen = false;
+
+    private async Task SaveContractAsync()
+    {
+        await contractService.AddContractAsync(newContract);
+        contracts = await contractService.GetAllContractsAsync();
+        ApplyFilters();
+        CloseCreateContractModal();
+    }
+
+    private void ApplyFilters()
+    {
+        filteredContracts = contracts
+            .Where(c => string.IsNullOrWhiteSpace(filterRefNumber) || c.RefNumber.Contains(filterRefNumber, StringComparison.OrdinalIgnoreCase))
+            .Where(c => !filterStartDate.HasValue || c.StartDate >= filterStartDate)
+            .Where(c => !filterEndDate.HasValue || c.Deadline <= filterEndDate)
+            .Where(c => !filterMinQuantity.HasValue || c.Quantity >= filterMinQuantity)
+            .Where(c => !filterMaxQuantity.HasValue || c.Quantity <= filterMaxQuantity)
+            .ToList();
+    }
+}

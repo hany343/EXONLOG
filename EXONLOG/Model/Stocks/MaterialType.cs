@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace EXONLOG.Model.Shared
+namespace EXONLOG.Model.Stocks
 {
     public class MaterialType
     {

@@ -5,7 +5,7 @@
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
     using EXONLOG.Model.Outbound;
-    using EXONLOG.Model.Shared;
+    using EXONLOG.Model.Stocks;
     using EXONLOG.Model.Inbound;
 
     public class User

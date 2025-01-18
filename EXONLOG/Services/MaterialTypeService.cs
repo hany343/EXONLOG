@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using EXONLOG.Model.Shared;
+using EXONLOG.Model.Stocks;
 using EXONLOG.Data;
 
-namespace EXONLOG.Components.Shared
+namespace EXONLOG.Services
 {
     public class MaterialTypeService
     {

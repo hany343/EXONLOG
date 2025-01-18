@@ -4,7 +4,7 @@
     using EXONLOG.Model.Account;
     using EXONLOG.Model.Inbound;
     using EXONLOG.Model.Outbound;
-    using EXONLOG.Model.Shared;
+    using EXONLOG.Model.Stocks;
     using EXONLOG.Model.Trans;
     using Microsoft.AspNetCore.Identity;
 

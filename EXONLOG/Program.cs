@@ -1,10 +1,8 @@
 using EXONLOG;
 using EXONLOG.Components;
-using EXONLOG.Components.Shared;
-using EXONLOG.Components.Shared.MaterialPages;
-using EXONLOG.Components.Shared.StockPages;
 using EXONLOG.Data;
 using EXONLOG.Model.Account;
+using EXONLOG.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +53,13 @@ builder.Services.AddSingleton(new ConnectionStringService
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Add services to the container.
+builder.Services.AddScoped<CustomerService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddHttpContextAccessor(); // Required for IHttpContextAccessor
+
+builder.Services.AddScoped<ContractService>();
 
 builder.Services.AddScoped<MaterialTypeService>();
 builder.Services.AddScoped<MaterialService>();

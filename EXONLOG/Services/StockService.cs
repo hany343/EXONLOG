@@ -1,10 +1,10 @@
-﻿namespace EXONLOG.Components.Shared.StockPages
+﻿namespace EXONLOG.Services
 {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using EXONLOG.Data;
-    using EXONLOG.Model.Shared;
+    using EXONLOG.Model.Stocks;
     using Microsoft.EntityFrameworkCore;
 
     public class StockService

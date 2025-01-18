@@ -1,5 +1,6 @@
 ﻿@page "/materials/list"
-@using EXONLOG.Model.Shared
+@using EXONLOG.Model.Stocks
+@using EXONLOG.Services
 @using EXONLOG.Components.Shared
 @inject MaterialService MaterialService
 
@@ -21,8 +22,9 @@ else
                 <th>ID</th>
                 <th>Name</th>
                 <th>Prefix</th>
-                <th>Description</th>
                 <th>Available Quantity</th>
+                <th>Description</th>
+
             </tr>
         </thead>
         <tbody>
@@ -32,8 +34,9 @@ else
                     <td>@material.MaterialID</td>
                     <td>@material.MaterialName</td>
                     <td>@material.Prefix</td>
-                    <td>@material.Description</td>
                     <td>@material.TotalQuantityInStock</td>
+                    <td>@material.Description</td>
+
                 </tr>
             }
         </tbody>

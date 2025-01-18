@@ -5,7 +5,7 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using EXONLOG.Model.Account;
     using EXONLOG.Model.Inbound;
-    using EXONLOG.Model.Shared;
+    using EXONLOG.Model.Stocks;
 
     public class Contract
     {
@@ -33,11 +33,6 @@
         public Material? Material { get; set; } // Navigation Property
 
         [Required]
-        [ForeignKey("Port")]
-        public int PortID { get; set; } // Foreign Key to Port
-        public Port? Port { get; set; } // Navigation Property for the Port
-
-        [Required]
         [ForeignKey("Customer")]
         public int CustomerID { get; set; } // Foreign Key to Customer
         public Customer? Customer { get; set; } // Navigation Property for Customer
@@ -49,11 +44,11 @@
         [Required]
         public double Quantity { get; set; } // Quantity of Material Required
 
-        [Required]
-        public DateTime StartDate { get; set; } // Contract Start Date
+        
+        public DateTime? StartDate { get; set; } // Contract Start Date
 
-        [Required]
-        public DateTime Deadline { get; set; } // Contract Deadline
+        
+        public DateTime? Deadline { get; set; } // Contract Deadline
 
         [MaxLength(500)]
         [Column(TypeName = "nvarchar(250)")]

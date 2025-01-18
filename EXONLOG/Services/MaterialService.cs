@@ -1,10 +1,10 @@
 ﻿using EXONLOG.Data;
-using EXONLOG.Model.Shared;
+using EXONLOG.Model.Stocks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EXONLOG.Components.Shared
+namespace EXONLOG.Services
 {
     public class MaterialService
     {

@@ -403,7 +403,7 @@ namespace EXONLOG.Migrations
                     b.Property<int>("CustomerID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Deadline")
+                    b.Property<DateTime?>("Deadline")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("MaterialID")
@@ -413,9 +413,6 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<int>("PortID")
-                        .HasColumnType("int");
-
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
@@ -424,7 +421,7 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("UserID")
@@ -435,8 +432,6 @@ namespace EXONLOG.Migrations
                     b.HasIndex("CustomerID");
 
                     b.HasIndex("MaterialID");
-
-                    b.HasIndex("PortID");
 
                     b.HasIndex("UserID");
 
@@ -679,7 +674,7 @@ namespace EXONLOG.Migrations
                     b.ToTable("Ports");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.Material", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.Material", b =>
                 {
                     b.Property<int>("MaterialID")
                         .ValueGeneratedOnAdd()
@@ -724,7 +719,7 @@ namespace EXONLOG.Migrations
                     b.ToTable("Materials");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.MaterialType", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.MaterialType", b =>
                 {
                     b.Property<int>("MaterialTypeID")
                         .ValueGeneratedOnAdd()
@@ -759,7 +754,7 @@ namespace EXONLOG.Migrations
                     b.ToTable("MaterialTypes");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.Stock", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.Stock", b =>
                 {
                     b.Property<int>("StockID")
                         .ValueGeneratedOnAdd()
@@ -805,7 +800,7 @@ namespace EXONLOG.Migrations
                     b.ToTable("Stocks");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.StockMovement", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.StockMovement", b =>
                 {
                     b.Property<int>("StockMovementId")
                         .ValueGeneratedOnAdd()
@@ -1106,7 +1101,7 @@ namespace EXONLOG.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("EXONLOG.Model.Shared.Material", "Material")
+                    b.HasOne("EXONLOG.Model.Stocks.Material", "Material")
                         .WithMany()
                         .HasForeignKey("MaterialID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1179,16 +1174,10 @@ namespace EXONLOG.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("EXONLOG.Model.Shared.Material", "Material")
+                    b.HasOne("EXONLOG.Model.Stocks.Material", "Material")
                         .WithMany()
                         .HasForeignKey("MaterialID")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EXONLOG.Model.Outbound.Port", "Port")
-                        .WithMany()
-                        .HasForeignKey("PortID")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "User")
@@ -1200,8 +1189,6 @@ namespace EXONLOG.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Material");
-
-                    b.Navigation("Port");
 
                     b.Navigation("User");
                 });
@@ -1304,9 +1291,9 @@ namespace EXONLOG.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.Material", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.Material", b =>
                 {
-                    b.HasOne("EXONLOG.Model.Shared.MaterialType", "MaterialType")
+                    b.HasOne("EXONLOG.Model.Stocks.MaterialType", "MaterialType")
                         .WithMany("Materials")
                         .HasForeignKey("MaterialTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1323,7 +1310,7 @@ namespace EXONLOG.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.MaterialType", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.MaterialType", b =>
                 {
                     b.HasOne("EXONLOG.Model.Account.User", "User")
                         .WithMany()
@@ -1334,9 +1321,9 @@ namespace EXONLOG.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.Stock", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.Stock", b =>
                 {
-                    b.HasOne("EXONLOG.Model.Shared.Material", "Material")
+                    b.HasOne("EXONLOG.Model.Stocks.Material", "Material")
                         .WithMany("Stocks")
                         .HasForeignKey("MaterialId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1353,9 +1340,9 @@ namespace EXONLOG.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.StockMovement", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.StockMovement", b =>
                 {
-                    b.HasOne("EXONLOG.Model.Shared.Stock", "Stock")
+                    b.HasOne("EXONLOG.Model.Stocks.Stock", "Stock")
                         .WithMany("StockMovements")
                         .HasForeignKey("StockId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1445,17 +1432,17 @@ namespace EXONLOG.Migrations
                     b.Navigation("OutLadings");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.Material", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.Material", b =>
                 {
                     b.Navigation("Stocks");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.MaterialType", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.MaterialType", b =>
                 {
                     b.Navigation("Materials");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Shared.Stock", b =>
+            modelBuilder.Entity("EXONLOG.Model.Stocks.Stock", b =>
                 {
                     b.Navigation("StockMovements");
                 });

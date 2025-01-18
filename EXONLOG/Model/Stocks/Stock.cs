@@ -1,4 +1,4 @@
-﻿namespace EXONLOG.Model.Shared
+﻿namespace EXONLOG.Model.Stocks
 {
     using EXONLOG.Model.Account;
     using EXONLOG.Model.Outbound;
