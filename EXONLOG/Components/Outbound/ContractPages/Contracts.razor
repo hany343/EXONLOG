@@ -16,7 +16,7 @@
 
 <!-- Filters -->
 <div class="mb-3">
-    <div class="row g-3">
+    <div class="row g-3 bg-secondary">
         <div class="col-md-3">
             <label for="filterStartDate" class="form-label">Start Date</label>
             <input id="filterStartDate" type="date" class="form-control" @bind="filterStartDate" />
@@ -38,7 +38,7 @@
 
 <!-- Contract Table -->
 <table class="table table-striped">
-    <thead>
+    <thead class="bg-gradient">
         <tr>
             <th>Ref Number</th>
             <th>Contract Number</th>
@@ -85,7 +85,7 @@
 <!-- Create Contract Modal -->
 @if (isCreateContractModalOpen)
 {
-    <div class="modal show d-block" tabindex="-1">
+    <div class="modal show d-block mt-3" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -252,7 +252,7 @@
             {
                 if (enteredQuantity > FreeQuantity)
                 {
-                    newContract.Quantity = FreeQuantity; // Cap to available stock
+                    //newContract.Quantity = FreeQuantity; // Cap to available stock
                     Console.WriteLine("Entered quantity exceeds available stock.");
                 }
                 else
@@ -262,6 +262,7 @@
             }
             else
             {
+                Console.WriteLine("Invalid quantity!");
                 newContract.Quantity = 0; // Reset to 0 if input is invalid
             }
         }
