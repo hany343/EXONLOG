@@ -11,15 +11,17 @@
         public int OrderID { get; set; } // Primary Key
 
         [Required]
+        [MaxLength(100)]
+        [Column(TypeName = "nvarchar(100)")]
+        public string OrderNumber { get; set; } // MaterialName or Title of the Contract
+
+        [Required]
         [ForeignKey("Contract")]
         public int ContractID { get; set; } // Foreign Key to Contract
         public Contract? Contract { get; set; } // Navigation Property for Contract
 
         [Required]
         public double Quantity { get; set; } // Quantity for the Order (as double)
-
-        [Required]
-        public DateTime OrderDate { get; set; } // Date the Order was created
 
         [Column(TypeName = "nvarchar(250)")]
         public string? Notes { get; set; } // Additional Notes about the Order

@@ -9,29 +9,30 @@
 
 <h3>Contract Management</h3>
 
+<!-- Header Section -->
 <div class="mb-3 d-flex justify-content-between align-items-center">
     <button class="btn btn-primary" @onclick="OpenCreateContractModal">Create New Contract</button>
-    <input class="form-control w-25" placeholder="Search by Ref Number" @bind="filterRefNumber" />
+    <input class="form-control w-25" placeholder="Search by Ref Number" @bind="filterRefNumber" @oninput="ApplyFilters" />
 </div>
 
-<!-- Filters -->
+<!-- Filters Section -->
 <div class="mb-3">
-    <div class="row g-3 bg-secondary">
+    <div class="row g-3 bg-secondary p-3">
         <div class="col-md-3">
             <label for="filterStartDate" class="form-label">Start Date</label>
-            <input id="filterStartDate" type="date" class="form-control" @bind="filterStartDate" />
+            <input id="filterStartDate" type="date" class="form-control" @bind="filterStartDate" @oninput="ApplyFilters" />
         </div>
         <div class="col-md-3">
             <label for="filterEndDate" class="form-label">End Date</label>
-            <input id="filterEndDate" type="date" class="form-control" @bind="filterEndDate" />
+            <input id="filterEndDate" type="date" class="form-control" @bind="filterEndDate" @oninput="ApplyFilters" />
         </div>
         <div class="col-md-3">
             <label for="filterMinQuantity" class="form-label">Min Quantity</label>
-            <input id="filterMinQuantity" type="number" class="form-control" @bind="filterMinQuantity" />
+            <input id="filterMinQuantity" type="number" class="form-control" @bind="filterMinQuantity" @oninput="ApplyFilters" />
         </div>
         <div class="col-md-3">
             <label for="filterMaxQuantity" class="form-label">Max Quantity</label>
-            <input id="filterMaxQuantity" type="number" class="form-control" @bind="filterMaxQuantity" />
+            <input id="filterMaxQuantity" type="number" class="form-control" @bind="filterMaxQuantity" @oninput="ApplyFilters" />
         </div>
     </div>
 </div>
@@ -54,13 +55,13 @@
         @if (filteredContracts == null)
         {
             <tr>
-                <td colspan="9" class="text-center">Loading contracts...</td>
+                <td colspan="8" class="text-center">Loading contracts...</td>
             </tr>
         }
         else if (!filteredContracts.Any())
         {
             <tr>
-                <td colspan="9" class="text-center">No contracts found.</td>
+                <td colspan="8" class="text-center">No contracts found.</td>
             </tr>
         }
         else
@@ -104,8 +105,8 @@
                         </div>
                         <div class="col-md-6">
                             <label for="newMaterialID" class="form-label">Material</label>
-                            <select id="newMaterialID" class="form-select" @onchange="OnMaterialSelected">
-                                
+                            <select id="newMaterialID" class="form-select"  @onchange="OnMaterialSelected">
+                                <option value="">-- Select Material --</option>
                                 @foreach (var material in materials)
                                 {
                                     <option value="@material.MaterialID">@material.MaterialName</option>
@@ -127,14 +128,13 @@
                         <div class="col-md-6">
                             <label for="newCustomerID" class="form-label">Customer</label>
                             <select id="newCustomerID" class="form-select" @bind="newContract.CustomerID">
+                                <option value="">-- Select Customer --</option>
                                 @foreach (var customer in customers)
                                 {
                                     <option value="@customer.CustomerID">@customer.CustomerName</option>
                                 }
                             </select>
                         </div>
-
-                       
                         <div class="col-md-6">
                             <label for="newStartDate" class="form-label">Start Date</label>
                             <input id="newStartDate" type="date" class="form-control" @bind="newContract.StartDate" />
@@ -151,17 +151,14 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseCreateContractModal">Cancel</button>
-                    @if (newContract.Quantity <= FreeQuantity)
-                    {<button type="button" class="btn btn-primary" @onclick="SaveContractAsync">Save</button>
-                    }
-                    </div>
+                    <button type="button" class="btn btn-primary" @onclick="SaveContractAsync" disabled="@(newContract.Quantity > FreeQuantity)">Save</button>
+                </div>
             </div>
         </div>
     </div>
 }
 
 @code {
-
     private List<Contract> contracts;
     private List<Contract> filteredContracts;
     private List<Material> materials;
@@ -174,36 +171,43 @@
     private double? filterMinQuantity;
     private double? filterMaxQuantity;
 
+    private Material selectedMaterial;
+    private double FreeQuantity;
+
     protected override async Task OnInitializedAsync()
     {
         contracts = await contractService.GetAllContractsAsync();
         materials = await materialService.GetMaterialsAsync();
         customers = await customerService.GetCustomersAsync();
-
         ApplyFilters();
     }
 
-    //private void OpenCreateContractModal() => isCreateContractModalOpen = true;
-    private void CloseCreateContractModal() => isCreateContractModalOpen = false;
+    private void OpenCreateContractModal()
+    {
+        ResetCreateContractForm();
+        isCreateContractModalOpen = true;
+    }
+
+    private void CloseCreateContractModal()
+    {
+        isCreateContractModalOpen = false;
+    }
 
     private async Task SaveContractAsync()
     {
-        FreeQuantity = materialService.GetFreeQuantity(selectedMaterial.MaterialID);
         if (newContract.Quantity > FreeQuantity)
         {
-            Console.WriteLine("Cannot save. Entered quantity exceeds available stock.");
+            Console.WriteLine("Cannot save. Quantity exceeds available stock.");
             return;
         }
 
-        newContract.UserID = 1; // Assign the current user ID here
+        newContract.UserID = 1; // Replace with current user's ID
+        newContract.MaterialID = selectedMaterial.MaterialID;
         await contractService.AddContractAsync(newContract);
         contracts = await contractService.GetAllContractsAsync();
         ApplyFilters();
-
-        ResetCreateContractForm(); // Reset the form
-        CloseCreateContractModal(); // Close the modal
+        CloseCreateContractModal();
     }
-
 
     private void ApplyFilters()
     {
@@ -216,83 +220,24 @@
             .ToList();
     }
 
-    private Material selectedMaterial;
-    double FreeQuantity = 0;
-
     private void OnMaterialSelected(ChangeEventArgs e)
     {
-        try
+        if (int.TryParse(e.Value?.ToString(), out int materialId))
         {
-            if (int.TryParse(e.Value?.ToString(), out int materialId) && materialId > 0)
-            {
-                selectedMaterial = materials.FirstOrDefault(m => m.MaterialID == materialId);
-                FreeQuantity = selectedMaterial != null ? materialService.GetFreeQuantity(materialId) : 0;
-                newContract.MaterialID = materialId; // Update the contract's MaterialID
-                newContract.Quantity = 0; // Reset quantity on material change
-            }
-            else
-            {
-                selectedMaterial = null;
-                FreeQuantity = 0; // Reset stock
-                newContract.MaterialID = 0; // Clear MaterialID
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in OnMaterialSelected: {ex.Message}");
+            selectedMaterial = materials.FirstOrDefault(m => m.MaterialID == materialId);
+            FreeQuantity = materialService.GetFreeQuantity(selectedMaterial.MaterialID);
         }
     }
 
-
-    private void ValidateQuantity(ChangeEventArgs e)
+    private void ValidateQuantity()
     {
-        try
-        {
-            if (double.TryParse(e.Value?.ToString(), out double enteredQuantity))
-            {
-                if (enteredQuantity > FreeQuantity)
-                {
-                    //newContract.Quantity = FreeQuantity; // Cap to available stock
-                    Console.WriteLine("Entered quantity exceeds available stock.");
-                }
-                else
-                {
-                    newContract.Quantity = enteredQuantity;
-                }
-            }
-            else
-            {
-                Console.WriteLine("Invalid quantity!");
-                newContract.Quantity = 0; // Reset to 0 if input is invalid
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in ValidateQuantity: {ex.Message}");
-        }
-    }
-
-
-    private void OpenCreateContractModal()
-    {
-        ResetCreateContractForm(); // Reset the form on opening
-        isCreateContractModalOpen = true;
-
-        if (materials != null && materials.Any())
-        {
-            var defaultMaterial = materials.First();
-            selectedMaterial = defaultMaterial;
-            FreeQuantity = materialService.GetFreeQuantity(defaultMaterial.MaterialID);
-            newContract.MaterialID = defaultMaterial.MaterialID;
-        }
+        // Validation logic if needed
     }
 
     private void ResetCreateContractForm()
     {
         newContract = new Contract();
-        //selectedMaterial = null;
+        selectedMaterial = null;
         FreeQuantity = 0;
     }
-
-
 }

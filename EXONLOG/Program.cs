@@ -54,16 +54,19 @@ builder.Services.AddSingleton(new ConnectionStringService
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Add services to the container.
+// Add services to the container.OrderService
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddHttpContextAccessor(); // Required for IHttpContextAccessor
 
 builder.Services.AddScoped<ContractService>();
+builder.Services.AddScoped<OrderService>();
 
 builder.Services.AddScoped<MaterialTypeService>();
 builder.Services.AddScoped<MaterialService>();
 builder.Services.AddScoped<StockService>();
+
+
 
 
 var app = builder.Build();

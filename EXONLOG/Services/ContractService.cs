@@ -28,7 +28,7 @@
                 .Include(c => c.Material)
                 .Include(c => c.Customer)
                 .Include(c => c.User)
-                .FirstOrDefaultAsync(c => c.ID == id);
+                .FirstOrDefaultAsync(c => c.ContractID == id);
         }
 
         public async Task AddContractAsync(Contract contract)

@@ -384,11 +384,11 @@ namespace EXONLOG.Migrations
 
             modelBuilder.Entity("EXONLOG.Model.Outbound.Contract", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("ContractID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContractID"));
 
                     b.Property<string>("ContractNumber")
                         .IsRequired()
@@ -427,7 +427,7 @@ namespace EXONLOG.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
+                    b.HasKey("ContractID");
 
                     b.HasIndex("CustomerID");
 
@@ -498,8 +498,10 @@ namespace EXONLOG.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("float");

@@ -1,0 +1,241 @@
+﻿@page "/Orders"
+@using EXONLOG.Model.Outbound
+@using EXONLOG.Services
+@inject OrderService orderService
+@inject ContractService contractService
+@rendermode InteractiveServer
+
+<h3>Order Management</h3>
+
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <button class="btn btn-primary" @onclick="OpenCreateOrderModal">Create New Order</button>
+    <input class="form-control w-25" placeholder="Search by Order Number" @bind="filterOrderNumber" />
+</div>
+
+<!-- Filters -->
+<div class="mb-3">
+    <div class="row g-3 bg-secondary">
+        <div class="col-md-4">
+            <label for="filterContract" class="form-label">Contract</label>
+            <select id="filterContract" class="form-select" @bind="filterContractID">
+                <option value="">-- All Contracts --</option>
+                @foreach (var contract in contracts)
+                {
+                    <option value="@contract.ContractID">@contract.RefNumber</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="filterStartDate" class="form-label">Start Date</label>
+            <input id="filterStartDate" type="date" class="form-control" @bind="filterStartDate" />
+        </div>
+        <div class="col-md-4">
+            <label for="filterEndDate" class="form-label">End Date</label>
+            <input id="filterEndDate" type="date" class="form-control" @bind="filterEndDate" />
+        </div>
+    </div>
+</div>
+
+<!-- Order Table -->
+<table class="table table-striped">
+    <thead class="bg-gradient">
+        <tr>
+            <th>Order Number</th>
+            <th>Contract</th>
+            <th>Quantity</th>
+            <th>Order Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @if (filteredOrders == null)
+        {
+            <tr>
+                <td colspan="5" class="text-center">Loading orders...</td>
+            </tr>
+        }
+        else if (!filteredOrders.Any())
+        {
+            <tr>
+                <td colspan="5" class="text-center">No orders found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var order in filteredOrders)
+            {
+                <tr>
+                    <td>@order.OrderNumber</td>
+                    <td>@order.Contract?.RefNumber</td>
+                    <td>@order.Quantity</td>
+                    <td>@order.CreateDate.ToShortDateString()</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteOrder(order.OrderID)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Create Order Modal -->
+@if (isCreateOrderModalOpen)
+{
+    <div class="modal show d-block mt-3" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Order</h5>
+                    <button type="button" class="btn-close" @onclick="CloseCreateOrderModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="newOrderNumber" class="form-label">Order Number</label>
+                            <input id="newOrderNumber" class="form-control" @bind="newOrder.OrderNumber" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newContractID" class="form-label">Contract</label>
+                            <select id="newContractID" class="form-select" @onchange="OnContractSelected">
+                                <option value="">-- Select Contract --</option>
+                                @foreach (var contract in contracts)
+                                {
+                                    <option value="@contract.ContractID">@contract.RefNumber</option>
+                                }
+                            </select>
+                            @if (selectedContract != null)
+                            {
+                                <small class="text-muted">Remaining Quantity: @RemainingContractQuantity</small>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newQuantity" class="form-label">Quantity</label>
+                            <input id="newQuantity" type="number" class="form-control" @bind="newOrder.Quantity" @oninput="ValidateOrderQuantity" />
+                            @if (newOrder.Quantity > RemainingContractQuantity)
+                            {
+                                <small class="text-danger">Entered quantity exceeds remaining contract quantity!</small>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newCreateDate" class="form-label">Order Date</label>
+                            <input id="newCreateDate" type="date" class="form-control" @bind="newOrder.CreateDate" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseCreateOrderModal">Cancel</button>
+                    @if (newOrder.Quantity <= RemainingContractQuantity)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="SaveOrderAsync">Save</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@code {
+    private List<Order> orders;
+    private List<Order> filteredOrders;
+    private List<Contract> contracts;
+    private bool isCreateOrderModalOpen = false;
+    private Order newOrder = new Order();
+    private int? filterContractID;
+    private DateTime? filterStartDate;
+    private DateTime? filterEndDate;
+    private string filterOrderNumber;
+
+    private Contract selectedContract;
+    private double RemainingContractQuantity = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await orderService.GetAllOrdersAsync();
+        contracts = await contractService.GetAllContractsAsync();
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        filteredOrders = orders
+            .Where(o => string.IsNullOrWhiteSpace(filterOrderNumber) || o.OrderNumber.Contains(filterOrderNumber, StringComparison.OrdinalIgnoreCase))
+            .Where(o => !filterContractID.HasValue || o.ContractID == filterContractID)
+            .Where(o => !filterStartDate.HasValue || o.CreateDate >= filterStartDate)
+            .Where(o => !filterEndDate.HasValue || o.CreateDate <= filterEndDate)
+            .ToList();
+    }
+
+    private void OpenCreateOrderModal()
+    {
+        ResetCreateOrderForm();
+        isCreateOrderModalOpen = true;
+    }
+
+    private void CloseCreateOrderModal()
+    {
+        isCreateOrderModalOpen = false;
+    }
+
+    private async Task SaveOrderAsync()
+    {
+        if (newOrder.Quantity > RemainingContractQuantity)
+        {
+            Console.WriteLine("Cannot save. Entered quantity exceeds remaining contract quantity.");
+            return;
+        }
+
+        await orderService.AddOrderAsync(newOrder);
+        orders = await orderService.GetAllOrdersAsync();
+        ApplyFilters();
+        CloseCreateOrderModal();
+    }
+
+    private void OnContractSelected(ChangeEventArgs e)
+    {
+
+        if (int.TryParse(e.Value?.ToString(), out var contractId))
+        {
+            selectedContract = contracts.FirstOrDefault(c => c.ContractID == contractId);
+            RemainingContractQuantity = selectedContract != null ? selectedContract.Quantity - selectedContract.Orders.Sum(o => o.Quantity) : 0;
+            newOrder.ContractID = contractId;
+        }
+        else
+        {
+            selectedContract = null;
+            RemainingContractQuantity = 0;
+        }
+
+    }
+
+    private void ValidateOrderQuantity(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out var enteredQuantity))
+        {
+            if (enteredQuantity > RemainingContractQuantity)
+            {
+                Console.WriteLine("Entered quantity exceeds remaining contract quantity.");
+            }
+            else
+            {
+                newOrder.Quantity = enteredQuantity;
+            }
+        }
+    }
+
+    private void ResetCreateOrderForm()
+    {
+        newOrder = new Order();
+        selectedContract = null;
+        RemainingContractQuantity = 0;
+    }
+
+    private async Task DeleteOrder(int orderId)
+    {
+        await orderService.DeleteOrderAsync(orderId);
+        orders = await orderService.GetAllOrdersAsync();
+        ApplyFilters();
+    }
+}

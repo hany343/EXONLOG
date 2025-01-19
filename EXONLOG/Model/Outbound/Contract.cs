@@ -10,7 +10,7 @@
     public class Contract
     {
         [Key]
-        public int ID { get; set; } // Primary Key
+        public int ContractID { get; set; } // Primary Key
 
         [Required]
         [MaxLength(50)]
