@@ -58,7 +58,7 @@
                 double totalOrderedQuantity = contract.Orders.Sum(o => o.Quantity);
                 if (totalOrderedQuantity + order.Quantity > contract.Quantity)
                     throw new Exception("Order quantity exceeds the remaining contract quantity.");
-
+            order.UserID = 1;
                 _dbContext.Orders.Add(order);
                 await _dbContext.SaveChangesAsync();
             }
