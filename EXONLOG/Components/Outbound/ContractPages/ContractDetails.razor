@@ -1,0 +1,58 @@
+﻿@using EXONLOG.Model.Outbound
+@using EXONLOG.Services
+@inject ContractService contractService
+
+@if (IsOpen)
+{
+    <div class="modal show d-block mt-3">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Mode @("Contract")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Details of the Contract -->
+                        <dt class="col-sm-3">Contract Number</dt>
+                        <dd class="col-sm-9">@Contract.ContractNumber</dd>
+
+                        <dt class="col-sm-3">Material</dt>
+                        <dd class="col-sm-9">@Contract.Material?.MaterialName</dd>
+
+                        <dt class="col-sm-3">Customer</dt>
+                        <dd class="col-sm-9">@Contract.Customer?.CustomerName</dd>
+
+                        <dt class="col-sm-3">Quantity</dt>
+                        <dd class="col-sm-9">@Contract.Quantity</dd>
+
+                        <dt class="col-sm-3">Start Date</dt>
+                        <dd class="col-sm-9">@Contract.StartDate?.ToShortDateString()</dd>
+
+                        <dt class="col-sm-3">Deadline</dt>
+                        <dd class="col-sm-9">@Contract.Deadline?.ToShortDateString()</dd>
+
+                        <dt class="col-sm-3">Notes</dt>
+                        <dd class="col-sm-9">@Contract.Notes</dd>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Contract Contract { get; set; }
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public string Mode { get; set; }
+
+    private async Task CloseModal()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(IsOpen);
+    }
+}

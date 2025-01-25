@@ -1,0 +1,160 @@
+﻿@page "/Outladings"
+@using Services
+@using EXONLOG.Model.Outbound
+@inject ContractService contractService
+@inject OrderService orderService
+@inject MaterialService materialService
+@inject OutloadingService outloadingService
+@rendermode InteractiveServer
+
+<div class="container mt-3">
+    <h3>Create Outloading</h3>
+
+    <EditForm Model="newOutlading" OnValidSubmit="SaveOutloading" FormName="Create">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <!-- Contract Selection -->
+        <div class="mb-3">
+            <label class="form-label">Contract</label>
+            <input type="text" class="form-control mb-2" placeholder="Search Contract by Number" @bind="SearchContract" @oninput="FilterContracts" />
+            <select class="form-select"  @onchange="LoadOrdersForContract">
+                <option value="">Select Contract</option>
+                @foreach (var contract in FilteredContracts)
+                {
+                    <option value="@contract.ContractID">@contract.RefNumber</option>
+                }
+            </select>
+        </div>
+
+        <!-- Order Selection -->
+        <div class="mb-3" style="display: @(Orders.Any() ? "block" : "none");">
+            <label class="form-label">Order</label>
+            <select class="form-select"  @onchange="DisplayOrderSummary">
+                <option value="">Select Order</option>
+                @foreach (var order in Orders)
+                {
+                    <option value="@order.OrderID">@order.OrderNumber</option>
+                }
+            </select>
+        </div>
+
+        <!-- FillType Selection -->
+        <div class="mb-3">
+            <label class="form-label">Fill Type</label>
+            <select class="form-select" @bind="newOutlading.FillType">
+                <option value="">Select Fill Type</option>
+                <option value="Liquid">Liquid</option>
+                <option value="Solid">Solid</option>
+            </select>
+        </div>
+
+        <!-- ShippingType Selection -->
+        <div class="mb-3">
+            <label class="form-label">Shipping Type</label>
+            <select class="form-select" @bind="newOutlading.ShippingType">
+                <option value="">Select Shipping Type</option>
+                <option value="Standard">Standard</option>
+                <option value="Express">Express</option>
+            </select>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="border p-3 mt-3" style="display: @(newOutlading.OrderID > 0 ? "block" : "none");">
+            <h5>Summary</h5>
+            <p><strong>Material:</strong> @SelectedMaterialName</p>
+            <p><strong>Contract Quantity:</strong> @ContractQuantity</p>
+            <p><strong>Remaining Quantity:</strong> @RemainingQuantity</p>
+            <p><strong>Free Stock:</strong> @FreeStock</p>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3" style="display: @(newOutlading.OrderID > 0 ? "block" : "none");">
+            Save Outloading
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    private string? SearchContract;
+    private List<Contract> Contracts = new();
+    private List<Contract> FilteredContracts = new();
+    private List<Order> Orders = new();
+    [SupplyParameterFromForm(FormName = "Create")]
+    private OutLading newOutlading { set; get; } = new OutLading();
+
+    private string? SelectedMaterialName;
+    private double ContractQuantity;
+    private double RemainingQuantity;
+    private double FreeStock;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        // Load all contracts initially
+        Contracts = await contractService.GetAllContractsAsync();
+        FilteredContracts = Contracts;
+    }
+
+    private void FilterContracts()
+    {
+        if (string.IsNullOrWhiteSpace(SearchContract))
+        {
+            FilteredContracts = Contracts;
+        }
+        else
+        {
+            FilteredContracts = Contracts
+                .Where(c => c.RefNumber.Contains(SearchContract, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private async Task LoadOrdersForContract(ChangeEventArgs e)
+    {
+        var cid = int.Parse(e.Value.ToString() ?? "0");
+        if (cid > 0)
+        {
+            Orders = await orderService.GetOrdersByContractIdAsync(cid);
+
+            // Load additional details for the selected contract
+            var contract = Contracts.FirstOrDefault(c => c.ContractID == cid);
+            if (contract != null)
+            {
+                var material = await materialService.GetMaterialDetailsAsync(contract.MaterialID);
+                SelectedMaterialName = material.MaterialName;
+                ContractQuantity = contract.Quantity;
+                RemainingQuantity = ContractQuantity - Orders.Sum(o => o.Quantity); // Example logic
+                FreeStock = await materialService.GetAvailableQuantityAsync(contract.MaterialID);
+            }
+        }
+    }
+
+    private async Task DisplayOrderSummary(ChangeEventArgs e)
+    {
+        var oid = int.Parse(e.Value.ToString() ?? "0");
+        if (oid > 0)
+        {
+            // Optionally, update order-specific details (if needed)
+            var order = Orders.FirstOrDefault(o => o.OrderID == newOutlading.OrderID);
+            if (order != null)
+            {
+                // Update relevant information for the selected order (if needed)
+            }
+        }
+    }
+
+    private async Task SaveOutloading()
+    {
+        if (newOutlading.OrderID <= 0 || string.IsNullOrEmpty(newOutlading.FillType) || string.IsNullOrEmpty(newOutlading.ShippingType))
+        {
+            // Optionally show a message to inform the user that all fields must be filled
+            return;
+        }
+
+        // Call the SaveOutloadingAsync method without assigning the result to a variable
+        await outloadingService.SaveOutloadingAsync(newOutlading);
+
+        // Optionally show success message or navigate away
+    }
+
+}

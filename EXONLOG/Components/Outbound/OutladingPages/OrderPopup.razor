@@ -1,0 +1,79 @@
+﻿@using EXONLOG.Model.Outbound
+
+@inject EXONLOG.Services.OrderService orderService
+
+<div class="modal show d-block" style="display: @(IsOpen ? "block" : "none");">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Order</h5>
+                <button type="button" class="btn-close" @onclick="ClosePopup"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control mb-3" @bind="SearchTerm" placeholder="Search by Order Number" @oninput="SearchOrders" />
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Details</th>
+                            <th>Select</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in FilteredOrders)
+                        {
+                            <tr>
+                                <td>@order.OrderNumber</td>
+                                <td>@order.Quantity</td>
+                                <td>
+                                    <button class="btn btn-primary" @onclick="() => SelectOrder(order.OrderNumber)">Select</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<string> OnOrderSelected { get; set; }
+
+    private string? SearchTerm;
+    private List<Order> Orders = new();
+    private List<Order> FilteredOrders = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Orders = await orderService.GetAllOrdersAsync(); // Fetch all orders
+        FilteredOrders = Orders;
+    }
+
+    private void SearchOrders()
+    {
+        if (string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            FilteredOrders = Orders;
+        }
+        else
+        {
+            FilteredOrders = Orders.Where(o => o.OrderNumber.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+
+    private async Task SelectOrder(string orderNumber)
+    {
+        await OnOrderSelected.InvokeAsync(orderNumber);
+        await ClosePopup();
+    }
+
+    private async Task ClosePopup()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(IsOpen);
+    }
+}

@@ -12,10 +12,10 @@
         [Key]
         public int ContractID { get; set; } // Primary Key
 
-        [Required]
+        
         [MaxLength(50)]
         [Column(TypeName = "nvarchar(100)")]
-        public string RefNumber { get; set; } // Unique Reference Number for the Contract
+        public string? RefNumber { get; set; } // Unique Reference Number for the Contract
 
         [Required]
         [MaxLength(100)]

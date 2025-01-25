@@ -1,5 +1,6 @@
 ﻿namespace EXONLOG.Services
 {
+    using EXONLOG.Components.Outbound.ContractPages;
     using EXONLOG.Data;
     using EXONLOG.Model.Outbound;
     using Microsoft.EntityFrameworkCore;
@@ -15,11 +16,21 @@
 
         public async Task<List<Contract>> GetAllContractsAsync()
         {
-            return await _context.Contracts
+            try
+            {
+              List <Contract> contracts= await _context.Contracts
                 .Include(c => c.Material)
                 .Include(c => c.Customer)
-                .Include(c => c.User)
-                .ToListAsync();
+                .Include(c => c.User).ToListAsync();
+
+                return contracts;
+            }
+            catch (Exception ex)
+            {
+                // Log error for debugging
+                Console.WriteLine($"Error fetching contracts: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<Contract> GetContractByIdAsync(int id)

@@ -72,6 +72,38 @@ namespace EXONLOG.Services
 
             return materials;
         }
+
+        public  double GetFreeQuantityAsync(int materialId)
+        {
+            try
+            {
+                // Validate MaterialID
+                var materialExists =  _context.Materials.Any(m => m.MaterialID == materialId);
+                if (!materialExists)
+                {
+                    throw new ArgumentException("Invalid MaterialID provided.");
+                }
+
+                // Get total stock
+                var totalStock =  _context.Stocks
+                    .Where(s => s.MaterialId == materialId)
+                    .Sum(s => (double?)s.Quantity) ?? 0;
+
+                // Get reserved quantity
+                var reservedQuantity =  _context.Contracts
+                    .Where(c => c.MaterialID == materialId)//&& c.Deadline >= DateTime.UtcNow
+                    .Sum(c => (double?)c.Quantity) ?? 0;
+
+                // Calculate free quantity
+                return totalStock - reservedQuantity;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging
+                Console.WriteLine($"Error in GetFreeQuantityAsync: {ex.Message}");
+                throw;
+            }
+        }
         // Method to add a new material
         public async Task AddMaterialAsync(Material material)
         {

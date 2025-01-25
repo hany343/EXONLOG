@@ -112,7 +112,14 @@
                 _dbContext.Orders.Remove(order);
                 await _dbContext.SaveChangesAsync();
             }
+
+        public async Task<List<Order>> GetOrdersByContractIdAsync(int contractId)
+        {
+            return await _dbContext.Orders.Where(o => o.ContractID == contractId).ToListAsync();
         }
+
     }
+
+}
 
 

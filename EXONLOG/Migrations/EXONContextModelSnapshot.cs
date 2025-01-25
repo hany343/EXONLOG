@@ -417,7 +417,6 @@ namespace EXONLOG.Migrations
                         .HasColumnType("float");
 
                     b.Property<string>("RefNumber")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(100)");
 
@@ -547,7 +546,7 @@ namespace EXONLOG.Migrations
                     b.Property<int?>("FirstWeigherID")
                         .HasColumnType("int");
 
-                    b.Property<double>("FirstWeight")
+                    b.Property<double?>("FirstWeight")
                         .HasColumnType("float");
 
                     b.Property<DateTime?>("FirstWeightDate")
@@ -575,7 +574,7 @@ namespace EXONLOG.Migrations
                     b.Property<int?>("SecondWeigherID")
                         .HasColumnType("int");
 
-                    b.Property<double>("SecondWeight")
+                    b.Property<double?>("SecondWeight")
                         .HasColumnType("float");
 
                     b.Property<DateTime?>("SecondWeightDate")
@@ -607,7 +606,6 @@ namespace EXONLOG.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("UserID")
