@@ -73,7 +73,10 @@ builder.Services.AddScoped<MaterialTypeService>();
 builder.Services.AddScoped<MaterialService>();
 builder.Services.AddScoped<StockService>();
 
-
+//////////////// Trans Service  /////////
+///
+builder.Services.AddScoped<TruckService>();
+builder.Services.AddScoped<DriverService>();
 
 
 var app = builder.Build();

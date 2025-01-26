@@ -29,7 +29,7 @@
         public string OwnerName { get; set; } // Owner's name
 
         [MaxLength(50)]
-        public string TruckType { get; set; } // Type of truck (e.g., "Flatbed", "Tanker")
+        public string? TruckType { get; set; } // Type of truck (e.g., "Flatbed", "Tanker")
 
         public double? Capacity { get; set; } // Maximum load capacity of the truck
 

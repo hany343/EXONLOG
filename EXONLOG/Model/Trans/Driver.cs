@@ -15,16 +15,18 @@
         [Column(TypeName = "nvarchar(100)")]
         public string DriverName { get; set; } // Driver's name
 
-        [MaxLength(15)]
-        [Column(TypeName = "nvarchar(100)")]
-        public string Contact { get; set; } // Driver's contact number
+        
+        [Required]
+        [MaxLength(20)]
+        public string NationalID { get; set; } // Driver's national identification number
 
         [MaxLength(20)]
         public string LicenseNumber { get; set; } // Driver's license number
 
-        [Required]
-        [MaxLength(20)]
-        public string NationalID { get; set; } // Driver's national identification number
+
+        [MaxLength(15)]
+        [Column(TypeName = "nvarchar(100)")]
+        public string? Contact { get; set; } // Driver's contact number
 
         [Required]
         public int UserID { get; set; } // User who created or registered the driver
@@ -32,7 +34,7 @@
 
         [MaxLength(250)]
         [Column(TypeName = "nvarchar(250)")]
-        public string Address { get; set; } // Driver's address
+        public string? Address { get; set; } // Driver's address
 
         [Column(TypeName = "nvarchar(250)")]
         public string? Notes { get; set; } // Additional notes about the driver

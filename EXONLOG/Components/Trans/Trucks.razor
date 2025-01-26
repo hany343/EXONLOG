@@ -1,0 +1,218 @@
+﻿@page "/Trucks"
+@using EXONLOG.Model.Trans
+@using Services
+@inject TruckService truckService
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<div class="container mt-3">
+    <h3>Manage Trucks</h3>
+
+    <!-- Add Button -->
+    <button class="btn btn-primary mb-3" @onclick="ShowAddTruckModal">Add Truck</button>
+
+    <!-- Search Box -->
+    <div class="mb-3 d-flex justify-content-end">
+        <input type="text" class="form-control w-50" placeholder="Search by Truck or Trailer Number" @bind="searchText" @oninput="FilterTrucks" />
+    </div>
+
+    <!-- Trucks List -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Truck Number</th>
+                <th>License Number</th>
+                <th>Trailer Number</th>
+                <th>Trailer License</th>
+                <th>Owner</th>
+                <th>Truck Type</th>
+                <th>Capacity</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (filteredTrucks.Any())
+            {
+                @foreach (var truck in filteredTrucks)
+                {
+                    <tr>
+                        <td>@truck.TruckNumber</td>
+                        <td>@truck.LicenseNumber</td>
+                        <td>@truck.TrailerNumber</td>
+                        <td>@truck.TrailerLicenseNumber</td>
+                        <td>@truck.OwnerName</td>
+                        <td>@truck.TruckType</td>
+                        <td>@truck.Capacity</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-2" @onclick="() => EditTruck(truck.TruckID)">Edit</button>
+                            <button class="btn btn-sm btn-info me-2" @onclick="() => ViewTruckDetails(truck.TruckID)">Details</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteTruck(truck.TruckID)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center">No trucks found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Add/Edit Truck Modal -->
+@if (isTruckModalVisible)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitle</h5>
+                    <button type="button" class="btn-close" @onclick="CloseTruckModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="selectedTruck" OnValidSubmit="SaveTruck">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label class="form-label">Truck Number</label>
+                            <input type="text" class="form-control" @bind="selectedTruck.TruckNumber" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">License Number</label>
+                            <input type="text" class="form-control" @bind="selectedTruck.LicenseNumber" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Trailer Number</label>
+                            <input type="text" class="form-control" @bind="selectedTruck.TrailerNumber" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Trailer License Number</label>
+                            <input type="text" class="form-control" @bind="selectedTruck.TrailerLicenseNumber" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Owner Name</label>
+                            <input type="text" class="form-control" @bind="selectedTruck.OwnerName" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Truck Type</label>
+                            <input type="text" class="form-control" @bind="selectedTruck.TruckType" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Capacity</label>
+                            <input type="number" class="form-control" @bind="selectedTruck.Capacity" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" @bind="selectedTruck.Notes"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Save</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CloseTruckModal">Cancel</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Truck> trucks = new();
+    private List<Truck> filteredTrucks = new();
+    private Truck selectedTruck = new();
+    private string searchText = string.Empty;
+    private bool isTruckModalVisible = false;
+    private string modalTitle = "Add Truck";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTrucks();
+    }
+
+    private async Task LoadTrucks()
+    {
+        trucks = await truckService.GetAllTrucksAsync();
+        filteredTrucks = trucks;
+    }
+
+    private async void FilterTrucks()
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            filteredTrucks = trucks;
+        }
+        else
+        {
+            filteredTrucks = trucks.Where(t =>
+                t.TruckNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrWhiteSpace(t.TrailerNumber) && t.TrailerNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+            
+                await InvokeAsync(StateHasChanged);
+           
+        }
+    }
+
+    private void ShowAddTruckModal()
+    {
+        selectedTruck = new Truck();
+        modalTitle = "Add Truck";
+        isTruckModalVisible = true;
+    }
+
+    private void EditTruck(int truckId)
+    {
+        selectedTruck = trucks.FirstOrDefault(t => t.TruckID == truckId) ?? new Truck();
+        modalTitle = "Edit Truck";
+        isTruckModalVisible = true;
+    }
+
+    private async Task SaveTruck()
+    {
+        if (selectedTruck.TruckID == 0)
+        {
+            await truckService.AddTruckAsync(selectedTruck);
+        }
+        else
+        {
+            await truckService.UpdateTruckAsync(selectedTruck);
+        }
+
+        isTruckModalVisible = false;
+        await LoadTrucks();
+    }
+
+    private void ViewTruckDetails(int truckId)
+    {
+        var truck = trucks.FirstOrDefault(t => t.TruckID == truckId);
+        if (truck != null)
+        {
+            // Display truck details (implementation can vary)
+            JSRuntime.InvokeVoidAsync("alert", $"Truck: {truck.TruckNumber}\nOwner: {truck.OwnerName}");
+        }
+    }
+
+    private async Task DeleteTruck(int truckId)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this truck?");
+        if (confirmed)
+        {
+            await truckService.DeleteTruckAsync(truckId);
+            await LoadTrucks();
+        }
+    }
+
+    private void CloseTruckModal()
+    {
+        isTruckModalVisible = false;
+    }
+}

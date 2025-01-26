@@ -1,6 +1,7 @@
 ﻿@page "/Outladings"
 @using Services
 @using EXONLOG.Model.Outbound
+@using Model.Trans
 @inject ContractService contractService
 @inject OrderService orderService
 @inject MaterialService materialService
@@ -18,11 +19,11 @@
         <div class="mb-3">
             <label class="form-label">Contract</label>
             <input type="text" class="form-control mb-2" placeholder="Search Contract by Number" @bind="SearchContract" @oninput="FilterContracts" />
-            <select class="form-select"  @onchange="LoadOrdersForContract">
+            <select class="form-select" @onchange="LoadOrdersForContract">
                 <option value="">Select Contract</option>
                 @foreach (var contract in FilteredContracts)
                 {
-                    <option value="@contract.ContractID">@contract.RefNumber</option>
+                    <option value="@contract.ContractID">@contract.ContractNumber</option>
                 }
             </select>
         </div>
@@ -30,7 +31,7 @@
         <!-- Order Selection -->
         <div class="mb-3" style="display: @(Orders.Any() ? "block" : "none");">
             <label class="form-label">Order</label>
-            <select class="form-select"  @onchange="DisplayOrderSummary">
+            <select class="form-select" @onchange="DisplayOrderSummary">
                 <option value="">Select Order</option>
                 @foreach (var order in Orders)
                 {
@@ -38,6 +39,29 @@
                 }
             </select>
         </div>
+
+        <!-- Truck Selection -->
+        <div class="mb-3">
+            <label class="form-label">Truck</label>
+            <input type="text" class="form-control mb-2" placeholder="Search Truck by Number" @bind="SearchTruck" @oninput="FilterTrucks" />
+            <select class="form-select" @onchange="DisplaySelectedTruck">
+                <option value="">Select Truck</option>
+                @foreach (var truck in FilteredTrucks)
+                {
+                    <option value="@truck.TruckID">
+                        @truck.TruckNumber @(string.IsNullOrEmpty(truck.TrailerNumber) ? "" : $"- Trailer: {truck.TrailerNumber}")
+                    </option>
+                }
+            </select>
+        </div>
+
+        <!-- Selected Truck Display -->
+        <div class="border p-3 mt-3" style="display: @(SelectedTruck != null ? "block" : "none");">
+            <h5>Selected Truck</h5>
+            <p><strong>Truck Number:</strong> @SelectedTruck?.TruckNumber</p>
+            <p><strong>Trailer Number:</strong> @SelectedTruck?.TrailerNumber</p>
+        </div>
+
 
         <!-- FillType Selection -->
         <div class="mb-3">
@@ -60,7 +84,7 @@
         </div>
 
         <!-- Summary Section -->
-        <div class="border p-3 mt-3" style="display: @(newOutlading.OrderID > 0 ? "block" : "none");">
+        <div class="border p-3 mt-3 flex" style="display: @(newOutlading.OrderID == 0 ? "block" : "none");">
             <h5>Summary</h5>
             <p><strong>Material:</strong> @SelectedMaterialName</p>
             <p><strong>Contract Quantity:</strong> @ContractQuantity</p>
@@ -68,7 +92,7 @@
             <p><strong>Free Stock:</strong> @FreeStock</p>
         </div>
 
-        <button type="submit" class="btn btn-success mt-3" style="display: @(newOutlading.OrderID > 0 ? "block" : "none");">
+        <button type="submit" class="btn btn-success mt-3" style="display: @(newOutlading.OrderID == 0 ? "block" : "none");">
             Save Outloading
         </button>
     </EditForm>
@@ -86,6 +110,12 @@
     private double ContractQuantity;
     private double RemainingQuantity;
     private double FreeStock;
+
+
+    private string? SearchTruck;
+    private List<Truck> Trucks = new();
+    private List<Truck> FilteredTrucks = new();
+    private Truck? SelectedTruck;
 
     protected override async Task OnInitializedAsync()
     {
@@ -145,16 +175,31 @@
 
     private async Task SaveOutloading()
     {
-        if (newOutlading.OrderID <= 0 || string.IsNullOrEmpty(newOutlading.FillType) || string.IsNullOrEmpty(newOutlading.ShippingType))
-        {
-            // Optionally show a message to inform the user that all fields must be filled
-            return;
-        }
+        //if (newOutlading.OrderID <= 0 || string.IsNullOrEmpty(newOutlading.FillType) || string.IsNullOrEmpty(newOutlading.ShippingType))
+        //{
+        //    // Optionally show a message to inform the user that all fields must be filled
+        //    return;
+        //}
 
         // Call the SaveOutloadingAsync method without assigning the result to a variable
         await outloadingService.SaveOutloadingAsync(newOutlading);
 
         // Optionally show success message or navigate away
     }
+    private void FilterTrucks()
+    {
+        FilteredTrucks = string.IsNullOrWhiteSpace(SearchTruck)
+            ? Trucks
+            : Trucks.Where(t => t.TruckNumber.Contains(SearchTruck, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
 
+    private void DisplaySelectedTruck(ChangeEventArgs e)
+    {
+        var truckId = int.Parse(e.Value?.ToString() ?? "0");
+        SelectedTruck = Trucks.FirstOrDefault(t => t.TruckID == truckId);
+        if (SelectedTruck != null)
+        {
+            newOutlading.TruckID = SelectedTruck.TruckID;
+        }
+    }
 }
