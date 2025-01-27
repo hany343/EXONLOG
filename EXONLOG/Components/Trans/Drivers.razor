@@ -1,6 +1,6 @@
 ﻿@page "/Drivers"
-@using Services
 @using EXONLOG.Model.Trans
+@using Services
 @inject DriverService driverService
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
@@ -8,29 +8,29 @@
 <div class="container mt-3">
     <h3>Manage Drivers</h3>
 
-    <!-- Add Button to Open the Create Driver Form (Modal) -->
-    <button class="btn btn-primary" @onclick="ShowModal">Add Driver</button>
+    <!-- Add Button -->
+    <button class="btn btn-primary mb-3" @onclick="ShowAddDriverModal">Add Driver</button>
 
-    <!-- Search Box for Driver Name or National ID -->
-    <div class="mb-3">
-        <input type="text" class="form-control  w-50" placeholder="Search Driver by Name or National ID" @bind="SearchDriver" @oninput="FilterDrivers" />
+    <!-- Search Box -->
+    <div class="mb-3 d-flex justify-content-end">
+        <input type="text" class="form-control w-50" placeholder="Search by Name or National ID" @bind="searchText" @oninput="FilterDrivers" />
     </div>
 
-    <!-- List of Drivers -->
-    <div>
-        <h4>Driver List</h4>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>National ID</th>
-                    <th>License Number</th>
-                    <th>Contact</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var driver in FilteredDrivers)
+    <!-- Drivers List -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Driver Name</th>
+                <th>National ID</th>
+                <th>License Number</th>
+                <th>Contact</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (filteredDrivers.Any())
+            {
+                @foreach (var driver in filteredDrivers)
                 {
                     <tr>
                         <td>@driver.DriverName</td>
@@ -38,175 +38,151 @@
                         <td>@driver.LicenseNumber</td>
                         <td>@driver.Contact</td>
                         <td>
-                            <button class="btn btn-info" @onclick="() => ShowEditDriverForm(driver.DriverID)">Edit</button>
-                            <button class="btn btn-danger" @onclick="() => DeleteDriver(driver.DriverID)">Delete</button>
+                            <button class="btn btn-sm btn-primary me-2" @onclick="() => EditDriver(driver.DriverID)">Edit</button>
+                            <button class="btn btn-sm btn-info me-2" @onclick="() => ViewDriverDetails(driver.DriverID)">Details</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteDriver(driver.DriverID)">Delete</button>
                         </td>
                     </tr>
                 }
-            </tbody>
-        </table>
-    </div>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">No drivers found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
-    <!-- Modal for Creating or Editing Driver -->
-    @if (isModalVisible)
-    {
-        <div class="modal d-block show" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createDriverModalLabel">Create Driver</h5>
-                        <button type="button" class="btn-close" @onclick="CloseModal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <EditForm Model="newDriver" OnValidSubmit="SaveDriver">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
+<!-- Add/Edit Driver Modal -->
+@if (isDriverModalVisible)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitle</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDriverModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="selectedDriver" OnValidSubmit="SaveDriver">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-                            <div class="mb-3">
-                                <label class="form-label">Driver Name</label>
-                                <input type="text" class="form-control" @bind="newDriver.DriverName" />
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Driver Name</label>
+                            <input type="text" class="form-control" @bind="selectedDriver.DriverName" />
+                        </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">National ID</label>
-                                <input type="text" class="form-control" @bind="newDriver.NationalID" />
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">National ID</label>
+                            <input type="text" class="form-control" @bind="selectedDriver.NationalID" />
+                        </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">License Number</label>
-                                <input type="text" class="form-control" @bind="newDriver.LicenseNumber" />
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">License Number</label>
+                            <input type="text" class="form-control" @bind="selectedDriver.LicenseNumber" />
+                        </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Contact</label>
-                                <input type="text" class="form-control" @bind="newDriver.Contact" />
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contact</label>
+                            <input type="text" class="form-control" @bind="selectedDriver.Contact" />
+                        </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Address</label>
-                                <input type="text" class="form-control" @bind="newDriver.Address" />
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-control" @bind="selectedDriver.Address" />
+                        </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Notes</label>
-                                <input type="text" class="form-control" @bind="newDriver.Notes" />
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" @bind="selectedDriver.Notes"></textarea>
+                        </div>
 
-                            <!-- Image Upload -->
-                            <div class="mb-3">
-                                <label class="form-label">Driver Image</label>
-                                <div class="d-flex">
-                                    <input type="file" class="form-control" accept="image/*" @onchange="OnInputFileChange" />
-                                    <button type="button" class="btn btn-secondary ms-2" @onclick="OpenCameraModal">Use Camera</button>
-                                </div>
-                                <div class="mt-3">
-                                    @if (!string.IsNullOrEmpty(imagePreview))
-                                    {
-                                        <img src="@imagePreview" alt="Driver Image" style="max-width: 200px; max-height: 200px;" />
-                                    }
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-success">Save Driver</button>
-                        </EditForm>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
-                        <button type="button" class="btn btn-primary" @onclick="SaveDriver">Save</button>
-                    </div>
+                        <button type="submit" class="btn btn-success">Save</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CloseDriverModal">Cancel</button>
+                    </EditForm>
                 </div>
             </div>
         </div>
-    }
-    <!-- Camera Capture Modal -->
-    @if (isCameraModalVisible)
-    {
-        <div class="modal d-block show" id="cameraModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="cameraModalLabel">Capture Driver Image</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseCameraModal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <video id="videoElement" width="100%" height="auto" autoplay></video>
-                        <canvas id="canvasElement" style="display: none;"></canvas>
-                        <img id="capturedImage" style="display: none; width: 100%; height: auto;" />
-                        <button class="btn btn-primary mt-2" @onclick="ShowCamera">Show Camera</button>
-                        <button class="btn btn-primary mt-2" @onclick="CapturePhoto">Capture Photo</button>
-                        <button class="btn btn-success mt-2" @onclick="ConfirmCapturedPhoto">Confirm</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-    }
     </div>
+}
 
 @code {
-    private string? SearchDriver;
     private List<Driver> drivers = new();
-    private List<Driver> FilteredDrivers = new();
-    private Driver newDriver = new Driver();
-    private string? imagePreview;
-
-    private ElementReference videoElement;
-    private ElementReference canvasElement;
-
-    // Flag to control modal visibility
-    private bool isModalVisible = false;
+    private List<Driver> filteredDrivers = new();
+    private Driver selectedDriver = new();
+    private string searchText = string.Empty;
+    private bool isDriverModalVisible = false;
+    private string modalTitle = "Add Driver";
 
     protected override async Task OnInitializedAsync()
     {
-        // Load all drivers initially
-        drivers = await driverService.GetAllDriversAsync();
-        FilteredDrivers = drivers;
+        await LoadDrivers();
     }
 
-    private void FilterDrivers()
+    private async Task LoadDrivers()
     {
-        if (string.IsNullOrWhiteSpace(SearchDriver))
+        drivers = await driverService.GetAllDriversAsync();
+        filteredDrivers = drivers;
+    }
+
+    private async void FilterDrivers()
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
         {
-            FilteredDrivers = drivers;
+            filteredDrivers = drivers;
         }
         else
         {
-            FilteredDrivers = drivers
-                .Where(d => d.DriverName.Contains(SearchDriver, StringComparison.OrdinalIgnoreCase) || d.NationalID.Contains(SearchDriver, StringComparison.OrdinalIgnoreCase))
+            filteredDrivers = drivers.Where(d =>
+                d.DriverName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrWhiteSpace(d.NationalID) && d.NationalID.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
+
+            await InvokeAsync(StateHasChanged);
         }
     }
 
-    private async Task ShowCreateDriverForm()
+    private void ShowAddDriverModal()
     {
-        newDriver = new Driver(); // Reset form data for new driver
-        isModalVisible = true; // Show the modal via C#
+        selectedDriver = new Driver();
+        modalTitle = "Add Driver";
+        isDriverModalVisible = true;
     }
 
-    private async Task ShowEditDriverForm(int driverId)
+    private void EditDriver(int driverId)
     {
-        newDriver = await driverService.GetDriverByIdAsync(driverId);
-        isModalVisible = true; // Show the modal via C#
+        selectedDriver = drivers.FirstOrDefault(d => d.DriverID == driverId) ?? new Driver();
+        modalTitle = "Edit Driver";
+        isDriverModalVisible = true;
     }
 
     private async Task SaveDriver()
     {
-        if (newDriver.DriverID == 0)
+        selectedDriver.UserID = 1;
+        if (selectedDriver.DriverID == 0)
         {
-            newDriver.UserID = 1;
-            // Add new driver
-            await driverService.AddDriverAsync(newDriver);
+            await driverService.AddDriverAsync(selectedDriver);
         }
         else
         {
-            // Update existing driver
-            await driverService.UpdateDriverAsync(newDriver);
+            await driverService.UpdateDriverAsync(selectedDriver);
         }
 
-        // Close the modal after saving
-        isModalVisible = false;
-        // Optionally, display success message
+        isDriverModalVisible = false;
+        await LoadDrivers();
+    }
+
+    private void ViewDriverDetails(int driverId)
+    {
+        var driver = drivers.FirstOrDefault(d => d.DriverID == driverId);
+        if (driver != null)
+        {
+            // Display driver details (implementation can vary)
+            JSRuntime.InvokeVoidAsync("alert", $"Driver: {driver.DriverName}\nContact: {driver.Contact}");
+        }
     }
 
     private async Task DeleteDriver(int driverId)
@@ -215,86 +191,12 @@
         if (confirmed)
         {
             await driverService.DeleteDriverAsync(driverId);
-            // Optionally, refresh the list of drivers
+            await LoadDrivers();
         }
     }
 
-    private async Task OnInputFileChange(ChangeEventArgs e)
+    private void CloseDriverModal()
     {
-        var file = (e.Value as IEnumerable<IBrowserFile>)?.FirstOrDefault();
-        if (file != null)
-        {
-            // Get the file content as a base64 string
-            var buffer = new byte[file.Size];
-            await file.OpenReadStream().ReadAsync(buffer);
-            imagePreview = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
-        }
+        isDriverModalVisible = false;
     }
-
-    private async Task OpenCameraModal()
-    {
-        // Use JSInterop for Camera Modal
-        isModalVisible = false;
-        isCameraModalVisible = true;
-
-    }
-
-    private async Task ShowCamera()
-    {
-        await JSRuntime.InvokeVoidAsync("openCameraModal");
-    }
-
-    private async Task CloseCameraModal()
-    {
-        await JSRuntime.InvokeVoidAsync("closeCameraModal");
-        isCameraModalVisible = false; // Close the modal
-    }
-
-    private async Task CapturePhoto()
-    {
-        await JSRuntime.InvokeVoidAsync("capturePhoto");
-    }
-    private void ConfirmCapturedPhoto()
-    {
-
-        try
-        {
-            // Remove Base64 prefix and convert to byte array
-            var base64Data = imagePreview.Substring(imagePreview.IndexOf(",") + 1);
-            newDriver.Image = Convert.FromBase64String(base64Data);
-
-            // Optionally, save the image to a file or process it
-            var filePath = Path.Combine("wwwroot/uploads", "driverImage.png");
-            File.WriteAllBytes(filePath, newDriver.Image);
-
-            isCameraModalVisible = false; // Close the modal
-
-            isModalVisible = true;
-        }
-        catch (FormatException ex)
-        {
-            Console.WriteLine($"Invalid Base64 string: {ex.Message}");
-        }
-    }
-
-
-
-    private void ShowModal()
-    {
-
-        newDriver = new Driver(); // Reset form data for new driver
-        isModalVisible = true; // Show the modal via C#
-    }
-    private void CloseModal()
-    {
-        isModalVisible = false;
-    }
-
-    private bool isCameraModalVisible = false;
-
-
-
-
-
-
 }

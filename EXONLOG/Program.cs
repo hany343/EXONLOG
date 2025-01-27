@@ -67,7 +67,7 @@ builder.Services.AddHttpContextAccessor(); // Required for IHttpContextAccessor
 
 builder.Services.AddScoped<ContractService>();
 builder.Services.AddScoped<OrderService>();
-builder.Services.AddScoped<OutloadingService>();
+builder.Services.AddScoped<OutladingService>();
 
 builder.Services.AddScoped<MaterialTypeService>();
 builder.Services.AddScoped<MaterialService>();

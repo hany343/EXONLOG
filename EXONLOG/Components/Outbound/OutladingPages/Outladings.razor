@@ -1,205 +1,213 @@
-﻿@page "/Outladings"
-@using Services
-@using EXONLOG.Model.Outbound
-@using Model.Trans
-@inject ContractService contractService
+﻿@page "/outlading"
+@inject OutladingService outLadingService
 @inject OrderService orderService
-@inject MaterialService materialService
-@inject OutloadingService outloadingService
+@inject DriverService driverService
+@inject TruckService truckService
+@inject ContractService contractService
 @rendermode InteractiveServer
 
-<div class="container mt-3">
-    <h3>Create Outloading</h3>
 
-    <EditForm Model="newOutlading" OnValidSubmit="SaveOutloading" FormName="Create">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+<PageTitle>OutLading Management</PageTitle>
 
-        <!-- Contract Selection -->
-        <div class="mb-3">
-            <label class="form-label">Contract</label>
-            <input type="text" class="form-control mb-2" placeholder="Search Contract by Number" @bind="SearchContract" @oninput="FilterContracts" />
-            <select class="form-select" @onchange="LoadOrdersForContract">
-                <option value="">Select Contract</option>
-                @foreach (var contract in FilteredContracts)
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">OutLading Management</h1>
+
+    <!-- Add OutLading Button -->
+    <button class="bg-blue-500 text-white px-4 py-2 rounded" @onclick="() => ShowAddOutLadingPopup = true">Add OutLading</button>
+
+    <!-- Add OutLading Popup -->
+    @if (ShowAddOutLadingPopup)
+    {
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div class="bg-white p-6 rounded shadow-xl w-1/2">
+                <h2 class="text-xl font-bold mb-4">Add OutLading</h2>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Contract</label>
+                    <select class="w-full border rounded px-2 py-1" @onchange="OnContractChange">
+                        <option value="">Select Contract</option>
+                        @foreach (var contract in contracts)
+                        {
+                            <option value="@contract.ContractID">@contract.RefNumber</option>
+                        }
+                    </select>
+                </div>
+
+                @if (selectedContractID != null)
                 {
-                    <option value="@contract.ContractID">@contract.ContractNumber</option>
+                    <div class="mb-4">
+                        <label class="block font-medium">Order</label>
+                        <select class="w-full border rounded px-2 py-1" @bind="selectedOrderID">
+                            <option value="">Select Order</option>
+                            @foreach (var order in orders)
+                            {
+                                <option value="@order.OrderID">@order.OrderNumber</option>
+                            }
+                        </select>
+                    </div>
                 }
-            </select>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Driver</label>
+                    <input type="text" class="w-full border rounded px-2 py-1 mb-2" placeholder="Search by Name or National ID" @bind="driverSearchTerm" @oninput="SearchDrivers" />
+                    <select class="w-full border rounded px-2 py-1" @bind="selectedDriverID">
+                        <option value="">Select Driver</option>
+                        @foreach (var driver in filteredDrivers)
+                        {
+                            <option value="@driver.DriverID">@driver.DriverName (@driver.NationalID)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Truck</label>
+                    <input type="text" class="w-full border rounded px-2 py-1 mb-2" placeholder="Search by Truck Number" @bind="truckSearchTerm" @oninput="SearchTrucks" />
+                    <select class="w-full border rounded px-2 py-1" @bind="selectedTruckID">
+                        <option value="">Select Truck</option>
+                        @foreach (var truck in filteredTrucks)
+                        {
+                            <option value="@truck.TruckID">@truck.TruckNumber - @truck.TrailerNumber</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Lading Type</label>
+                    <input type="text" class="w-full border rounded px-2 py-1" @bind="newOutLading.Type" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Fill Type</label>
+                    <input type="text" class="w-full border rounded px-2 py-1" @bind="newOutLading.FillType" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Stack Bar</label>
+                    <input type="text" class="w-full border rounded px-2 py-1" @bind="newOutLading.StackBar" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Shipping Address</label>
+                    <input type="text" class="w-full border rounded px-2 py-1" @bind="newOutLading.ShippingAddress" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Shipping City</label>
+                    <input type="text" class="w-full border rounded px-2 py-1" @bind="newOutLading.ShippingCity" />
+                </div>
+
+                <div class="flex justify-end">
+                    <button class="bg-gray-500 text-white px-4 py-2 rounded mr-2" @onclick="() => ShowAddOutLadingPopup = false">Cancel</button>
+                    <button class="bg-green-500 text-white px-4 py-2 rounded" @onclick="AddOutLading">Add</button>
+                </div>
+            </div>
         </div>
+    }
 
-        <!-- Order Selection -->
-        <div class="mb-3" style="display: @(Orders.Any() ? "block" : "none");">
-            <label class="form-label">Order</label>
-            <select class="form-select" @onchange="DisplayOrderSummary">
-                <option value="">Select Order</option>
-                @foreach (var order in Orders)
-                {
-                    <option value="@order.OrderID">@order.OrderNumber</option>
-                }
-            </select>
-        </div>
-
-        <!-- Truck Selection -->
-        <div class="mb-3">
-            <label class="form-label">Truck</label>
-            <input type="text" class="form-control mb-2" placeholder="Search Truck by Number" @bind="SearchTruck" @oninput="FilterTrucks" />
-            <select class="form-select" @onchange="DisplaySelectedTruck">
-                <option value="">Select Truck</option>
-                @foreach (var truck in FilteredTrucks)
-                {
-                    <option value="@truck.TruckID">
-                        @truck.TruckNumber @(string.IsNullOrEmpty(truck.TrailerNumber) ? "" : $"- Trailer: {truck.TrailerNumber}")
-                    </option>
-                }
-            </select>
-        </div>
-
-        <!-- Selected Truck Display -->
-        <div class="border p-3 mt-3" style="display: @(SelectedTruck != null ? "block" : "none");">
-            <h5>Selected Truck</h5>
-            <p><strong>Truck Number:</strong> @SelectedTruck?.TruckNumber</p>
-            <p><strong>Trailer Number:</strong> @SelectedTruck?.TrailerNumber</p>
-        </div>
-
-
-        <!-- FillType Selection -->
-        <div class="mb-3">
-            <label class="form-label">Fill Type</label>
-            <select class="form-select" @bind="newOutlading.FillType">
-                <option value="">Select Fill Type</option>
-                <option value="Liquid">Liquid</option>
-                <option value="Solid">Solid</option>
-            </select>
-        </div>
-
-        <!-- ShippingType Selection -->
-        <div class="mb-3">
-            <label class="form-label">Shipping Type</label>
-            <select class="form-select" @bind="newOutlading.ShippingType">
-                <option value="">Select Shipping Type</option>
-                <option value="Standard">Standard</option>
-                <option value="Express">Express</option>
-            </select>
-        </div>
-
-        <!-- Summary Section -->
-        <div class="border p-3 mt-3 flex" style="display: @(newOutlading.OrderID == 0 ? "block" : "none");">
-            <h5>Summary</h5>
-            <p><strong>Material:</strong> @SelectedMaterialName</p>
-            <p><strong>Contract Quantity:</strong> @ContractQuantity</p>
-            <p><strong>Remaining Quantity:</strong> @RemainingQuantity</p>
-            <p><strong>Free Stock:</strong> @FreeStock</p>
-        </div>
-
-        <button type="submit" class="btn btn-success mt-3" style="display: @(newOutlading.OrderID == 0 ? "block" : "none");">
-            Save Outloading
-        </button>
-    </EditForm>
+    <!-- OutLading List -->
+    <table class="table-auto w-full mt-4 border">
+        <thead>
+            <tr>
+                <th class="border px-4 py-2">ID</th>
+                <th class="border px-4 py-2">Order</th>
+                <th class="border px-4 py-2">Driver</th>
+                <th class="border px-4 py-2">Truck</th>
+                <th class="border px-4 py-2">Lading Type</th>
+                <th class="border px-4 py-2">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var outLading in outLadings)
+            {
+                <tr>
+                    <td class="border px-4 py-2">@outLading.LadingID</td>
+                    <td class="border px-4 py-2">@outLading.Order?.OrderNumber</td>
+                    <td class="border px-4 py-2">@outLading.Driver?.DriverName</td>
+                    <td class="border px-4 py-2">@outLading.Truck?.TruckNumber</td>
+                    <td class="border px-4 py-2">@outLading.Type</td>
+                    <td class="border px-4 py-2">
+                        <button class="bg-yellow-500 text-white px-2 py-1 rounded" @onclick="() => EditOutLading(outLading)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 
 @code {
-    private string? SearchContract;
-    private List<Contract> Contracts = new();
-    private List<Contract> FilteredContracts = new();
-    private List<Order> Orders = new();
-    [SupplyParameterFromForm(FormName = "Create")]
-    private OutLading newOutlading { set; get; } = new OutLading();
-
-    private string? SelectedMaterialName;
-    private double ContractQuantity;
-    private double RemainingQuantity;
-    private double FreeStock;
-
-
-    private string? SearchTruck;
-    private List<Truck> Trucks = new();
-    private List<Truck> FilteredTrucks = new();
-    private Truck? SelectedTruck;
+    private bool ShowAddOutLadingPopup = false;
+    private List<OutLading> outLadings = new();
+    private List<Contract> contracts = new();
+    private List<Order> orders = new();
+    private List<Driver> drivers = new();
+    private List<Truck> trucks = new();
+    private List<Driver> filteredDrivers = new();
+    private List<Truck> filteredTrucks = new();
+    private int? selectedContractID;
+    private int? selectedOrderID;
+    private int? selectedDriverID;
+    private int? selectedTruckID;
+    private string driverSearchTerm = string.Empty;
+    private string truckSearchTerm = string.Empty;
+    private OutLading newOutLading = new();
 
     protected override async Task OnInitializedAsync()
     {
-
-        // Load all contracts initially
-        Contracts = await contractService.GetAllContractsAsync();
-        FilteredContracts = Contracts;
+        contracts = await contractService.GetAllContractsAsync();
+        drivers = await driverService.GetAllDriversAsync();
+        trucks = await truckService.GetAllTrucksAsync();
+        outLadings = await outLadingService.GetOutLadingsAsync();
+        filteredDrivers = drivers;
+        filteredTrucks = trucks;
     }
 
-    private void FilterContracts()
+    private async Task OnContractChange(ChangeEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(SearchContract))
+        if (int.TryParse(e.Value?.ToString(), out int contractID))
         {
-            FilteredContracts = Contracts;
+            selectedContractID = contractID;
+            orders = await outLadingService.GetOrdersByContractAsync(contractID);
         }
         else
         {
-            FilteredContracts = Contracts
-                .Where(c => c.RefNumber.Contains(SearchContract, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            selectedContractID = null;
+            orders.Clear();
         }
     }
 
-    private async Task LoadOrdersForContract(ChangeEventArgs e)
+    private void SearchDrivers(ChangeEventArgs e)
     {
-        var cid = int.Parse(e.Value.ToString() ?? "0");
-        if (cid > 0)
+        driverSearchTerm = e.Value?.ToString() ?? string.Empty;
+        filteredDrivers = drivers.Where(d => d.DriverName.Contains(driverSearchTerm, StringComparison.OrdinalIgnoreCase) || d.NationalID.Contains(driverSearchTerm)).ToList();
+    }
+
+    private void SearchTrucks(ChangeEventArgs e)
+    {
+        truckSearchTerm = e.Value?.ToString() ?? string.Empty;
+        filteredTrucks = trucks.Where(t => t.TruckNumber.Contains(truckSearchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    private async Task AddOutLading()
+    {
+        if (selectedOrderID.HasValue && selectedDriverID.HasValue && selectedTruckID.HasValue)
         {
-            Orders = await orderService.GetOrdersByContractIdAsync(cid);
-
-            // Load additional details for the selected contract
-            var contract = Contracts.FirstOrDefault(c => c.ContractID == cid);
-            if (contract != null)
-            {
-                var material = await materialService.GetMaterialDetailsAsync(contract.MaterialID);
-                SelectedMaterialName = material.MaterialName;
-                ContractQuantity = contract.Quantity;
-                RemainingQuantity = ContractQuantity - Orders.Sum(o => o.Quantity); // Example logic
-                FreeStock = await materialService.GetAvailableQuantityAsync(contract.MaterialID);
-            }
+            newOutLading.OrderID = selectedOrderID.Value;
+            newOutLading.DriverID = selectedDriverID.Value;
+            newOutLading.TruckID = selectedTruckID.Value;
+            await outLadingService.AddOutLadingAsync(newOutLading);
+            outLadings = await outLadingService.GetOutLadingsAsync();
+            ShowAddOutLadingPopup = false;
+            newOutLading = new();
         }
     }
 
-    private async Task DisplayOrderSummary(ChangeEventArgs e)
+    private void EditOutLading(OutLading outLading)
     {
-        var oid = int.Parse(e.Value.ToString() ?? "0");
-        if (oid > 0)
-        {
-            // Optionally, update order-specific details (if needed)
-            var order = Orders.FirstOrDefault(o => o.OrderID == newOutlading.OrderID);
-            if (order != null)
-            {
-                // Update relevant information for the selected order (if needed)
-            }
-        }
-    }
-
-    private async Task SaveOutloading()
-    {
-        //if (newOutlading.OrderID <= 0 || string.IsNullOrEmpty(newOutlading.FillType) || string.IsNullOrEmpty(newOutlading.ShippingType))
-        //{
-        //    // Optionally show a message to inform the user that all fields must be filled
-        //    return;
-        //}
-
-        // Call the SaveOutloadingAsync method without assigning the result to a variable
-        await outloadingService.SaveOutloadingAsync(newOutlading);
-
-        // Optionally show success message or navigate away
-    }
-    private void FilterTrucks()
-    {
-        FilteredTrucks = string.IsNullOrWhiteSpace(SearchTruck)
-            ? Trucks
-            : Trucks.Where(t => t.TruckNumber.Contains(SearchTruck, StringComparison.OrdinalIgnoreCase)).ToList();
-    }
-
-    private void DisplaySelectedTruck(ChangeEventArgs e)
-    {
-        var truckId = int.Parse(e.Value?.ToString() ?? "0");
-        SelectedTruck = Trucks.FirstOrDefault(t => t.TruckID == truckId);
-        if (SelectedTruck != null)
-        {
-            newOutlading.TruckID = SelectedTruck.TruckID;
-        }
+        ShowAddOutLadingPopup = true;
+        newOutLading = outLading;
+        selectedOrderID = outLading.OrderID;
+        selectedDriverID = outLading.DriverID;
+        selectedTruckID = outLading.TruckID;
     }
 }
+

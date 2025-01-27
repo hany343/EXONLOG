@@ -4,16 +4,16 @@ using System;
 
 namespace EXONLOG.Services
 {
-    public class OutloadingService
+    public class OutladingService
     {
         private readonly EXONContext _context;
 
-        public OutloadingService(EXONContext context)
+        public OutladingService(EXONContext context)
         {
             _context = context;
         }
 
-        public async Task SaveOutloadingAsync(OutLading outloading)
+        public async Task SaveOutladingAsync(OutLading outloading)
         {
             _context.OutLadings.Add(outloading);
             await _context.SaveChangesAsync();
