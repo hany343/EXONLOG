@@ -117,6 +117,10 @@
         {
             return await _dbContext.Orders.Where(o => o.ContractID == contractId).ToListAsync();
         }
+        public  List<Order> GetOrdersByContractId(int contractId)
+        {
+            return  _dbContext.Orders.Where(o => o.ContractID == contractId).ToList();
+        }
 
     }
 
