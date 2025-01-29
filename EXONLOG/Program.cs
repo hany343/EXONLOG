@@ -3,6 +3,7 @@ using EXONLOG.Components;
 using EXONLOG.Data;
 using EXONLOG.Model.Account;
 using EXONLOG.Services;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<CircuitOptions>(options => options.DetailedErrors = true);
 
 var ProductionString = builder.Configuration.GetConnectionString("Production");
 var primaryConnectionString = builder.Configuration.GetConnectionString("homeString");

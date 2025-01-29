@@ -1,4 +1,4 @@
-﻿namespace EXONLOG.Model.Outbound
+﻿namespace EXONLOG.Model.Inbound
 {
     using EXONLOG.Model.Account;
     using System;

@@ -18,9 +18,9 @@
             }
 
             // Get all drivers
-            public async Task<List<Driver>> GetAllDriversAsync()
+            public  Task<List<Driver>> GetAllDriversAsync()
             {
-                return await _dbContext.Drivers
+                return  _dbContext.Drivers
                     .Include(d => d.User) // Optionally include related user data
                     .ToListAsync();
             }

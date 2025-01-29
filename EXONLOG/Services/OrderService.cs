@@ -18,23 +18,37 @@
                 _dbContext = dbContext;
             }
 
-            /// <summary>
-            /// Retrieves all orders from the database.
-            /// </summary>
-            /// <returns>List of orders</returns>
-            public async Task<List<Order>> GetAllOrdersAsync()
+        /// <summary>
+        /// Retrieves all orders from the database.
+        /// </summary>
+        /// <returns>List of orders</returns>
+        public  Task<List<Order>> GetAllOrdersAsync()
+        {
+            try
             {
-                return await _dbContext.Orders
+                return _dbContext.Orders
                     .Include(o => o.Contract) // Eager load the related Contract
                     .ToListAsync();
-            }
 
-            /// <summary>
-            /// Retrieves a single order by its ID.
-            /// </summary>
-            /// <param name="orderId">Order ID</param>
-            /// <returns>Order</returns>
-            public async Task<Order> GetOrderByIdAsync(int orderId)
+                 
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you can use a logging framework like Serilog, NLog, etc.)
+                Console.WriteLine($"An error occurred: {ex.Message}");
+
+                // Optionally, rethrow the exception or return a default value
+                throw;
+            }
+            
+        }
+
+        /// <summary>
+        /// Retrieves a single order by its ID.
+        /// </summary>
+        /// <param name="orderId">Order ID</param>
+        /// <returns>Order</returns>
+        public async Task<Order> GetOrderByIdAsync(int orderId)
             {
                 return await _dbContext.Orders
                     .Include(o => o.Contract) // Include related Contract

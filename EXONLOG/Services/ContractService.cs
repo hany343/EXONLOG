@@ -14,14 +14,33 @@
             _context = context;
         }
 
+        public async Task<List<Contract>> GetActiveContractListAsync()
+        {
+            try
+            {
+                List<Contract> contracts = await _context.Contracts
+                    .Select(c => new Contract
+                    {
+                        ContractID = c.ContractID,
+                        ContractNumber = c.ContractNumber
+                    })
+                    .ToListAsync();
+                return contracts;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                throw;
+            }
+        }
         public async Task<List<Contract>> GetAllContractsAsync()
         {
             try
             {
-              List <Contract> contracts= await _context.Contracts
-                .Include(c => c.Material)
-                .Include(c => c.Customer)
-                .Include(c => c.User).ToListAsync();
+                List<Contract> contracts = await _context.Contracts
+                  .Include(c => c.Material)
+                  .Include(c => c.Customer)
+                  .Include(c => c.User).ToListAsync();
 
                 return contracts;
             }

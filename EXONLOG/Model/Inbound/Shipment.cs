@@ -1,5 +1,4 @@
 ﻿using EXONLOG.Model.Account;
-using EXONLOG.Model.Outbound;
 using EXONLOG.Model.Stocks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

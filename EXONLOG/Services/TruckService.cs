@@ -15,9 +15,9 @@
             }
 
             // Get all trucks
-            public async Task<List<Truck>> GetAllTrucksAsync()
+            public  Task<List<Truck>> GetAllTrucksAsync()
             {
-                return await _dbContext.Set<Truck>()
+                return  _dbContext.Set<Truck>()
                                        .OrderBy(t => t.TruckNumber)
                                        .ToListAsync();
             }
