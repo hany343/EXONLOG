@@ -13,13 +13,13 @@ namespace EXONLOG.Model.Trans
         public string CompanyName { get; set; } // MaterialName of the transport company
 
         [MaxLength(200)]
-        public string Address { get; set; } // Address of the transport company
+        public string? Address { get; set; } // Address of the transport company
 
         [MaxLength(15)]
-        public string Phone { get; set; } // Contact phone number
+        public string? Phone { get; set; } // Contact phone number
 
         [MaxLength(100)]
-        public string Email { get; set; } // Contact email
+        public string? Email { get; set; } // Contact email
 
         public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Date the company was added
 

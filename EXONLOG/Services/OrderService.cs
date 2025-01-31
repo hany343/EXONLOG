@@ -48,9 +48,9 @@
         /// </summary>
         /// <param name="orderId">Order ID</param>
         /// <returns>Order</returns>
-        public async Task<Order> GetOrderByIdAsync(int orderId)
+        public  Task<Order> GetOrderByIdAsync(int orderId)
             {
-                return await _dbContext.Orders
+                return  _dbContext.Orders
                     .Include(o => o.Contract) // Include related Contract
                     .FirstOrDefaultAsync(o => o.OrderID == orderId);
             }

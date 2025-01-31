@@ -1,0 +1,12 @@
+﻿/* Add this to ensure the dropdown appears above content */
+.dropdown-menu {
+    position: absolute;
+    max-height: 200px; /* Optional: Limit dropdown height */
+    overflow-y: auto; /* Enable scrolling if more than 5 results */
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    width: 100%; /* Adjust based on the input width */
+}
+.form-group{
+    margin-bottom:5px !important;
+    box-shadow:#808080 1 1 2 2;

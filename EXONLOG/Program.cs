@@ -79,6 +79,8 @@ builder.Services.AddScoped<StockService>();
 ///
 builder.Services.AddScoped<TruckService>();
 builder.Services.AddScoped<DriverService>();
+builder.Services.AddScoped<TransCompanyService>();
+
 
 
 var app = builder.Build();

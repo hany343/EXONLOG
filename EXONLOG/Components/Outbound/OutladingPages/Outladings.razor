@@ -5,6 +5,7 @@
 @inject OrderService orderService
 @inject DriverService driverService
 @inject TruckService truckService
+@inject TransCompanyService transCompanyService
 @inject IJSRuntime jsRuntime
 @rendermode InteractiveServer
 
@@ -51,81 +52,125 @@
 <!-- Add/Edit Outlading Modal -->
 @if (ShowModal)
 {
-    <div class="modal d-block">
+    <div class="modal d-flex ">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">@(IsEdit ? "Edit Outlading" : "Add Outlading")</h5>
                     <button type="button" class="close" @onclick="CloseModal">&times;</button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body ">
+
+                    @*----------------Select Contract------------------------*@
                     <div class="form-group ">
                         <label>Contract</label>
-                        <select class="form-select"  @onchange="filterContracts">
-                            <option value="">Select Customer</option>
+                        <select class="form-select" @onchange="filterByContracts">
+                            <option value="0">Select Contract</option>
                             @foreach (var contract in filteredContracts)
                             {
                                 <option value="@contract.ContractID">@contract.ContractNumber</option>
                             }
                         </select>
-                       
+                        @if (selectedContractID > 0)
+                        {
+                           <div class="card d-flex flex-wrap g-2 fs-6 fw-light fst-italic " >
+                            <span><b>Material:</b>@selectedContract.Material?.MaterialName</span>
+                            <span><b>Quantity</b> @selectedContract.Quantity</span>
+
+                        </div>
+                        }
                     </div>
-                    <EditForm Model="CurrentOutlading" OnValidSubmit="SaveOutlading">
-                        <div class="form-group">
-                            <label>Order</label>
-                            <InputText class="form-control" placeholder="Search Order..." @bind-Value="OrderSearch" @oninput="searchOrders" />
-                            <InputSelect @bind-Value="NewOutlading.OrderID" class="form-control bi bi-chevron-down">
-                                <option value="0">Select Order</option>
-                                @foreach (var order in filteredOrders)
-                                {
-                                    <option value="@order.OrderID">@order.OrderNumber</option>
-                                }
-                            </InputSelect>
-
-                        </div>
 
 
-                        <div class="form-group">
-                            <label>Driver</label>
-                            <InputText class="form-control" placeholder="Search Driver..." @bind-Value="DriverSearch" />
-                            <ul class="list-group">
-                                @foreach (var driver in filteredDrivers)
-                                {
-                                    <li class="list-group-item" @onclick="() => SelectDriver(driver)">@driver.DriverName</li>
-                                }
-                            </ul>
-                        </div>
+                    <EditForm Model="CurrentOutlading" OnValidSubmit="SaveOutlading" >
 
-                        <div class="form-group">
-                            <label>Truck</label>
-                            <InputText class="form-control" placeholder="Search Truck..." @bind-Value="TruckSearch" />
-                            <ul class="list-group">
-                                @foreach (var truck in filteredTrucks)
-                                {
-                                    <li class="list-group-item" @onclick="() => SelectTruck(truck)">@truck.TruckNumber</li>
-                                }
-                            </ul>
-                        </div>
+                        <div class="d-flex g-2 gap-2 flex-wrap">
+                            @*----------------Select Order------------------------*@
+                            <div class="form-group">
+                                <label>Order</label>
+                                <InputText class="form-control" placeholder="Search Orders..." @bind-Value="OrderSearch" @oninput="searchOrders" />
+                                <select class="form-select" @onchange="selectOrder">
+                                    <option value="0">Select Order</option>
+                                    @foreach (var order in filteredOrders)
+                                    {
+                                        <option value="@order.ContractID">@order.OrderNumber</option>
+                                    }
+                                </select>
+                                <div class="card d-flex flex-wrap g-2 fs-6 fw-light fst-italic" hidden="@(selectedContractID>0?"false":"true")">
+                                    <span><b>Material:</b>@selectedContract.Material?.MaterialName</span>
+                                    <span><b>Quantity</b>@selectedContract.Quantity</span>
 
-                        <div class="form-group">
-                            <label>Lading Type</label>
-                            <InputSelect @bind-Value="CurrentOutlading.Type" class="form-control">
-                                <option value="Inbound">Inbound</option>
-                                <option value="Outbound">Outbound</option>
-                            </InputSelect>
-                        </div>
+                                </div>
+                            </div>
 
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <InputNumber @bind-Value="CurrentOutlading.Quantity" class="form-control" />
-                        </div>
+                            @*----------------Select Driver------------------------*@
+                            <div class="form-group">
+                                <label>Driver</label>
+                                <InputText class="form-control" placeholder="Search Drivers..." @bind-Value="DriverSearch" @oninput="SearchDrivers" />
+                                <select class="form-select" @bind="CurrentOutlading.DriverID">
+                                    <option value="0">Select Driver</option>
+                                    @foreach (var driver in filteredDrivers)
+                                    {
+                                        <option value="@driver.DriverID">@driver.DriverName</option>
+                                    }
+                                </select>
+                            </div>
 
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                            @*----------------Select Truck------------------------*@
+                            <div class="form-group">
+                                <label>Truck</label>
+                                <InputText class="form-control" placeholder="Search Trucks..." @bind-Value="TruckSearch" @oninput="SearchTrucks" />
+                                <select class="form-select" @bind="CurrentOutlading.TruckID">
+                                    <option value="0">Select Truck</option>
+                                    @foreach (var truck in filteredTrucks)
+                                    {
+                                        <option value="@truck.TruckID">@truck.TruckNumber</option>
+                                    }
+                                </select>
+                            </div>
+
+
+                            @*----------------Select Truck------------------------*@
+                            <div class="form-group">
+                                <label>Trans Company</label>
+                                <InputText class="form-control" placeholder="Search Trucks..." @bind-Value="TransSearch" @oninput="SearchTrans" />
+                                <select class="form-select" @bind="CurrentOutlading.TransCompanyID">
+                                    <option value="0">Select Truck</option>
+                                    @foreach (var trans in filteredTrans)
+                                    {
+                                        <option value="@trans.TransCompanyID">@trans.CompanyName</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Lading Type</label>
+                                <InputSelect @bind-Value="CurrentOutlading.ShippingType" class="form-control">
+                                    <option value="OnFactory">OnFactory</option>
+                                    <option value="Delivery">Delivery</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label>Fill Type</label>
+                                <InputSelect @bind-Value="CurrentOutlading.FillType" class="form-control">
+                                    <option value="Filling">Filling</option>
+                                    <option value="Paged">Paged</option>
+                                    <option value="Packed">Packed</option>
+                                </InputSelect>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <InputNumber @bind-Value="CurrentOutlading.Quantity" class="form-control" />
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                            </div>
                         </div>
                     </EditForm>
-                </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -140,6 +185,7 @@
         private string OrderSearch = "";
         private string DriverSearch = "";
         private string TruckSearch = "";
+        private string TransSearch = "";
         private OutLading CurrentOutlading { get; set; } = new();
         private List<OutLading> outladings { get; set; } = new();
         private List<OutLading> filteredOutladings { get; set; } = new();
@@ -149,16 +195,22 @@
         private List<Driver> filteredDrivers { get; set; } = new();
         private List<Truck> trucks { get; set; } = new();
         private List<Truck> filteredTrucks { get; set; } = new();
+
+        private List<TransCompany> transCompanies { get; set; } = new();
+        private List<TransCompany> filteredTrans { get; set; } = new();
         private bool showModal = false;
         private bool isEditing = false;
-        private OutLading NewOutlading { get; set; } = new();
+        private Order selectedOrder = new();
+        private Contract selectedContract = new();
+
         private string orderSearchTerm = "";
         private string driverSearchTerm = "";
         private string truckSearchTerm = "";
         private int selectedContractID = 0;
         private List<Contract> contracts = new();
         private List<Contract> filteredContracts = new();
-
+        private bool isTruckListLoaded = false;
+        private bool isDriverListLoaded = false;
 
 
         protected override async Task OnInitializedAsync()
@@ -167,9 +219,10 @@
             {
                 outladings = await outladingService.GetOutLadingsAsync();
                 filteredOutladings = outladings;
-                //drivers = await driverService.GetAllDriversAsync();
-                //orders = await orderService.GetAllOrdersAsync();
-                //trucks = await truckService.GetAllTrucksAsync();
+                drivers = await driverService.GetAllDriversAsync();
+                trucks = await truckService.GetAllTrucksAsync();
+                transCompanies = await transCompanyService.GetAllAsync();
+
                 contracts = await contractService.GetActiveContractListAsync();
                 filteredContracts = contracts;
             }
@@ -179,43 +232,80 @@
             }
         }
 
-        private void filterContracts(ChangeEventArgs e)
-        {
-            var selectedContractID = int.Parse(e.Value.ToString() ?? "0");
-            if (selectedContractID > 0)
-            {
-                
-                filteredOrders = orderService.GetOrdersByContractId(selectedContractID);// Where(c => c.ContractID == cid).ToList();
-            }
-
-        }
         private void SearchOutladings(ChangeEventArgs e)
         {
             searchTerm = e.Value.ToString();
             filteredOutladings = outladings.Where(o => o.Order?.OrderNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false).ToList();
         }
 
+        private async Task filterByContracts(ChangeEventArgs e)
+        {
+            selectedContractID = int.Parse(e.Value.ToString() ?? "0");
+            if (selectedContractID > 0)
+            {
+
+                orders = orderService.GetOrdersByContractId(selectedContractID);
+                filteredOrders = orders;// Where(c => c.ContractID == cid).ToList();
+                selectedContract = await contractService.GetContractByIdAsync(selectedContractID);
+            }
+            else
+            {
+                orders = new();
+                filteredOrders = orders;// Where(c => c.ContractID == cid).ToList();
+                selectedContract = new();
+            }
+        }
+
+        private async Task selectOrder(ChangeEventArgs e)
+        {
+            var selectedOrderId = int.Parse(e.Value.ToString() ?? "0");
+            CurrentOutlading.OrderID = selectedOrderId;
+            if (selectedOrderId > 0)
+            {
+                selectedOrder =await  orderService.GetOrderByIdAsync(selectedOrderId);
+            }
+            else { selectedOrder = new Order(); }
+
+        }
         private void searchOrders(ChangeEventArgs e)
         {
             OrderSearch = e.Value.ToString();
             filteredOrders = orders.Where(o => o.OrderNumber.Contains(OrderSearch, StringComparison.OrdinalIgnoreCase)).ToList();
         }
+        private void SelectOrder(Order order) {
+            CurrentOutlading.OrderID = order.OrderID;
+            OrderSearch = order.OrderNumber;
+            filteredOrders.Clear();
+        }
+
+
 
         private void SearchDrivers(ChangeEventArgs e)
         {
-            DriverSearch = e.Value.ToString();
-            filteredDrivers = drivers.Where(d => d.DriverName.Contains(DriverSearch, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            DriverSearch = e.Value?.ToString() ?? "";
+            filteredDrivers = drivers
+                .Where(t => t.DriverName.Contains(DriverSearch, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
 
         private void SearchTrucks(ChangeEventArgs e)
         {
-            TruckSearch = e.Value.ToString();
-            filteredTrucks = trucks.Where(t => t.TruckNumber.Contains(TruckSearch, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            TruckSearch = e.Value?.ToString() ?? "";
+            filteredTrucks = trucks
+                .Where(t => t.TruckNumber.Contains(TruckSearch, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
 
-        private void SelectOrder(Order order) { CurrentOutlading.OrderID = order.OrderID; OrderSearch = order.OrderNumber; filteredOrders.Clear(); }
-        private void SelectDriver(Driver driver) { CurrentOutlading.DriverID = driver.DriverID; DriverSearch = driver.DriverName; filteredDrivers.Clear(); }
-        private void SelectTruck(Truck truck) { CurrentOutlading.TruckID = truck.TruckID; TruckSearch = truck.TruckNumber; filteredTrucks.Clear(); }
+        private void SearchTrans(ChangeEventArgs e)
+        {
+
+            TransSearch = e.Value?.ToString() ?? "";
+            filteredTrans = transCompanies
+                .Where(t => t.CompanyName.Contains(TransSearch, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
 
         private void ShowAddModal() { ShowModal = true; IsEdit = false; CurrentOutlading = new(); }
 
@@ -223,17 +313,30 @@
 
         private void CloseModal() { ShowModal = false; }
 
-        private async Task SaveOutlading() { await outladingService.AddOutLadingAsync(CurrentOutlading); ShowModal = false; }
+        private async Task SaveOutlading() {
+            try
+            {
+
+                await outladingService.AddOutLadingAsync(CurrentOutlading);
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            ShowModal = false;
+        }
 
         private async Task HandleValidSubmit()
         {
             if (isEditing)
             {
-                await outladingService.UpdateOutLadingAsync(NewOutlading);
+                await outladingService.UpdateOutLadingAsync(CurrentOutlading);
             }
             else
             {
-                await outladingService.AddOutLadingAsync(NewOutlading);
+                await outladingService.AddOutLadingAsync(CurrentOutlading);
             }
             outladings = await outladingService.GetOutLadingsAsync();
             filteredOutladings = outladings;
@@ -247,7 +350,7 @@
 
         private void EditOutlading(int ladingId)
         {
-            NewOutlading = outladings.First(o => o.LadingID == ladingId);
+            CurrentOutlading = outladings.First(o => o.LadingID == ladingId);
             isEditing = true;
             showModal = true;
         }

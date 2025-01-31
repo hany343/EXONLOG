@@ -251,6 +251,42 @@ namespace EXONLOG.Migrations
                     b.ToTable("InLadings");
                 });
 
+            modelBuilder.Entity("EXONLOG.Model.Inbound.Port", b =>
+                {
+                    b.Property<int>("PortID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PortID"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2(0)")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("PortName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("PortID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("Ports");
+                });
+
             modelBuilder.Entity("EXONLOG.Model.Inbound.Shipment", b =>
                 {
                     b.Property<int>("ID")
@@ -638,42 +674,6 @@ namespace EXONLOG.Migrations
                     b.ToTable("OutLadings");
                 });
 
-            modelBuilder.Entity("EXONLOG.Model.Outbound.Port", b =>
-                {
-                    b.Property<int>("PortID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PortID"));
-
-                    b.Property<DateTime>("CreateDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2(0)")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("PortName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.HasKey("PortID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Ports");
-                });
-
             modelBuilder.Entity("EXONLOG.Model.Stocks.Material", b =>
                 {
                     b.Property<int>("MaterialID")
@@ -842,12 +842,10 @@ namespace EXONLOG.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DriverID"));
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Contact")
-                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(100)");
 
@@ -896,7 +894,6 @@ namespace EXONLOG.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransCompanyID"));
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
@@ -911,12 +908,10 @@ namespace EXONLOG.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
@@ -975,7 +970,6 @@ namespace EXONLOG.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TruckType")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -1093,6 +1087,17 @@ namespace EXONLOG.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EXONLOG.Model.Inbound.Port", b =>
+                {
+                    b.HasOne("EXONLOG.Model.Account.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EXONLOG.Model.Inbound.Shipment", b =>
                 {
                     b.HasOne("EXONLOG.Model.Inbound.Importer", "Importer")
@@ -1107,7 +1112,7 @@ namespace EXONLOG.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("EXONLOG.Model.Outbound.Port", "Port")
+                    b.HasOne("EXONLOG.Model.Inbound.Port", "Port")
                         .WithMany()
                         .HasForeignKey("PortID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1276,17 +1281,6 @@ namespace EXONLOG.Migrations
                     b.Navigation("TransCompany");
 
                     b.Navigation("Truck");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EXONLOG.Model.Outbound.Port", b =>
-                {
-                    b.HasOne("EXONLOG.Model.Account.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });

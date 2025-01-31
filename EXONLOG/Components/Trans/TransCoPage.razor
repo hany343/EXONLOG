@@ -1,0 +1,109 @@
+﻿@page "/Trans-Companies"
+@rendermode InteractiveServer
+
+@inject TransCompanyService transCompanyService
+
+<h3>Transport Companies</h3>
+
+<button class="btn btn-primary mb-3" @onclick="ShowCreateForm">Add New Company</button>
+
+@if (showForm)
+{
+    <div class="card p-3 mb-4">
+        <EditForm Model="company" OnValidSubmit="SaveCompany">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label>Company Name</label>
+                <InputText class="form-control" @bind-Value="company.CompanyName" />
+            </div>
+            <div class="mb-3">
+                <label>Address</label>
+                <InputText class="form-control" @bind-Value="company.Address" />
+            </div>
+            <div class="mb-3">
+                <label>Phone</label>
+                <InputText class="form-control" @bind-Value="company.Phone" />
+            </div>
+            <div class="mb-3">
+                <label>Email</label>
+                <InputText class="form-control" @bind-Value="company.Email" />
+            </div>
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </EditForm>
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in companies)
+        {
+            <tr>
+                <td>@item.CompanyName</td>
+                <td>@item.Address</td>
+                <td>@item.Phone</td>
+                <td>@item.Email</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" @onclick="() => EditCompany(item)">Edit</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private bool showForm = false;
+    private List<TransCompany> companies = new();
+    private TransCompany company = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        companies = await transCompanyService.GetAllAsync();
+    }
+
+    private void ShowCreateForm()
+    {
+        company = new TransCompany();
+        showForm = true;
+    }
+
+    private void EditCompany(TransCompany item)
+    {
+        company = new TransCompany
+        {
+            TransCompanyID = item.TransCompanyID,
+            CompanyName = item.CompanyName,
+            Address = item.Address,
+            Phone = item.Phone,
+            Email = item.Email
+        };
+        showForm = true;
+    }
+
+    private async Task SaveCompany()
+    {
+        if (company.TransCompanyID == 0)
+            await transCompanyService.AddAsync(company);
+        else
+            await transCompanyService.UpdateAsync(company);
+
+        companies = await transCompanyService.GetAllAsync();
+        showForm = false;
+    }
+
+    private void Cancel()
+    {
+        showForm = false;
+    }
+}

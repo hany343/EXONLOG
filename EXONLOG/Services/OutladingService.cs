@@ -45,6 +45,11 @@ namespace EXONLOG.Services
         public async Task AddOutLadingAsync(OutLading outLading)
         {
             outLading.CreateDate = DateTime.UtcNow;
+            outLading.UserID = 1;
+            outLading.LadingState = "pending";
+            outLading.WeightStatus = "first";
+
+
             _context.OutLadings.Add(outLading);
             await _context.SaveChangesAsync();
         }
