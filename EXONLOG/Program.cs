@@ -18,6 +18,7 @@ var ProductionString = builder.Configuration.GetConnectionString("Production");
 var primaryConnectionString = builder.Configuration.GetConnectionString("homeString");
 var secondaryConnectionString = builder.Configuration.GetConnectionString("alexString");
 
+
 string activeConnectionString;
 string serverName;
 if (await ConnectionHelper.TestConnectionAsync(ProductionString))

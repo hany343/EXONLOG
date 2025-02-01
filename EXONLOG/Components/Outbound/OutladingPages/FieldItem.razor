@@ -1,0 +1,38 @@
+﻿<div class="d-flex justify-content-start field-item">
+    <div class="field-label">@Label</div>
+    <div class="field-value">@Value</div>
+</div>
+
+@code{
+    [Parameter]
+    public string Label { get; set; }
+    [Parameter]
+    public string Value { get; set; }
+}
+<style>
+    .field-item {
+        border: 1px solid #000;
+        margin-bottom: 5px;
+       
+    }
+
+    .field-label {
+        font-weight: bold;
+        font-size: 10pt;
+        text-decoration: underline;
+        background-color: #c0c0c0;
+        width: 100px;
+        padding: 0px 3px;
+        align-content:end;
+        text-align:end
+    }
+    .field-label::after{
+        content:":";
+        font-size:18px;
+    }
+    .field-value {
+        font-size: 10pt;
+        text-align: right;
+        padding: 3px 3px;
+    }
+</style>
