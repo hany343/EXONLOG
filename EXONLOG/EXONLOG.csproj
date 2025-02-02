@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Model\Inventory\**" />
+    <Content Remove="Model\Inventory\**" />
+    <EmbeddedResource Remove="Model\Inventory\**" />
+    <None Remove="Model\Inventory\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -18,7 +25,6 @@
   <ItemGroup>
     <Folder Include="Components\Inbound\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Model\Inventory\" />
   </ItemGroup>
 
   <ItemGroup>

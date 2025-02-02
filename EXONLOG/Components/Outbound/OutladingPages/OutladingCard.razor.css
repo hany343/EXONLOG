@@ -28,9 +28,14 @@
     margin: 10px 0;
     text-align: center;
 }
-
+@font-face {
+    font-family: 'IDAutomationHC39M';
+    src: url('/fonts/IDAutomationHC39M.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 .barcode {
-    font-family: 'IDAutomationHC39M', sans-serif;
+    font-family: 'IDAutomationHC39M';
     font-size: 16pt;
     margin: 5px 0;
 }
