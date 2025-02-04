@@ -1,0 +1,362 @@
+﻿@page "/shipments"
+@inject ShipmentService shipmentService
+@inject MaterialService materialService
+@inject SupplierService supplierService
+@inject PortService portService
+
+@using EXONLOG.Model.Inbound
+@using Model.Stocks
+@inject NavigationManager Navigation
+
+<PageTitle>Shipment Management</PageTitle>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Shipment Management</h3>
+        <button class="btn btn-primary" @onclick="ToggleAddForm">
+            @(showAddForm ? "Cancel" : "+ New Shipment")
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search shipments..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
+
+    <!-- Add Shipment Form -->
+    @if (showAddForm)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">New Shipment</h5>
+                <EditForm Model="@newShipment" OnValidSubmit="HandleAddSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Shipment Name *</label>
+                            <InputText @bind-Value="@newShipment.ShipmentName" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Material *</label>
+                            <select class="form-control" @onchange="LoadFreeQuantity">
+                                <option value="">Select Material</option>
+                                @foreach (var material in materials)
+                                {
+                                    <option value="@material.MaterialID">@material.MaterialName</option>
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => newShipment.MaterialID)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Available Quantity</label>
+                            <input class="form-control"
+                                   value="@freeQuantity.ToString("N2")"
+                                   disabled />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <InputNumber @bind-Value="@newShipment.Quantity"
+                                         class="form-control"
+                                         min="0" />
+                            <ValidationMessage For="@(() => newShipment.Quantity)" />
+                            @if (quantityError)
+                            {
+                                <div class="text-danger">Quantity exceeds available stock!</div>
+                            }
+                        </div>
+
+                        <!-- Add other shipment fields (Supplier, ShipmentDate, etc.) -->
+                        <div class="col-md-6">
+                            <label class="form-label">Supplier *</label>
+                            <InputSelect @bind-Value="@newShipment.SupplierID" class="form-control">
+                                <option value="">Select Supplier</option>
+                                @foreach (var supplier in suppliers)
+                                {
+                                    <option value="@supplier.ID">@supplier.SupplierName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => newShipment.SupplierID)" />
+                        </div>
+
+
+                        <!-- Add other shipment fields (Ports, ShipmentDate, etc.) -->
+                        <div class="col-md-6">
+                            <label class="form-label">Port *</label>
+                            <InputSelect @bind-Value="@newShipment.PortID" class="form-control">
+                                <option value="">Select Port</option>
+                                @foreach (var port in ports)
+                                {
+                                    <option value="@port.PortID">@port.PortName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => newShipment.PortID)" />
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <label class="form-label">Shipment Date *</label>
+                            <InputDate @bind-Value="@newShipment.CreateDate" class="form-control" />
+                            <ValidationMessage For="@(() => newShipment.CreateDate)" />
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">Create Shipment</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    <!-- Shipments Table -->
+    <div class="table-responsive">
+        <table class="table table-hover table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Material</th>
+                    <th>Quantity</th>
+                    <th>Supplier</th>
+                    <th>Shipment Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var shipment in filteredShipments)
+                {
+                    <tr>
+                        <td>@shipment.Material?.MaterialName</td>
+                        <td>@shipment.Quantity.ToString("N2")</td>
+                        <td>@shipment.Supplier?.SupplierName</td>
+                        <td>@shipment.CreateDate.ToString("dd MMM yyyy")</td>
+                        <td>@shipment.ShipmentStatus</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning"
+                                    @onclick="() => ShowEditModal(shipment)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger"
+                                    @onclick="() => DeleteShipment(shipment.ShipmentID)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+@if (showEditModal)
+{
+    <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Shipment</h5>
+                    <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@selectedShipment" OnValidSubmit="HandleEditSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <div class="row g-3">
+
+
+                            <div class="col-md-6">
+                                <label class="form-label">Shipment Name *</label>
+                                <InputText  @bind-Value="@selectedShipment.ShipmentName" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Material *</label>
+                                <select class="form-control" @onchange="LoadFreeQuantity">
+                                    <option value="">Select Material</option>
+                                    @foreach (var material in materials)
+                                    {
+                                        <option value="@material.MaterialID">@material.MaterialName</option>
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => selectedShipment.MaterialID)" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Available Quantity</label>
+                                <input class="form-control"
+                                       value="@freeQuantity.ToString("N2")"
+                                       disabled />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Quantity *</label>
+                                <InputNumber @bind-Value="@selectedShipment.Quantity"
+                                             class="form-control"
+                                             min="0" />
+                                <ValidationMessage For="@(() => selectedShipment.Quantity)" />
+                                @if (quantityError)
+                                {
+                                    <div class="text-danger">Quantity exceeds available stock!</div>
+                                }
+                            </div>
+
+                            <!-- Add other shipment fields (Supplier, ShipmentDate, etc.) -->
+                            <div class="col-md-6">
+                                <label class="form-label">Supplier *</label>
+                                <InputSelect @bind-Value="@selectedShipment.SupplierID" class="form-control">
+                                    <option value="">Select Supplier</option>
+                                    @foreach (var supplier in suppliers)
+                                    {
+                                        <option value="@supplier.ID">@supplier.SupplierName</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => selectedShipment.SupplierID)" />
+                            </div>
+
+
+                            <!-- Add other shipment fields (Ports, ShipmentDate, etc.) -->
+                            <div class="col-md-6">
+                                <label class="form-label">Port *</label>
+                                <InputSelect @bind-Value="@selectedShipment.PortID" class="form-control">
+                                    <option value="">Select Port</option>
+                                    @foreach (var port in ports)
+                                    {
+                                        <option value="@port.PortID">@port.PortName</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => selectedShipment.PortID)" />
+                            </div>
+
+
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Shipment> shipments = new();
+    private List<Shipment> filteredShipments = new();
+    private List<Material> materials = new();
+    private List<Supplier> suppliers = new();
+    private List<Port> ports = new();
+    private string searchTerm = string.Empty;
+    private bool showAddForm;
+    private bool showEditModal;
+    private bool quantityError;
+    private double freeQuantity;
+
+    private Shipment newShipment = new();
+    private Shipment selectedShipment = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        shipments = await shipmentService.GetAllShipmentsAsync();
+        materials = await materialService.GetMaterialsAsync();
+        suppliers = await supplierService.GetSuppliersAsync();
+        ports = await portService.GetPortsAsync();
+        FilterShipments();
+    }
+
+    private  void LoadFreeQuantity(ChangeEventArgs e)
+    {
+        string MID = e.Value.ToString();
+
+        newShipment.MaterialID = int.Parse(MID);
+        selectedShipment.MaterialID = newShipment.MaterialID;
+
+        freeQuantity =  materialService.GetFreeQuantityAsync(newShipment.MaterialID);
+        //quantityError = newShipment.Quantity > freeQuantity;
+        StateHasChanged();
+    }
+
+    private void FilterShipments()
+    {
+        filteredShipments = shipments
+            .Where(s => string.IsNullOrEmpty(searchTerm) ||
+                s.Material.MaterialName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private async Task HandleAddSubmit()
+    {
+        // Validate available quantity
+        var currentFreeQty =  materialService.GetFreeQuantityAsync(newShipment.MaterialID);
+        if (newShipment.Quantity > currentFreeQty)
+        {
+            quantityError = true;
+            return;
+        }
+        newShipment.UserID = 1;
+        await shipmentService.CreateShipmentAsync(newShipment);
+        await LoadData();
+        showAddForm = false;
+        ResetForm();
+    }
+
+    private void ResetForm()
+    {
+        newShipment = new Shipment();
+        freeQuantity = 0;
+        quantityError = false;
+    }
+
+    private void ShowEditModal(Shipment shipment)
+    {
+        selectedShipment = shipment;
+        showEditModal = true;
+    }
+
+    private async Task HandleEditSubmit()
+    {
+        // Validate available quantity
+        var currentFreeQty =  materialService.GetFreeQuantityAsync(selectedShipment.MaterialID);
+        if (selectedShipment.Quantity > currentFreeQty)
+        {
+            quantityError = true;
+            return;
+        }
+
+        await shipmentService.UpdateShipmentAsync(selectedShipment);
+        await LoadData();
+        showEditModal = false;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedShipment = new Shipment();
+    }
+
+    private async Task DeleteShipment(int shipmentId)
+    {
+        await shipmentService.DeleteShipmentAsync(shipmentId);
+        await LoadData();
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm) newShipment = new();
+    }
+}

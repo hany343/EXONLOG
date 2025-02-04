@@ -29,6 +29,13 @@
                                        .FirstOrDefaultAsync(t => t.TruckID == truckId);
             }
 
+            // Get a single truck by ID
+            public async Task<Truck?> searchTruck(string tnum)
+            {
+                return await _dbContext.Set<Truck>()
+                                       .FindAsync(tnum);
+            }
+
             // Add a new truck
             public async Task AddTruckAsync(Truck truck)
             {

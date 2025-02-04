@@ -1,0 +1,41 @@
+﻿@inject DriverService DriverService
+
+<div class="search-component">
+    <input type="text" class="form-control" placeholder="Search drivers by name or ID..."
+           @bind="searchTerm" @bind:event="oninput" />
+
+    @if (searchResults.Any())
+    {
+        <div class="search-results">
+            @foreach (var driver in searchResults)
+            {
+                <div class="search-item" @onclick="() => SelectDriver(driver)">
+                    @driver.DriverName (@driver.NationalID)
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<Driver> OnDriverSelected { get; set; }
+
+    private string searchTerm = string.Empty;
+    private List<Driver> searchResults = new();
+
+    private async Task SearchDrivers()
+    {
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchResults = await DriverService.searchDriver(searchTerm);
+        }
+    }
+
+    private async Task SelectDriver(Driver driver)
+    {
+        await OnDriverSelected.InvokeAsync(driver);
+        searchResults.Clear();
+        searchTerm = string.Empty;
+    }
+}

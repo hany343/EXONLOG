@@ -6,10 +6,10 @@ namespace EXONLOG.Model.Inbound
 {
     public class Shipment
     {
-        public int ID { get; set; } // Primary Key
+        public int ShipmentID { get; set; } // Primary Key
 
         [Column(TypeName = "nvarchar(100)")]
-        public string ShipmentRef { get; set; } = string.Empty; // Unique reference for the shipment
+        public string? ShipmentRef { get; set; } = string.Empty; // Unique reference for the shipment
 
 
         [Column(TypeName = "nvarchar(100)")]
@@ -23,7 +23,7 @@ namespace EXONLOG.Model.Inbound
 
         public double Quantity { get; set; } // Total quantity in the shipment
 
-        public DateTime ArrivalDate { get; set; } // Date the shipment arrives
+        public DateTime? ArrivalDate { get; set; } // Date the shipment arrives
 
         [Column(TypeName = "nvarchar(250)")]
         public string? Notes { get; set; } // Additional notes about the shipment
@@ -33,19 +33,26 @@ namespace EXONLOG.Model.Inbound
         public int UserID { get; set; } // Foreign key to the user who registered the shipment
 
         // Navigation Properties
-        public int ShipmentStatusId { get; set; }
-        public ShipmentStatus? ShipmentStatus { get; set; }
+        //public int ShipmentStatusId { get; set; }
+        public string? ShipmentStatus { get; set; }= Status.Pending.ToString(); // Status of the shipment
         public Material? Material { get; set; } // Related Material
         public Port? Port { get; set; } // Related Port
         public Supplier? Supplier { get; set; } // Related Supplier
         public User? User { get; set; } // User who registered the shipment
         public ICollection<Batch>? Batches { get; set; } // Collection of related batches
 
-        [Required]
-        [ForeignKey("Importer")]
-        public int ImporterID { get; set; } // Foreign Key to Importer
-        public Importer? Importer { get; set; } // Navigation Property for Importer
+        //[Required]
+        //[ForeignKey("Importer")]
+        //public int ImporterID { get; set; } // Foreign Key to Importer
+        public string? Importer { get; set; } // Navigation Property for Importer
 
+    }
+    public enum Status
+    {
+        Pending,
+        InTransit,
+        Delivered,
+        Cancelled
     }
 
 }

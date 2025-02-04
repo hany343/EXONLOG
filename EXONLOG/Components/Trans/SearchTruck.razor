@@ -1,0 +1,41 @@
+﻿@inject TruckService TruckService
+
+<div class="search-component">
+    <input type="text" class="form-control" placeholder="Search trucks by number..."
+           @bind="searchTerm" @bind:event="oninput" />
+
+    @if (searchResults.Any())
+    {
+        <div class="search-results">
+            @foreach (var truck in searchResults)
+            {
+                <div class="search-item" @onclick="() => SelectTruck(truck)">
+                    @truck.TruckNumber
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<Truck> OnTruckSelected { get; set; }
+
+    private string searchTerm = string.Empty;
+    private List<Truck> searchResults = new();
+
+    private async Task SearchTrucks()
+    {
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchResults = await TruckService.SearchTrucksAsync(searchTerm);
+        }
+    }
+
+    private async Task SelectTruck(Truck truck)
+    {
+        await OnTruckSelected.InvokeAsync(truck);
+        searchResults.Clear();
+        searchTerm = string.Empty;
+    }
+}

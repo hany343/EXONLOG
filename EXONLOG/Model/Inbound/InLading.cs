@@ -8,7 +8,7 @@ namespace EXONLOG.Model.Inbound
     {
         public int ID { get; set; } // Primary Key
 
-        public string LadingRef { get; set; } = string.Empty; // Unique reference for the lading
+        public string? LadingRef { get; set; } = string.Empty; // Unique reference for the lading
 
         public int BatchID { get; set; } // Foreign key to the batch
 

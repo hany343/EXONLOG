@@ -331,12 +331,12 @@
             #region Inbound
             // Add more relationships as needed
 
-            // Inbound Models Relationships
-            modelBuilder.Entity<Importer>()
-              .HasMany(i => i.Shipments) // An Importer can have many Shipments
-              .WithOne(s => s.Importer)  // Each Shipment is linked to one Importer
-              .HasForeignKey(s => s.ImporterID)
-              .OnDelete(DeleteBehavior.Restrict); // Foreign key in Shipment referring to Importer
+            //// Inbound Models Relationships
+            //modelBuilder.Entity<Importer>()
+            //  .HasMany(i => i.Shipments) // An Importer can have many Shipments
+            //  .WithOne(s => s.Importer)  // Each Shipment is linked to one Importer
+            //  .HasForeignKey(s => s.ImporterID)
+            //  .OnDelete(DeleteBehavior.Restrict); // Foreign key in Shipment referring to Importer
 
             modelBuilder.Entity<Supplier>()
                  .HasMany(s => s.Shipments)
@@ -363,11 +363,11 @@
                 .HasForeignKey(l => l.PortID)
                 .OnDelete(DeleteBehavior.Restrict);  // Handle delete behavior
 
-            modelBuilder.Entity<Shipment>()
-                .HasOne(l => l.ShipmentStatus)  // First weigher as a user
-                .WithMany(s => s.Shipments)  // Assuming each User can be the first weigher in many ladings
-                .HasForeignKey(l => l.ShipmentStatusId)
-                .OnDelete(DeleteBehavior.Restrict);  // Handle delete behavior
+            //modelBuilder.Entity<Shipment>()
+            //    .HasOne(l => l.ShipmentStatus)  // First weigher as a user
+            //    .WithMany(s => s.Shipments)  // Assuming each User can be the first weigher in many ladings
+            //    .HasForeignKey(l => l.ShipmentStatusId)
+            //    .OnDelete(DeleteBehavior.Restrict);  // Handle delete behavior
 
             // Batch -> IncomingLadings Relationship
             modelBuilder.Entity<Batch>()

@@ -1,0 +1,211 @@
+﻿@page "/ports"
+@inject PortService PortService
+@inject NavigationManager Navigation
+@using EXONLOG.Model.Inbound
+
+<PageTitle>Port Management</PageTitle>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Port Management</h3>
+        <button class="btn btn-primary" @onclick="ToggleAddForm">
+            @(showAddForm ? "Cancel" : "+ Add Port")
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search ports..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
+
+    <!-- Add Port Form -->
+    @if (showAddForm)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">New Port</h5>
+                <EditForm Model="@newPort" OnValidSubmit="HandleAddSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Port Name *</label>
+                            <InputText class="form-control" @bind-Value="newPort.PortName" />
+                            <ValidationMessage For="@(() => newPort.PortName)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Location</label>
+                            <InputText class="form-control" @bind-Value="newPort.Location" />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="newPort.Notes" />
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">Save Port</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    <!-- Ports Table -->
+    <div class="table-responsive">
+        <table class="table table-hover table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Port Name</th>
+                    <th>Location</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var port in filteredPorts)
+                {
+                    <tr>
+                        <td>@port.PortName</td>
+                        <td>@port.Location</td>
+                        <td>@port.CreateDate.ToString("dd MMM yyyy")</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning"
+                                    @onclick="() => ShowEditModal(port)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger"
+                                    @onclick="() => DeletePort(port.PortID)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+@if (showEditModal)
+{
+    <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Port</h5>
+                    <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@selectedPort" OnValidSubmit="HandleEditSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Port Name *</label>
+                                <InputText class="form-control" @bind-Value="selectedPort.PortName" />
+                                <ValidationMessage For="@(() => selectedPort.PortName)" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Location</label>
+                                <InputText class="form-control" @bind-Value="selectedPort.Location" />
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Notes</label>
+                                <InputTextArea class="form-control" @bind-Value="selectedPort.Notes" />
+                            </div>
+
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Port> ports = new();
+    private List<Port> filteredPorts = new();
+    private string searchTerm = string.Empty;
+    private bool showAddForm;
+    private bool showEditModal;
+
+    private Port newPort = new();
+    private Port selectedPort = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPorts();
+    }
+
+    private async Task LoadPorts()
+    {
+        ports = await PortService.GetPortsAsync(searchTerm);
+        FilterPorts();
+    }
+
+    private void FilterPorts()
+    {
+        filteredPorts = ports
+            .Where(p => string.IsNullOrEmpty(searchTerm) ||
+                p.PortName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Location.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private async Task HandleAddSubmit()
+    {
+        newPort.UserID = 1;
+        await PortService.AddPortAsync(newPort);
+        await LoadPorts();
+        showAddForm = false;
+        ResetForm();
+    }
+
+    private void ResetForm()
+    {
+        newPort = new Port();
+    }
+
+    private void ShowEditModal(Port port)
+    {
+        selectedPort = port;
+        showEditModal = true;
+    }
+
+    private async Task HandleEditSubmit()
+    {
+        await PortService.UpdatePortAsync(selectedPort);
+        await LoadPorts();
+        showEditModal = false;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedPort = new Port();
+    }
+
+    private async Task DeletePort(int portId)
+    {
+        await PortService.DeletePortAsync(portId);
+        await LoadPorts();
+    }
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm) newPort = new();
+    }
+}

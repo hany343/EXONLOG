@@ -289,13 +289,13 @@ namespace EXONLOG.Migrations
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.Shipment", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("ShipmentID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShipmentID"));
 
-                    b.Property<DateTime>("ArrivalDate")
+                    b.Property<DateTime?>("ArrivalDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreateDate")
@@ -303,7 +303,10 @@ namespace EXONLOG.Migrations
                         .HasColumnType("datetime2(0)")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<int>("ImporterID")
+                    b.Property<string>("Importer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ImporterID")
                         .HasColumnType("int");
 
                     b.Property<int>("MaterialID")
@@ -323,10 +326,12 @@ namespace EXONLOG.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ShipmentRef")
-                        .IsRequired()
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("ShipmentStatusId")
+                    b.Property<string>("ShipmentStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ShipmentStatusId")
                         .HasColumnType("int");
 
                     b.Property<int>("SupplierID")
@@ -335,7 +340,7 @@ namespace EXONLOG.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
+                    b.HasKey("ShipmentID");
 
                     b.HasIndex("ImporterID");
 
@@ -401,12 +406,12 @@ namespace EXONLOG.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("SupplierName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
@@ -1100,11 +1105,9 @@ namespace EXONLOG.Migrations
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.Shipment", b =>
                 {
-                    b.HasOne("EXONLOG.Model.Inbound.Importer", "Importer")
+                    b.HasOne("EXONLOG.Model.Inbound.Importer", null)
                         .WithMany("Shipments")
-                        .HasForeignKey("ImporterID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ImporterID");
 
                     b.HasOne("EXONLOG.Model.Stocks.Material", "Material")
                         .WithMany()
@@ -1118,11 +1121,9 @@ namespace EXONLOG.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("EXONLOG.Model.Inbound.ShipmentStatus", "ShipmentStatus")
+                    b.HasOne("EXONLOG.Model.Inbound.ShipmentStatus", null)
                         .WithMany("Shipments")
-                        .HasForeignKey("ShipmentStatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ShipmentStatusId");
 
                     b.HasOne("EXONLOG.Model.Inbound.Supplier", "Supplier")
                         .WithMany("Shipments")
@@ -1136,13 +1137,9 @@ namespace EXONLOG.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Importer");
-
                     b.Navigation("Material");
 
                     b.Navigation("Port");
-
-                    b.Navigation("ShipmentStatus");
 
                     b.Navigation("Supplier");
 

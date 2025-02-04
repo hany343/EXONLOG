@@ -1,0 +1,186 @@
+﻿
+@page "/weight-station"
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+<!-- Error Message -->
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+@if (!isBrowserSupported)
+{
+    <div class="alert alert-warning">
+        Your browser does not support the Web Serial API. Please use Chrome, Edge, or Opera.
+    </div>
+}
+
+<!-- Live Weight Display -->
+<div class="weight-display">
+    <div class="black-screen">
+        <span class="weight-value">@currentWeight.ToString("N2") kg</span>
+    </div>
+</div>
+
+<!-- Controls Section -->
+<div class="controls-section">
+    <button @onclick="InitializeScale"
+            class="btn btn-primary"
+            disabled="@isScaleInitialized">
+        Connect to Scale
+    </button>
+
+    <button @onclick="ConfirmWeight"
+            class="btn btn-success"
+            disabled="@(!isWeightStable || !isScaleInitialized)">
+        Confirm Weight
+    </button>
+</div>
+
+
+
+<!-- Camera Preview -->
+<div class="camera-preview">
+    @if (showCamera)
+    {
+        <img src="@cameraStreamUrl" class="camera-feed" />
+    }
+    else
+    {
+        <div class="camera-placeholder">Camera Offline</div>
+    }
+</div>
+
+<div class="form-group">
+    <label>Weight Notes:</label>
+    <textarea @bind="weightNotes" class="form-control" rows="3"></textarea>
+</div>
+
+<button @onclick="ConfirmWeight"
+        class="btn btn-primary"
+        disabled="@(!isWeightStable)">
+    Confirm Weight (@timerCountdown)
+</button>
+
+<button @onclick="ToggleCamera" class="btn btn-secondary">
+    @(showCamera ? "Hide Camera" : "Show Camera")
+</button>
+
+
+
+@code {
+
+    private decimal currentWeight;
+    private bool isWeightStable;
+    private string selectedLadingType = "Inbound";
+    private string weightNotes = string.Empty;
+    private int timerCountdown = 5;
+    private bool showCamera = true;
+    private string cameraStreamUrl = string.Empty;
+    private DotNetObjectReference<WeightStation> objRef;
+    private IJSObjectReference? weightModule;
+
+    private bool isScaleInitialized;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            isBrowserSupported = await JSRuntime.InvokeAsync<bool>(
+                "eval", "'serial' in navigator");
+            StateHasChanged();
+
+            objRef = DotNetObjectReference.Create(this);
+            weightModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                "import", "./js/serialPort.js");
+
+            await InitializeCamera();
+            //await InitializeScale();
+
+        }
+    }
+
+    private async Task InitializeScale()
+    {
+        try
+        {
+            await weightModule!.InvokeVoidAsync(
+                "initializeScale",
+                objRef,
+                "COM3", // Configure port
+                9600);
+
+            isScaleInitialized = true;
+            errorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to initialize scale: {ex.Message}";
+        }
+    }
+    private async Task InitializeCamera()
+    {
+        var auth = Convert.ToBase64String(
+            System.Text.Encoding.ASCII.GetBytes($"hany:h12345"));
+
+        cameraStreamUrl = $"http://192.168.0.3/video?auth={auth}";
+        StateHasChanged();
+    }
+
+
+
+    [JSInvokable]
+    public void UpdateWeight(decimal weight)
+    {
+        currentWeight = weight;
+        isWeightStable = CheckWeightStability();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void HandleSerialError(string message)
+    {
+        errorMessage = $"Serial port error: {message}";
+        StateHasChanged();
+    }
+
+    private bool CheckWeightStability()
+    {
+        // Implement weight stabilization logic
+        return true;
+    }
+
+    private async Task ConfirmWeight()
+    {
+        // Save weight data
+        await ResetScale();
+    }
+
+    private async Task ResetScale()
+    {
+        await weightModule!.InvokeVoidAsync("resetScale");
+        currentWeight = 0;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (weightModule != null)
+        {
+            await weightModule.DisposeAsync();
+        }
+        objRef?.Dispose();
+    }
+    private void ToggleCamera()
+    {
+        showCamera = !showCamera;
+    }
+
+  
+    private bool isBrowserSupported = true;
+
+
+}

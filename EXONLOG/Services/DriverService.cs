@@ -3,6 +3,7 @@
     using EXONLOG.Data;
     using EXONLOG.Model.Trans;
     using Microsoft.EntityFrameworkCore;
+    using NuGet.Versioning;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -40,8 +41,13 @@
                 await _dbContext.SaveChangesAsync();
             }
 
-            // Update an existing driver
-            public async Task UpdateDriverAsync(Driver driver)
+        // Get a single truck by ID
+        public async Task<Driver?> searchDriver(string dnum)
+        {
+            return await _dbContext.Set<Driver>().fnid(dnum);
+        }
+        // Update an existing driver
+        public async Task UpdateDriverAsync(Driver driver)
             {
                 _dbContext.Drivers.Update(driver);
                 await _dbContext.SaveChangesAsync();

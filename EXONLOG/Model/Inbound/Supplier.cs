@@ -3,12 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EXONLOG.Model.Inbound
 {
+
     public class Supplier
     {
         public int ID { get; set; } // Primary Key
 
         [Column(TypeName = "nvarchar(100)")]
-        public string Name { get; set; } = string.Empty; // Supplier name
+        public string SupplierName { get; set; } = string.Empty; // Supplier name
 
         [Column(TypeName = "nvarchar(250)")]
         public string? Address { get; set; } // Supplier address

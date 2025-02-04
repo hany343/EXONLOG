@@ -83,6 +83,14 @@ builder.Services.AddScoped<DriverService>();
 builder.Services.AddScoped<TransCompanyService>();
 
 
+//////////////// Inbound Service  /////////
+///
+builder.Services.AddScoped<SupplierService>();
+builder.Services.AddScoped<ShipmentService>();
+builder.Services.AddScoped<PortService>();
+builder.Services.AddScoped<BatchService>();
+builder.Services.AddScoped<InLadingService>();
+
 
 var app = builder.Build();
 
