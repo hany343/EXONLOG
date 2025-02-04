@@ -36,9 +36,16 @@
     font-size: 11pt;
     margin: 5px 0;
 }
-
+@font-face {
+    font-family: 'IDAutomationHC39M';
+    src: url('/fonts/IDAutomationHC39M.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 .barcode {
-    font-family: 'IDAutomationHC39M', sans-serif;
+    font-family: "IDAutomationHC39M", serif;
+    font-weight: 400;
+    font-style: normal;
     font-size: 16pt;
     margin: 15px 0;
     text-align: center;
