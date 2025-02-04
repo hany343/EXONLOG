@@ -1,8 +1,8 @@
-﻿@inject DriverService DriverService
+﻿@inject DriverService driverService
 
 <div class="search-component">
     <input type="text" class="form-control" placeholder="Search drivers by name or ID..."
-           @bind="searchTerm" @bind:event="oninput" />
+            @oninput="SearchDrivers" />
 
     @if (searchResults.Any())
     {
@@ -24,11 +24,13 @@
     private string searchTerm = string.Empty;
     private List<Driver> searchResults = new();
 
-    private async Task SearchDrivers()
+    private async Task SearchDrivers(ChangeEventArgs e)
     {
+        searchTerm = e.Value.ToString();
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            searchResults = await DriverService.searchDriver(searchTerm);
+            searchResults = await driverService.SearchDriversAsync(searchTerm);
+            StateHasChanged();
         }
     }
 

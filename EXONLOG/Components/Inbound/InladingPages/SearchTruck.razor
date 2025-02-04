@@ -1,8 +1,8 @@
-﻿@inject TruckService TruckService
+﻿@inject TruckService truckService
 
 <div class="search-component">
     <input type="text" class="form-control" placeholder="Search trucks by number..."
-           @bind="searchTerm" @bind:event="oninput" />
+            @onchange="SearchTrucks" />
 
     @if (searchResults.Any())
     {
@@ -24,11 +24,12 @@
     private string searchTerm = string.Empty;
     private List<Truck> searchResults = new();
 
-    private async Task SearchTrucks()
+    private async Task SearchTrucks(ChangeEventArgs e)
     {
+        searchTerm = e.Value.ToString();
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            searchResults = await TruckService.SearchTrucksAsync(searchTerm);
+            searchResults = await truckService.SearchTrucksAsync(searchTerm);
         }
     }
 

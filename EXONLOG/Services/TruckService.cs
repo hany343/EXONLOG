@@ -21,9 +21,20 @@
                                        .OrderBy(t => t.TruckNumber)
                                        .ToListAsync();
             }
+        // Search trucks by truck number
+        public async Task<List<Truck>> SearchTrucksAsync(string searchTerm)
+        {
+            return await _dbContext.Trucks
+                .Include(t => t.User)
+                .Where(t => string.IsNullOrEmpty(searchTerm) ||
+                    t.TruckNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(t => t.TruckNumber)
+                .Take(10) // Limit results for performance
+                .ToListAsync();
+        }
 
-            // Get a single truck by ID
-            public async Task<Truck?> GetTruckByIdAsync(int truckId)
+        // Get a single truck by ID
+        public async Task<Truck?> GetTruckByIdAsync(int truckId)
             {
                 return await _dbContext.Set<Truck>()
                                        .FirstOrDefaultAsync(t => t.TruckID == truckId);

@@ -42,9 +42,13 @@
             }
 
         // Get a single truck by ID
-        public async Task<Driver?> searchDriver(string dnum)
+        
+        public async Task<List<Driver>> SearchDriversAsync(string searchTerm)
         {
-            return await _dbContext.Set<Driver>().fnid(dnum);
+            var drivers = _dbContext.Drivers
+   .Where(d => EF.Functions.Like(d.DriverName, $"%{searchTerm}%") || EF.Functions.Like(d.NationalID, $"%{searchTerm}%")).Take(5)
+   .ToList();
+            return drivers;
         }
         // Update an existing driver
         public async Task UpdateDriverAsync(Driver driver)

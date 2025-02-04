@@ -1,6 +1,8 @@
 ﻿@page "/inladings"
-@inject InLadingService InLadingService
-
+@inject InLadingService inLadingService
+@inject BatchService batchService
+@inject TransCompanyService transCompanyService
+@using Model.Inbound
 
 <PageTitle>InLading Management</PageTitle>
 
@@ -48,7 +50,7 @@
                                 <option value="">Select Trans Company</option>
                                 @foreach (var company in transCompanies)
                                 {
-                                    <option value="@company.ID">@company.Name</option>
+                                    <option value="@company.TransCompanyID">@company.CompanyName</option>
                                 }
                             </InputSelect>
                             <ValidationMessage For="@(() => newInLading.TransCompanyID)" />
@@ -144,9 +146,9 @@
 
     private async Task LoadData()
     {
-        inLadings = await InLadingService.GetAllInLadingsAsync(searchTerm);
-        batches = await Context.Batches.ToListAsync();
-        transCompanies = await Context.TransCompanies.ToListAsync();
+        inLadings = await inLadingService.GetAllInLadingsAsync(searchTerm);
+        batches = await batchService.GetBatchesAsync();
+        transCompanies = await transCompanyService.GetAllAsync();
         FilterInLadings();
     }
 
@@ -173,7 +175,7 @@
 
     private async Task HandleSubmit()
     {
-        await InLadingService.CreateInLadingAsync(newInLading);
+        await inLadingService.CreateInLadingAsync(newInLading);
         await LoadData();
         showAddForm = false;
         ResetForm();
@@ -188,7 +190,13 @@
 
     private async Task DeleteInLading(int id)
     {
-        await InLadingService.DeleteInLadingAsync(id);
+        // await inLadingService.DeleteInLadingAsync(id);
         await LoadData();
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm) newInLading = new();
     }
 }
