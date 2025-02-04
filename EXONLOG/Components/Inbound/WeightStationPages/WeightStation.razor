@@ -1,8 +1,9 @@
 ﻿
-@page "/weight-station"
+@page "/weightstation"
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
+
 <!-- Error Message -->
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -45,7 +46,7 @@
 <div class="camera-preview">
     @if (showCamera)
     {
-        <img src="@cameraStreamUrl" class="camera-feed" />
+        <video src="@cameraStreamUrl" class="camera-feed" />
     }
     else
     {
@@ -90,13 +91,13 @@
 
         if (firstRender)
         {
-            isBrowserSupported = await JSRuntime.InvokeAsync<bool>(
-                "eval", "'serial' in navigator");
-            StateHasChanged();
+            //isBrowserSupported = await JSRuntime.InvokeAsync<bool>(
+            //    "eval", "'serial' in navigator");
+            //StateHasChanged();
 
-            objRef = DotNetObjectReference.Create(this);
-            weightModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
-                "import", "./js/serialPort.js");
+            //objRef = DotNetObjectReference.Create(this);
+            //weightModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
+            //    "import", "./js/serialPort.js");
 
             await InitializeCamera();
             //await InitializeScale();
@@ -122,13 +123,26 @@
             errorMessage = $"Failed to initialize scale: {ex.Message}";
         }
     }
+    private string cameraError = string.Empty;
+
     private async Task InitializeCamera()
     {
-        var auth = Convert.ToBase64String(
-            System.Text.Encoding.ASCII.GetBytes($"hany:h12345"));
+        try
+        {
+            var auth = Convert.ToBase64String(
+        System.Text.Encoding.ASCII.GetBytes($"hany:h12345"));
 
-        cameraStreamUrl = $"http://192.168.0.3/video?auth={auth}";
-        StateHasChanged();
+            cameraStreamUrl = $"http://{auth}@192.168.0.3:80/video";
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            cameraError = $"Camera error: {ex.Message}";
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
 
@@ -179,7 +193,7 @@
         showCamera = !showCamera;
     }
 
-  
+
     private bool isBrowserSupported = true;
 
 

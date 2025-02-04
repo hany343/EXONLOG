@@ -92,6 +92,8 @@ builder.Services.AddScoped<BatchService>();
 builder.Services.AddScoped<InLadingService>();
 
 
+
+
 var app = builder.Build();
 
 

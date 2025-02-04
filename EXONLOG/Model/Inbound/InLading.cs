@@ -1,54 +1,106 @@
 ﻿using EXONLOG.Model.Account;
 using EXONLOG.Model.Trans;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EXONLOG.Model.Inbound
 {
     public class InLading
     {
-        public int ID { get; set; } // Primary Key
+        [Key]
+        public int InladID { get; set; }
 
-        public string? LadingRef { get; set; } = string.Empty; // Unique reference for the lading
+        //// Unique lading reference with validation
+        //[Required(ErrorMessage = "Lading reference is required")]
+        //[MaxLength(100, ErrorMessage = "Lading reference cannot exceed 100 characters")]
+        //[Column(TypeName = "nvarchar(100)")]
+        //[Index(IsUnique = true)] // Ensure unique reference
+        //public string LadingRef { get; set; } = string.Empty;
 
-        public int BatchID { get; set; } // Foreign key to the batch
+        // Foreign keys with explicit relationships
+        [Required(ErrorMessage = "Batch is required")]
+        [ForeignKey("Batch")]
+        public int BatchID { get; set; }
 
-        public int TruckID { get; set; } // Foreign key to the truck
+        [Required(ErrorMessage = "Truck is required")]
+        [ForeignKey("Truck")]
+        public int TruckID { get; set; }
 
-        public int DriverID { get; set; } // Foreign key to the driver
+        [Required(ErrorMessage = "Driver is required")]
+        [ForeignKey("Driver")]
+        public int DriverID { get; set; }
 
-        public double FirstWeight { get; set; } // Weight at the first weighbridge
+        // Weight validations
+        [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
+        public double FirstWeight { get; set; } = 0;
 
-        public double SecondWeight { get; set; } // Weight at the second weighbridge
+        [Range(0.00, double.MaxValue, ErrorMessage = "Second weight must be positive")]
+        public double SecondWeight { get; set; } = 0;
 
-        public double NetWeight { get; set; } // Net weight (calculated as |SecondWeight - FirstWeight|)
+        // Computed net weight (not stored in DB)
+        [NotMapped]
+        public double NetWeight => Math.Abs(SecondWeight - FirstWeight);
 
-        public DateTime FirstWeighDate { get; set; } // Date and time of the first weight
+        // Date validations
+        [Column(TypeName = "datetime2(0)")]
+        public DateTime? FirstWeighDate { get; set; }
 
-        public DateTime SecondWeighDate { get; set; } // Date and time of the second weight
 
-        [Column(TypeName = "nvarchar(100)")]
-        public string WeightStatus { get; set; } = "Pending"; // Status of the weigh operation
+        [Column(TypeName = "datetime2(0)")]
+        public DateTime? SecondWeighDate { get; set; }
 
-        public int FirstWeigherID { get; set; } // User ID of the first weigher
+        // Enum-based status
+        [Required]
+        [Column(TypeName = "nvarchar(50)")]
+        public WeightStatus WeightStatus { get; set; } = WeightStatus.Pending;
 
-        public int SecondWeigherID { get; set; } // User ID of the second weigher
+        // Weigher relationships
+        [ForeignKey("FirstWeigher")]
+        public int? FirstWeigherID { get; set; }
 
+
+        [ForeignKey("SecondWeigher")]
+        public int? SecondWeigherID { get; set; }
+
+        // Additional fields
+        [MaxLength(250, ErrorMessage = "Notes cannot exceed 250 characters")]
         [Column(TypeName = "nvarchar(250)")]
-        public string? Notes { get; set; } // Additional notes for the lading
+        public string? Notes { get; set; }
 
-        public DateTime CreateDate { get; set; } = DateTime.Now; // Record creation date
+        [Required]
+        [Column(TypeName = "datetime2(0)")]
+        public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Use UTC
 
-        public int UserID { get; set; } // Foreign key to the user who created the record
+        // User relationships
+        [Required(ErrorMessage = "User is required")]
+        [ForeignKey("User")]
+        public int UserID { get; set; }
 
-        public int TransCompanyID { get; set; }  // Foreign key to TransCompany
-        public TransCompany? TransCompany { get; set; }  // Navigation property
-        // Navigation Properties
-        public Batch? Batch { get; set; } // Related Batch
-        public Truck? Truck { get; set; } // Related Truck
-        public Driver? Driver { get; set; } // Related Driver
-        public User? User { get; set; } // User who created the lading
-        public User? FirstWeigher { get; set; } // First weigher user
-        public User? SecondWeigher { get; set; } // Second weigher user
+        // Transportation company relationship
+        [Required(ErrorMessage = "Transport company is required")]
+        [ForeignKey("TransCompany")]
+        public int TransCompanyID { get; set; }
+
+        // Navigation properties
+        public virtual Batch? Batch { get; set; }
+        public virtual Truck? Truck { get; set; }
+        public virtual Driver? Driver { get; set; }
+        public virtual User? User { get; set; }
+        public virtual User? FirstWeigher { get; set; }
+        public virtual User? SecondWeigher { get; set; }
+        public virtual TransCompany? TransCompany { get; set; }
+
+       
     }
 
+    public enum WeightStatus
+    {
+        Pending,
+        FirstWeighCompleted,
+        SecondWeighCompleted,
+        Verified,
+        Disputed
+    }
 }

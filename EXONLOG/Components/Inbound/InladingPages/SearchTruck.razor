@@ -2,7 +2,7 @@
 
 <div class="search-component">
     <input type="text" class="form-control" placeholder="Search trucks by number..."
-            @onchange="SearchTrucks" />
+            @oninput="SearchTrucks" />
 
     @if (searchResults.Any())
     {

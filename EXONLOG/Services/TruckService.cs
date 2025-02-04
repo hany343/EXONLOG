@@ -24,13 +24,10 @@
         // Search trucks by truck number
         public async Task<List<Truck>> SearchTrucksAsync(string searchTerm)
         {
-            return await _dbContext.Trucks
-                .Include(t => t.User)
-                .Where(t => string.IsNullOrEmpty(searchTerm) ||
-                    t.TruckNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                .OrderBy(t => t.TruckNumber)
-                .Take(10) // Limit results for performance
-                .ToListAsync();
+            var trucks = _dbContext.Trucks
+                       .Where(t => EF.Functions.Like(t.TruckNumber, $"%{searchTerm}%")).Take(5)
+                       .ToList();
+            return trucks;
         }
 
         // Get a single truck by ID

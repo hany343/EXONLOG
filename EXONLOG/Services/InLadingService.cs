@@ -21,7 +21,6 @@ namespace EXONLOG.Services
                 .Include(i => i.Driver)
                 .Include(i => i.TransCompany)
                 .Where(i => string.IsNullOrEmpty(searchTerm) ||
-                    i.LadingRef.Contains(searchTerm) ||
                     i.Batch.BatchNumber.Contains(searchTerm))
                 .ToListAsync();
         }

@@ -174,11 +174,11 @@ namespace EXONLOG.Migrations
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.InLading", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("InladID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InladID"));
 
                     b.Property<int>("BatchID")
                         .HasColumnType("int");
@@ -191,29 +191,23 @@ namespace EXONLOG.Migrations
                     b.Property<int>("DriverID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FirstWeighDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("FirstWeighDate")
+                        .HasColumnType("datetime2(0)");
 
-                    b.Property<int>("FirstWeigherID")
+                    b.Property<int?>("FirstWeigherID")
                         .HasColumnType("int");
 
                     b.Property<double>("FirstWeight")
                         .HasColumnType("float");
 
-                    b.Property<string>("LadingRef")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("NetWeight")
-                        .HasColumnType("float");
-
                     b.Property<string>("Notes")
+                        .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<DateTime>("SecondWeighDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("SecondWeighDate")
+                        .HasColumnType("datetime2(0)");
 
-                    b.Property<int>("SecondWeigherID")
+                    b.Property<int?>("SecondWeigherID")
                         .HasColumnType("int");
 
                     b.Property<double>("SecondWeight")
@@ -230,9 +224,9 @@ namespace EXONLOG.Migrations
 
                     b.Property<string>("WeightStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("ID");
+                    b.HasKey("InladID");
 
                     b.HasIndex("BatchID");
 
@@ -393,10 +387,12 @@ namespace EXONLOG.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Address")
+                        .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("ContactNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
@@ -404,14 +400,19 @@ namespace EXONLOG.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Notes")
+                        .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("SupplierName")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
@@ -1050,14 +1051,12 @@ namespace EXONLOG.Migrations
                     b.HasOne("EXONLOG.Model.Account.User", "FirstWeigher")
                         .WithMany()
                         .HasForeignKey("FirstWeigherID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("EXONLOG.Model.Account.User", "SecondWeigher")
                         .WithMany()
                         .HasForeignKey("SecondWeigherID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("EXONLOG.Model.Trans.TransCompany", "TransCompany")
                         .WithMany()
