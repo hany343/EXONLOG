@@ -2,8 +2,9 @@
 @page "/weightstation"
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
+@inject StreamService streamService
 @implements IAsyncDisposable
-
+@inject HttpClient Http
 <!-- Error Message -->
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -46,7 +47,14 @@
 <div class="camera-preview">
     @if (showCamera)
     {
-        <video src="@cameraStreamUrl" class="camera-feed" />
+
+        <button @onclick="StartStreaming" disabled="@streamService.IsStreaming">Start Stream</button>
+        <button @onclick="StopStreaming" disabled="@(streamService.IsStreaming == false)">Stop Stream</button>
+
+        <video id="videoPlayer" controls autoplay>
+            <source src="http://localhost:8080/live" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
     }
     else
     {
@@ -86,6 +94,9 @@
     private bool isScaleInitialized;
     private string errorMessage = string.Empty;
 
+    private string StreamUrl = "rtsp://alex:admin123!@192.168.60.110:554/Streaming/Channels/101";
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
 
@@ -98,11 +109,24 @@
             //objRef = DotNetObjectReference.Create(this);
             //weightModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
             //    "import", "./js/serialPort.js");
-
-            await InitializeCamera();
+            // await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", "cameraStream");
+            //await InitializeCamera();
             //await InitializeScale();
 
         }
+    }
+
+    
+    private void StartStreaming()
+    {
+        streamService.StartStreaming();
+        StateHasChanged();
+    }
+
+    private void StopStreaming()
+    {
+        streamService.StopStreaming();
+        StateHasChanged();
     }
 
     private async Task InitializeScale()
@@ -125,25 +149,6 @@
     }
     private string cameraError = string.Empty;
 
-    private async Task InitializeCamera()
-    {
-        try
-        {
-            var auth = Convert.ToBase64String(
-        System.Text.Encoding.ASCII.GetBytes($"hany:h12345"));
-
-            cameraStreamUrl = $"http://{auth}@192.168.0.3:80/video";
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            cameraError = $"Camera error: {ex.Message}";
-        }
-        finally
-        {
-            StateHasChanged();
-        }
-    }
 
 
 

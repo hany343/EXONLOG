@@ -3,6 +3,7 @@ using EXONLOG.Components;
 using EXONLOG.Data;
 using EXONLOG.Model.Account;
 using EXONLOG.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
@@ -91,8 +92,13 @@ builder.Services.AddScoped<PortService>();
 builder.Services.AddScoped<BatchService>();
 builder.Services.AddScoped<InLadingService>();
 
+builder.Services.AddSingleton<StreamService>();  // Register FFmpeg stream service
 
-
+builder.Services.AddScoped<HttpClient>(sp =>
+{
+    var navigationManager = sp.GetRequiredService<NavigationManager>();
+    return new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
+});
 
 var app = builder.Build();
 
