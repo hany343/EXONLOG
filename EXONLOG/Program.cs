@@ -52,6 +52,12 @@ builder.Services.AddSingleton(new ConnectionStringService
     ActiveConnectionString = serverName
 });
 
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", policy =>
+      policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+
 
 // Register the MaterialService
 //builder.Services.AddScoped<MaterialService>();
@@ -92,7 +98,8 @@ builder.Services.AddScoped<PortService>();
 builder.Services.AddScoped<BatchService>();
 builder.Services.AddScoped<InLadingService>();
 
-builder.Services.AddSingleton<StreamService>();  // Register FFmpeg stream service
+builder.Services.AddSingleton<FFmpegService>();
+
 
 builder.Services.AddScoped<HttpClient>(sp =>
 {
@@ -102,6 +109,8 @@ builder.Services.AddScoped<HttpClient>(sp =>
 
 var app = builder.Build();
 
+app.UseCors("AllowAll");
+app.UseStaticFiles(); // Serve wwwroot files
 
 using (var scope = app.Services.CreateScope())
 {

@@ -2,7 +2,7 @@
 @page "/weightstation"
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
-@inject StreamService streamService
+
 @implements IAsyncDisposable
 @inject HttpClient Http
 <!-- Error Message -->
@@ -18,49 +18,49 @@
         Your browser does not support the Web Serial API. Please use Chrome, Edge, or Opera.
     </div>
 }
+<div class="d-flex flex-wrap gap-3 ">
 
-<!-- Live Weight Display -->
-<div class="weight-display">
-    <div class="black-screen">
-        <span class="weight-value">@currentWeight.ToString("N2") kg</span>
+    <div class="col-lg-10 d-flex">
+        <!-- Live Weight Display -->
+        <div class="weight-display col-lg-10">
+            <div class="black-screen">
+                <span class="weight-value">@currentWeight.ToString("N2") kg</span>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <!-- Controls Section -->
+            <div class="controls-section d-flex gap-2 flex-column align-content-center justify-content-around">
+                <button @onclick="InitializeScale"
+                        class="btn btn-primary"
+                        disabled="@isScaleInitialized">
+                    Connect to Scale
+                </button>
+
+                <button @onclick="ConfirmWeight"
+                        class="btn btn-success"
+                        disabled="@(!isWeightStable || !isScaleInitialized)">
+                    Confirm Weight
+                </button>
+            </div>
+        </div>
+        
+    </div>
+
+   
+    <!-- Camera Preview -->
+    <div class="camera-preview">
+        @if (showCamera)
+        {
+            <LiveStream></LiveStream>
+        }
+        else
+        {
+            <div class="camera-placeholder">Camera Offline</div>
+        }
     </div>
 </div>
 
-<!-- Controls Section -->
-<div class="controls-section">
-    <button @onclick="InitializeScale"
-            class="btn btn-primary"
-            disabled="@isScaleInitialized">
-        Connect to Scale
-    </button>
-
-    <button @onclick="ConfirmWeight"
-            class="btn btn-success"
-            disabled="@(!isWeightStable || !isScaleInitialized)">
-        Confirm Weight
-    </button>
-</div>
-
-
-
-<!-- Camera Preview -->
-<div class="camera-preview">
-    @if (showCamera)
-    {
-
-        <button @onclick="StartStreaming" disabled="@streamService.IsStreaming">Start Stream</button>
-        <button @onclick="StopStreaming" disabled="@(streamService.IsStreaming == false)">Stop Stream</button>
-
-        <video id="videoPlayer" controls autoplay>
-            <source src="http://localhost:8080/live" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    }
-    else
-    {
-        <div class="camera-placeholder">Camera Offline</div>
-    }
-</div>
 
 <div class="form-group">
     <label>Weight Notes:</label>
@@ -87,49 +87,13 @@
     private string weightNotes = string.Empty;
     private int timerCountdown = 5;
     private bool showCamera = true;
-    private string cameraStreamUrl = string.Empty;
     private DotNetObjectReference<WeightStation> objRef;
     private IJSObjectReference? weightModule;
 
     private bool isScaleInitialized;
     private string errorMessage = string.Empty;
 
-    private string StreamUrl = "rtsp://alex:admin123!@192.168.60.110:554/Streaming/Channels/101";
-
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-
-        if (firstRender)
-        {
-            //isBrowserSupported = await JSRuntime.InvokeAsync<bool>(
-            //    "eval", "'serial' in navigator");
-            //StateHasChanged();
-
-            //objRef = DotNetObjectReference.Create(this);
-            //weightModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
-            //    "import", "./js/serialPort.js");
-            // await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", "cameraStream");
-            //await InitializeCamera();
-            //await InitializeScale();
-
-        }
-    }
-
-    
-    private void StartStreaming()
-    {
-        streamService.StartStreaming();
-        StateHasChanged();
-    }
-
-    private void StopStreaming()
-    {
-        streamService.StopStreaming();
-        StateHasChanged();
-    }
-
-    private async Task InitializeScale()
+  private async Task InitializeScale()
     {
         try
         {

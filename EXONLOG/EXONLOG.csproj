@@ -8,13 +8,16 @@
 
   <ItemGroup>
     <Compile Remove="Model\Inventory\**" />
+    <Compile Remove="wwwroot\screenshot\**" />
     <Content Remove="Model\Inventory\**" />
+    <Content Remove="wwwroot\screenshot\**" />
     <EmbeddedResource Remove="Model\Inventory\**" />
+    <EmbeddedResource Remove="wwwroot\screenshot\**" />
     <None Remove="Model\Inventory\**" />
+    <None Remove="wwwroot\screenshot\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FFMpegCore" Version="5.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -25,6 +28,8 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+    <Folder Include="wwwroot\screenshots\" />
+    <Folder Include="wwwroot\stream\" />
   </ItemGroup>
 
   <ItemGroup>

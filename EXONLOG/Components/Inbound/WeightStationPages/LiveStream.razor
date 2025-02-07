@@ -1,0 +1,49 @@
+﻿@page "/live-stream"
+@inject IJSRuntime JSRuntime
+@inject FFmpegService FFmpegService
+
+<button @onclick="StartContinuousScreenshots">Start Continuous Screenshots</button>
+<button @onclick="StopContinuousScreenshots">Stop Continuous Screenshots</button>
+
+@if (_showImage)
+{
+    <img src="/screenshots/latest.jpg?t=@_timestamp" alt="Latest Screenshot" style="width: 480px;" />
+}
+
+@code {
+    private string _rtspUrl = "rtsp://admin:Admin@2020@192.168.0.4:554/Streaming/Channels/101";
+    private string _outputPath = Path.Combine("wwwroot", "screenshots", "latest.jpg");
+    private bool _showImage = true;
+    private string _timestamp = DateTime.Now.Ticks.ToString();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(_outputPath));
+        }
+    }
+
+    private async Task StartContinuousScreenshots()
+    {
+        await FFmpegService.StartContinuousScreenshotsAsync(_rtspUrl, _outputPath, UpdateImage);
+    }
+
+    private void StopContinuousScreenshots()
+    {
+        FFmpegService.StopContinuousScreenshots();
+    }
+
+    private void UpdateImage()
+    {
+        // Update the timestamp to force the browser to reload the image
+        _timestamp = DateTime.Now.Ticks.ToString();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        FFmpegService.Dispose();
+    }
+}
