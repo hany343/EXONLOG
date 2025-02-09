@@ -4,6 +4,8 @@
 @inject SupplierService supplierService
 @inject PortService portService
 @inject NavigationManager Navigation
+@using Model.Stocks
+
 
 <PageTitle>Shipment Management</PageTitle>
 
@@ -37,9 +39,12 @@
     <!-- Edit Modal -->
     @if (showEditModal)
     {
-        <ShipmentEdit Shipment="selectedShipment"
-                      OnSubmit="HandleEditSubmit"
-                      OnCancel="CloseEditModal" />
+       <ShipmentEdit Shipment="selectedShipment"
+                     materials="materials"
+                     suppliers="suppliers"
+                     ports="ports"
+                     OnSubmit="HandleEditSubmit"
+                     OnCancel="CloseEditModal" />
     }
 
     <!-- Details Modal -->
@@ -53,6 +58,10 @@
 @code {
     private List<Shipment> shipments = new();
     private List<Shipment> filteredShipments = new();
+    private List<Material> materials = new();
+    private List<Supplier> suppliers = new();
+    private List<Port> ports = new();
+
     private string searchTerm = string.Empty;
     private bool showAddForm;
     private bool showEditModal;
@@ -67,6 +76,9 @@
     private async Task LoadData()
     {
         shipments = await shipmentService.GetAllShipmentsAsync();
+        materials = await materialService.GetMaterialsAsync();
+        suppliers = await supplierService.GetSuppliersAsync();
+        ports = await portService.GetPortsAsync();
         FilterShipments();
     }
 

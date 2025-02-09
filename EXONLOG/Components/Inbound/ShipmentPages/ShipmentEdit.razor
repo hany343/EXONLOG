@@ -1,5 +1,6 @@
 ﻿@using EXONLOG.Model.Inbound
 @using Model.Stocks
+@inject MaterialService materialService
 
 <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
     <div class="modal-dialog modal-lg">
@@ -14,12 +15,77 @@
                     <ValidationSummary class="text-danger" />
 
                     <div class="row g-3">
-                        <!-- Form fields go here (same as in the original code) -->
-                    </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Shipment Name *</label>
+                            <InputText @bind-Value="@Shipment.ShipmentName" class="form-control" />
+                            <ValidationMessage For="@(() => Shipment.ShipmentName)" />
+                        </div>
 
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                        <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+                        <div class="col-md-6">
+                            <label class="form-label">Material *</label>
+                            <InputSelect @bind-Value="@Shipment.MaterialID" class="form-control" @onchange="async e => await LoadFreeQuantity(e)">
+                                <option value="">Select Material</option>
+                                @foreach (var material in materials)
+                                {
+                                    <option value="@material.MaterialID">@material.MaterialName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Shipment.MaterialID)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Available Quantity</label>
+                            <input class="form-control"
+                                   value="@freeQuantity.ToString("N2")"
+                                   disabled />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <InputNumber @bind-Value="@Shipment.Quantity"
+                                         class="form-control"
+                                         min="0" />
+                            <ValidationMessage For="@(() => Shipment.Quantity)" />
+                            @if (quantityError)
+                            {
+                                <div class="text-danger">Quantity exceeds available stock!</div>
+                            }
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Supplier *</label>
+                            <InputSelect @bind-Value="@Shipment.SupplierID" class="form-control">
+                                <option value="">Select Supplier</option>
+                                @foreach (var supplier in suppliers)
+                                {
+                                    <option value="@supplier.ID">@supplier.SupplierName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Shipment.SupplierID)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Port *</label>
+                            <InputSelect @bind-Value="@Shipment.PortID" class="form-control">
+                                <option value="">Select Port</option>
+                                @foreach (var port in ports)
+                                {
+                                    <option value="@port.PortID">@port.PortName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Shipment.PortID)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Shipment Date *</label>
+                            <InputDate @bind-Value="@Shipment.CreateDate" class="form-control" />
+                            <ValidationMessage For="@(() => Shipment.CreateDate)" />
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+                        </div>
                     </div>
                 </EditForm>
             </div>
@@ -29,7 +95,7 @@
 
 @code {
     [Parameter]
-    public Shipment Shipment { get; set; }
+    public Shipment Shipment { get; set; } = new();
 
     [Parameter]
     public EventCallback<Shipment> OnSubmit { get; set; }
@@ -37,8 +103,45 @@
     [Parameter]
     public EventCallback OnCancel { get; set; }
 
+    [Parameter]
+    public List<Material> materials { get; set; } = new();
+
+    [Parameter]
+    public List<Supplier> suppliers { get; set; } = new();
+
+    [Parameter]
+    public List<Port> ports { get; set; } = new();
+
+    private double freeQuantity;
+    private bool quantityError;
+
+    protected override void OnParametersSet()
+    {
+        if (Shipment.MaterialID > 0)
+        {
+            freeQuantity = materialService.GetFreeQuantityAsync(Shipment.MaterialID);
+        }
+    }
+
+    private async Task LoadFreeQuantity(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int materialId))
+        {
+            Shipment.MaterialID = materialId;
+            freeQuantity = materialService.GetFreeQuantityAsync(materialId);
+            quantityError = Shipment.Quantity > freeQuantity;
+        }
+    }
+
     private async Task HandleSubmit()
     {
-        await OnSubmit.InvokeAsync(Shipment);
+        // Validate quantity before submitting
+        var currentFreeQty = materialService.GetFreeQuantityAsync(Shipment.MaterialID);
+        quantityError = Shipment.Quantity > currentFreeQty;
+
+        if (!quantityError)
+        {
+            await OnSubmit.InvokeAsync(Shipment);
+        }
     }
 }
