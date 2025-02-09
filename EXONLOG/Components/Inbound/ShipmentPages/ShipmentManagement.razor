@@ -1,0 +1,129 @@
+﻿@page "/shipmentsmanage"
+@inject ShipmentService shipmentService
+@inject MaterialService materialService
+@inject SupplierService supplierService
+@inject PortService portService
+@inject NavigationManager Navigation
+
+<PageTitle>Shipment Management</PageTitle>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Shipment Management</h3>
+        <button class="btn btn-primary" @onclick="ToggleAddForm">
+            @(showAddForm ? "Cancel" : "+ New Shipment")
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search shipments..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
+
+    <!-- Add Shipment Form -->
+    @if (showAddForm)
+    {
+        <ShipmentCreate OnSubmit="HandleAddSubmit" OnCancel="ToggleAddForm" />
+    }
+
+    <!-- Shipments Table -->
+    <ShipmentList Shipments="filteredShipments"
+                  OnEdit="ShowEditModal"
+                  OnDelete="DeleteShipment"
+                  OnDetails="ShowDetailsModal" />
+
+    <!-- Edit Modal -->
+    @if (showEditModal)
+    {
+        <ShipmentEdit Shipment="selectedShipment"
+                      OnSubmit="HandleEditSubmit"
+                      OnCancel="CloseEditModal" />
+    }
+
+    <!-- Details Modal -->
+    @if (showDetailsModal)
+    {
+        <ShipmentDetails Shipment="selectedShipment"
+                         OnClose="CloseDetailsModal" />
+    }
+</div>
+
+@code {
+    private List<Shipment> shipments = new();
+    private List<Shipment> filteredShipments = new();
+    private string searchTerm = string.Empty;
+    private bool showAddForm;
+    private bool showEditModal;
+    private bool showDetailsModal;
+    private Shipment selectedShipment = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        shipments = await shipmentService.GetAllShipmentsAsync();
+        FilterShipments();
+    }
+
+    private void FilterShipments()
+    {
+        filteredShipments = shipments
+            .Where(s => string.IsNullOrEmpty(searchTerm) ||
+                s.Material.MaterialName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private async Task HandleAddSubmit(Shipment newShipment)
+    {
+        await shipmentService.CreateShipmentAsync(newShipment);
+        await LoadData();
+        showAddForm = false;
+    }
+
+    private void ShowEditModal(Shipment shipment)
+    {
+        selectedShipment = shipment;
+        showEditModal = true;
+    }
+
+    private async Task HandleEditSubmit(Shipment updatedShipment)
+    {
+        await shipmentService.UpdateShipmentAsync(updatedShipment);
+        await LoadData();
+        showEditModal = false;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedShipment = new Shipment();
+    }
+
+    private void ShowDetailsModal(Shipment shipment)
+    {
+        selectedShipment = shipment;
+        showDetailsModal = true;
+    }
+
+    private void CloseDetailsModal()
+    {
+        showDetailsModal = false;
+        selectedShipment = new Shipment();
+    }
+
+    private async Task DeleteShipment(int shipmentId)
+    {
+        await shipmentService.DeleteShipmentAsync(shipmentId);
+        await LoadData();
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+    }
+}

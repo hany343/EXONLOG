@@ -28,8 +28,8 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="wwwroot\screenshots\" />
     <Folder Include="wwwroot\stream\" />
+    <Folder Include="wwwroot\screenshots\" />
   </ItemGroup>
 
   <ItemGroup>

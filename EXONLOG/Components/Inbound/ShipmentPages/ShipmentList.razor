@@ -1,0 +1,54 @@
+﻿@using EXONLOG.Model.Inbound
+@using Model.Stocks
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Material</th>
+                <th>Quantity</th>
+                <th>Supplier</th>
+                <th>Shipment Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var shipment in Shipments)
+            {
+                <tr>
+                    <td>@shipment.Material?.MaterialName</td>
+                    <td>@shipment.Quantity.ToString("N2")</td>
+                    <td>@shipment.Supplier?.SupplierName</td>
+                    <td>@shipment.CreateDate.ToString("dd MMM yyyy")</td>
+                    <td>@shipment.ShipmentStatus</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" @onclick="() => OnEdit.InvokeAsync(shipment)">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-info" @onclick="() => OnDetails.InvokeAsync(shipment)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => OnDelete.InvokeAsync(shipment.ShipmentID)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<Shipment> Shipments { get; set; }
+
+    [Parameter]
+    public EventCallback<Shipment> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnDelete { get; set; }
+
+    [Parameter]
+    public EventCallback<Shipment> OnDetails { get; set; }
+}

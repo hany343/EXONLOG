@@ -1,0 +1,37 @@
+﻿@using EXONLOG.Model.Inbound
+@using Model.Stocks
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">New Shipment</h5>
+        <EditForm Model="@NewShipment" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="row g-3">
+                <!-- Form fields go here (same as in the original code) -->
+            </div>
+
+            <div class="col-12">
+                <button type="submit" class="btn btn-success">Create Shipment</button>
+                <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<Shipment> OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private Shipment NewShipment = new();
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync(NewShipment);
+        NewShipment = new Shipment();
+    }
+}

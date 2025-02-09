@@ -19,7 +19,7 @@ public class FFmpegService : IDisposable
             // Overwrite the same file
             var processStartInfo = new ProcessStartInfo
             {
-                FileName = "ffmpeg",
+                FileName = @"c:\ffmpeg\bin\ffmpeg.exe",
                 Arguments = $"-y -rtsp_transport tcp -max_delay 500000 -i \"{rtspUrl}\" -vf \"fps=1\" -r 1 -frames:v 1 \"{outputPath}\"",
                 UseShellExecute = false,
                 CreateNoWindow = true,
