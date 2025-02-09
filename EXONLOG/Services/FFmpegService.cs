@@ -20,7 +20,7 @@ public class FFmpegService : IDisposable
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = @"c:\ffmpeg\bin\ffmpeg.exe",
-                Arguments = $"-y -rtsp_transport tcp -max_delay 500000 -i \"{rtspUrl}\" -vf \"fps=1\" -r 1 -frames:v 1 \"{outputPath}\"",
+                Arguments = $"-y -rtsp_transport tcp  -i \"{rtspUrl}\" -vf \"fps=1\" -q:v 1  -r 10 -frames:v 1 \"{outputPath}\"",
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardError = true,
@@ -49,7 +49,7 @@ public class FFmpegService : IDisposable
                 }
             }
 
-            await Task.Delay(100, cancellationToken);
+            await Task.Delay(10, cancellationToken);
         }
     }
 

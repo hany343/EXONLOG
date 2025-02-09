@@ -12,12 +12,8 @@ namespace EXONLOG.Model.Inbound
         [Key]
         public int InladID { get; set; }
 
-        //// Unique lading reference with validation
-        //[Required(ErrorMessage = "Lading reference is required")]
-        //[MaxLength(100, ErrorMessage = "Lading reference cannot exceed 100 characters")]
-        //[Column(TypeName = "nvarchar(100)")]
-        //[Index(IsUnique = true)] // Ensure unique reference
-        //public string LadingRef { get; set; } = string.Empty;
+        [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
+        public double Quantity { get; set; } // Total quantity in the shipment
 
         // Foreign keys with explicit relationships
         [Required(ErrorMessage = "Batch is required")]
@@ -32,37 +28,43 @@ namespace EXONLOG.Model.Inbound
         [ForeignKey("Driver")]
         public int DriverID { get; set; }
 
-        // Weight validations
-        [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
-        public double FirstWeight { get; set; } = 0;
-
-        [Range(0.00, double.MaxValue, ErrorMessage = "Second weight must be positive")]
-        public double SecondWeight { get; set; } = 0;
-
-        // Computed net weight (not stored in DB)
-        [NotMapped]
-        public double NetWeight => Math.Abs(SecondWeight - FirstWeight);
-
-        // Date validations
-        [Column(TypeName = "datetime2(0)")]
-        public DateTime? FirstWeighDate { get; set; }
-
-
-        [Column(TypeName = "datetime2(0)")]
-        public DateTime? SecondWeighDate { get; set; }
 
         // Enum-based status
         [Required]
         [Column(TypeName = "nvarchar(50)")]
         public WeightStatus WeightStatus { get; set; } = WeightStatus.Pending;
 
+        // Weight validations
+        [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
+        public double FirstWeight { get; set; } = 0;
+
+        [Column(TypeName = "nvarchar(150)")]
+        public string? FirstWeighStation { get; set; }
+
+        // Date validations
+        [Column(TypeName = "datetime2(0)")]
+        public DateTime? FirstWeighDate { get; set; }
+
         // Weigher relationships
         [ForeignKey("FirstWeigher")]
         public int? FirstWeigherID { get; set; }
 
 
+
+        [Column(TypeName = "datetime2(0)")]
+        public DateTime? SecondWeighDate { get; set; }
+
         [ForeignKey("SecondWeigher")]
         public int? SecondWeigherID { get; set; }
+
+        [Range(0.00, double.MaxValue, ErrorMessage = "Second weight must be positive")]
+        public double SecondWeight { get; set; } = 0;
+
+        [Column(TypeName = "nvarchar(150)")]
+        public string? SecondWeighStation { get; set; }
+        // Computed net weight (not stored in DB)
+        [NotMapped]
+        public double NetWeight => Math.Abs(SecondWeight - FirstWeight);
 
         // Additional fields
         [MaxLength(250, ErrorMessage = "Notes cannot exceed 250 characters")]

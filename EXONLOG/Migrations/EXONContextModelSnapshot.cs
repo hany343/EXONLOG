@@ -194,6 +194,9 @@ namespace EXONLOG.Migrations
                     b.Property<DateTime?>("FirstWeighDate")
                         .HasColumnType("datetime2(0)");
 
+                    b.Property<string>("FirstWeighStation")
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<int?>("FirstWeigherID")
                         .HasColumnType("int");
 
@@ -204,8 +207,14 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
                     b.Property<DateTime?>("SecondWeighDate")
                         .HasColumnType("datetime2(0)");
+
+                    b.Property<string>("SecondWeighStation")
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<int?>("SecondWeigherID")
                         .HasColumnType("int");

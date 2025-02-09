@@ -10,7 +10,9 @@ namespace EXONLOG.Model.Outbound
         [Key]
         public int LadingID { get; set; }
 
-       
+        [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
+        public double Quantity { get; set; } // Total quantity in the shipment
+
         public int TruckID { get; set; } // Foreign Key to Truck
 
         
@@ -39,9 +41,6 @@ namespace EXONLOG.Model.Outbound
         // Net Weight Information
         public double NetWeight { get; set; } // Net weight (auto-calculated)
         public double Shrink { get; set; } // Shrinkage between quantity and net weight (auto-calculated)
-
-        // Additional Fields
-        public double Quantity { get; set; } // Quantity of materials
 
         
         [Column(TypeName = "nvarchar(100)")]

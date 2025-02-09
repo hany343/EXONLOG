@@ -32,5 +32,26 @@ namespace EXONLOG.Services
             _context.InLadings.Add(inLading);
             await _context.SaveChangesAsync();
         }
+
+        // Get OutLading by ID
+        public async Task<InLading> GetInLadingByIdAsync(int id)
+        {
+            return await _context.InLadings
+                .Include(o => o.Truck)
+                .Include(o => o.Driver)
+                .Include(o => o.Batch)
+                .Include(o => o.FirstWeigher)
+                .Include(o => o.SecondWeigher)
+                .Include(o => o.User)
+                .Include(o => o.TransCompany)
+                .FirstOrDefaultAsync(o => o.InladID == id);
+        }
+
+        // Update an existing IntLading
+        public async Task UpdateIntLadingAsync(InLading inlading)
+        {
+            _context.InLadings.Update(inlading);
+            await _context.SaveChangesAsync();
+        }
     }
 }

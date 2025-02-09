@@ -5,6 +5,7 @@
 
 @implements IAsyncDisposable
 @inject HttpClient Http
+@inject InLadingService inLadingService
 <!-- Error Message -->
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -18,9 +19,9 @@
         Your browser does not support the Web Serial API. Please use Chrome, Edge, or Opera.
     </div>
 }
-<div class="d-flex flex-wrap gap-3 ">
+<div class="d-flex flex-wrap g-3 mw-100">
 
-    <div class="col-lg-10 d-flex">
+    <div class=" col-lg-8 d-flex  ">
         <!-- Live Weight Display -->
         <div class="weight-display col-lg-10">
             <div class="black-screen">
@@ -28,9 +29,9 @@
             </div>
         </div>
 
-        <div class="col-lg-3">
+        <div class="col-lg-2">
             <!-- Controls Section -->
-            <div class="controls-section d-flex gap-2 flex-column align-content-center justify-content-around">
+            <div class="controls-section d-flex gap-2 flex-column align-content-center justify-content-around ">
                 <button @onclick="InitializeScale"
                         class="btn btn-primary"
                         disabled="@isScaleInitialized">
@@ -44,12 +45,32 @@
                 </button>
             </div>
         </div>
-        
+
+    </div>
+    <div class="summary-box bg-light p-3  col-lg-4">
+        <div class="row flex-wrap">
+            <div class="col-md-3">
+                <strong>Material:</strong> @MaterialName
+            </div>
+            <div class="col-md-3">
+                <strong>Batch Quantity:</strong> @currentInLading.Quantity.ToString("N2") kg
+            </div>
+            <div class="col-md-3">
+                <strong>Truck:</strong> @currentInLading.Truck?.TruckNumber
+            </div>
+            <div class="col-md-3">
+                <strong>Lading ID:</strong> @currentInLading.InladID
+            </div>
+        </div>
     </div>
 
-   
+</div>
+
+
+<div class="d-flex flex-wrap g-3 mw-100 ">
+
     <!-- Camera Preview -->
-    <div class="camera-preview">
+    <div class="camera-preview col-lg-6">
         @if (showCamera)
         {
             <LiveStream></LiveStream>
@@ -59,9 +80,86 @@
             <div class="camera-placeholder">Camera Offline</div>
         }
     </div>
+    <div class="col-lg-6">
+        <!-- Weight Input Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <EditForm Model="@currentInLading" OnValidSubmit="HandleWeighSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="row g-3">
+                        @if (currentInLading.WeightStatus == WeightStatus.Pending ||
+                          currentInLading.WeightStatus == WeightStatus.FirstWeighCompleted)
+                        {
+                            <div class="col-md-6">
+                                <label class="form-label">First Weight (kg)</label>
+                                <InputNumber @bind-Value="@currentInLading.FirstWeight"
+                                             class="form-control"
+                                             min="0" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">First Weigh Date</label>
+                                <InputDate @bind-Value="@currentInLading.FirstWeighDate"
+                                           class="form-control" />
+                            </div>
+                        }
+
+                        @if (currentInLading.WeightStatus == WeightStatus.FirstWeighCompleted)
+                        {
+                            <div class="col-md-6">
+                                <label class="form-label">Second Weight (kg)</label>
+                                <InputNumber @bind-Value="@currentInLading.SecondWeight"
+                                             class="form-control"
+                                             min="0" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Second Weigh Date</label>
+                                <InputDate @bind-Value="@currentInLading.SecondWeighDate"
+                                           class="form-control" />
+                            </div>
+                        }
+
+                        @if (currentInLading.WeightStatus == WeightStatus.SecondWeighCompleted)
+                        {
+                            <div class="col-md-6">
+                                <strong>Net Weight:</strong>
+                                @currentInLading.NetWeight.ToString("N2") kg
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Shrinkage:</strong>
+                                @CalculateShrinkage().ToString("N2") kg
+                            </div>
+                        }
+
+                        <div class="col-md-6">
+                            <label class="form-label">Weigh Station</label>
+                            <InputSelect @bind-Value="@selectedWeighStation" class="form-control">
+                                <option value="">Select Weigh Station</option>
+                                @*@foreach (var station in weighStations)
+        {
+            <option value="@station.Id">@station.Name</option>
+        }*@
+                            </InputSelect>
+                        </div>
+
+                        <div class="col-12">
+                            <label>Comments</label>
+                            <textarea @bind="currentInLading.Notes" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary"
+                                    disabled="@(!isWeightStable && currentInLading.WeightStatus != WeightStatus.Verified)">
+                                @GetButtonText()
+                            </button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
 </div>
-
-
 <div class="form-group">
     <label>Weight Notes:</label>
     <textarea @bind="weightNotes" class="form-control" rows="3"></textarea>
@@ -80,10 +178,14 @@
 
 
 @code {
-
+    private InLading currentInLading { set; get; }=new();
+    //private List<WeighStation> weighStations = new();
+    private int selectedWeighStation;
     private decimal currentWeight;
     private bool isWeightStable;
+
     private string selectedLadingType = "Inbound";
+    private string MaterialName = "";
     private string weightNotes = string.Empty;
     private int timerCountdown = 5;
     private bool showCamera = true;
@@ -93,7 +195,73 @@
     private bool isScaleInitialized;
     private string errorMessage = string.Empty;
 
-  private async Task InitializeScale()
+    protected override async Task OnInitializedAsync()
+    {
+        currentInLading = await inLadingService.GetInLadingByIdAsync(3);
+        //weighStations = await InLadingService.GetWeighStations();
+        MaterialName = GetMaterialName();
+    }
+
+    private string GetMaterialName()
+    {
+        return currentInLading?.Batch?.Shipment?.Material?.MaterialName ?? "N/A";
+    }
+
+    private double CalculateShrinkage()
+    {
+        if (currentInLading?.Batch == null) return 0;
+        return currentInLading.Batch.Quantity - currentInLading.NetWeight;
+    }
+
+    private string GetButtonText()
+    {
+        return currentInLading.WeightStatus switch
+        {
+            WeightStatus.Pending => "Save First Weigh",
+            WeightStatus.FirstWeighCompleted => "Save Second Weigh",
+            _ => "Save Changes"
+        };
+    }
+
+    private async Task HandleWeighSubmit()
+    {
+        try
+        {
+            switch (currentInLading.WeightStatus)
+            {
+                case WeightStatus.Pending:
+                    currentInLading.FirstWeight = (double)currentWeight;
+                    currentInLading.FirstWeighDate = DateTime.UtcNow;
+                    currentInLading.WeightStatus = WeightStatus.FirstWeighCompleted;
+                    currentInLading.FirstWeigherID = await GetCurrentUserId();
+                    currentInLading.FirstWeighStation = "FirstWS";
+                    break;
+
+                case WeightStatus.FirstWeighCompleted:
+                    currentInLading.SecondWeight = (double)currentWeight;
+                    currentInLading.SecondWeighDate = DateTime.UtcNow;
+                    currentInLading.WeightStatus = WeightStatus.SecondWeighCompleted;
+                    currentInLading.SecondWeigherID = await GetCurrentUserId();
+                    currentInLading.SecondWeighStation = "SecondWS";
+                    break;
+            }
+
+            await inLadingService.UpdateIntLadingAsync(currentInLading);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error saving weight data: {ex.Message}";
+        }
+    }
+
+    private async Task<int> GetCurrentUserId()
+    {
+        // Implement user authentication logic
+        return 1; // Example user ID
+    }
+
+    private async Task InitializeScale()
     {
         try
         {

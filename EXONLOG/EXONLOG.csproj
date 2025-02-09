@@ -28,12 +28,12 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="wwwroot\stream\" />
     <Folder Include="wwwroot\screenshots\" />
+    <Folder Include="wwwroot\stream\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\ex nlog.mp4" />
+    <None Include="wwwroot\media\ex nlog.mp4" />
   </ItemGroup>
   
 </Project>
