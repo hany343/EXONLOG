@@ -1,0 +1,126 @@
+﻿@using Model.Inbound
+@inject BatchService batchService
+@inject TransCompanyService transCompanyService
+
+<div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@(Mode == "Create" ? "Create InLading" : "Edit InLading")</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@InLading" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Batch *</label>
+                            <InputSelect @bind-Value="@InLading.BatchID" class="form-control">
+                                <option value="">Select Batch</option>
+                                @foreach (var batch in batches)
+                                {
+                                    <option value="@batch.ID">@batch.BatchNumber</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => InLading.BatchID)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Trans Company *</label>
+                            <InputSelect @bind-Value="@InLading.TransCompanyID" class="form-control">
+                                <option value="">Select Trans Company</option>
+                                @foreach (var company in transCompanies)
+                                {
+                                    <option value="@company.TransCompanyID">@company.CompanyName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => InLading.TransCompanyID)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Driver *</label>
+                            <SearchDriver OnDriverSelected="HandleDriverSelected" />
+                            @if (selectedDriver != null)
+                            {
+                                <div class="selected-item">
+                                    Selected: @selectedDriver.DriverName (@selectedDriver.NationalID)
+                                </div>
+                            }
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Truck *</label>
+                            <SearchTruck OnTruckSelected="HandleTruckSelected" />
+                            @if (selectedTruck != null)
+                            {
+                                <div class="selected-item">
+                                    Selected: @selectedTruck.TruckNumber
+                                </div>
+                            }
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@InLading.Notes" />
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">Save</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public InLading InLading { get; set; } = new();
+
+    [Parameter]
+    public string Mode { get; set; } = "Create";
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private List<Batch> batches = new();
+    private List<TransCompany> transCompanies = new();
+    private Driver? selectedDriver;
+    private Truck? selectedTruck;
+
+    protected override async Task OnInitializedAsync()
+    {
+        batches = await batchService.GetBatchesAsync();
+        transCompanies = await transCompanyService.GetAllAsync();
+    }
+
+    private void HandleDriverSelected(Driver driver)
+    {
+        selectedDriver = driver;
+        InLading.DriverID = driver.DriverID;
+    }
+
+    private void HandleTruckSelected(Truck truck)
+    {
+        selectedTruck = truck;
+        InLading.TruckID = truck.TruckID;
+    }
+
+    private void CloseModal()
+    {
+        IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task HandleSubmit()
+    {
+        await OnSave.InvokeAsync();
+        CloseModal();
+    }
+}

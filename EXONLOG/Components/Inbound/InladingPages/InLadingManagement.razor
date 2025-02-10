@@ -1,0 +1,103 @@
+﻿@page "/InladingsManagement"
+@inject InLadingService inLadingService
+@inject BatchService batchService
+@inject TransCompanyService transCompanyService
+@using Model.Inbound
+
+<PageTitle>InLading Management</PageTitle>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>InLading Management</h3>
+        <button class="btn btn-primary" @onclick="ToggleAddForm">
+            @(showAddForm ? "Cancel" : "+ New InLading")
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search inladings..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
+
+    <!-- Add InLading Form -->
+    @if (showAddForm)
+    {
+        <CreateEditInLading @bind-IsOpen="showAddForm"
+                            InLading="newInLading"
+                            Mode="Create"
+                            OnSave="HandleSubmit"
+                            OnCancel="ToggleAddForm" />
+    }
+
+    <!-- InLadings Table -->
+    <InLadingList InLadings="filteredInLadings"
+                  OnDelete="DeleteInLading" />
+
+    <!-- Details Modal -->
+    @if (showDetailsModal)
+    {
+        <InLadingDetails @bind-IsOpen="showDetailsModal"
+                         InLading="detailsInLading"
+                         Mode="View" />
+    }
+</div>
+
+@code {
+    private List<InLading> inLadings = new();
+    private List<InLading> filteredInLadings = new();
+    private List<Batch> batches = new();
+    private List<TransCompany> transCompanies = new();
+    private string searchTerm = string.Empty;
+    private bool showAddForm;
+    private bool showDetailsModal;
+    private InLading newInLading = new();
+    private InLading detailsInLading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        inLadings = await inLadingService.GetAllInLadingsAsync(searchTerm);
+        batches = await batchService.GetBatchesAsync();
+        transCompanies = await transCompanyService.GetAllAsync();
+        FilterInLadings();
+    }
+
+    private void FilterInLadings()
+    {
+        filteredInLadings = inLadings
+            .Where(i => string.IsNullOrEmpty(searchTerm) ||
+                i.Batch.BatchNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private async Task HandleSubmit()
+    {
+        await inLadingService.CreateInLadingAsync(newInLading);
+        await LoadData();
+        showAddForm = false;
+        ResetForm();
+    }
+
+    private void ResetForm()
+    {
+        newInLading = new InLading();
+    }
+
+    private async Task DeleteInLading(int id)
+    {
+        //await inLadingService.DeleteInLadingAsync(id);
+        await LoadData();
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm) newInLading = new();
+    }
+}

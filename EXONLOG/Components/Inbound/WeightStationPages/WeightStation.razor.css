@@ -3,10 +3,16 @@
     background-color: #000;
     text-align:center;
     align-content:center;
-    margin: 10px 0;
+    margin: 5px 0;
     border-radius: 10px;
 }
-
+.summary-display {
+   
+    text-align: center;
+    align-content: center;
+    margin: 5px 0;
+    border-radius: 10px;
+}
 .black-screen {
     color: #0f0;
     font-size: 2em;

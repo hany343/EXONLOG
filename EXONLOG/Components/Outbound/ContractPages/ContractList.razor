@@ -1,0 +1,62 @@
+﻿@using EXONLOG.Model.Outbound
+
+<table class="table table-striped">
+    <thead class="bg-gradient">
+        <tr>
+            <th>ID</th>
+            <th>Contract Number</th>
+            <th>Customer</th>
+            <th>Material</th>
+            <th>Quantity</th>
+            <th>Start Date</th>
+            <th>Deadline</th>
+            <th>Create Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Contracts == null)
+        {
+            <tr>
+                <td colspan="9" class="text-center">Loading contracts...</td>
+            </tr>
+        }
+        else if (!Contracts.Any())
+        {
+            <tr>
+                <td colspan="9" class="text-center">No contracts found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var contract in Contracts)
+            {
+                <tr>
+                    <td>@contract.ContractID</td>
+                    <td>@contract.ContractNumber</td>
+                    <td>@contract.Customer?.CustomerName</td>
+                    <td>@contract.Material?.MaterialName</td>
+                    <td>@contract.Quantity</td>
+                    <td>@contract.StartDate?.ToShortDateString()</td>
+                    <td>@contract.Deadline?.ToShortDateString()</td>
+                    <td>@contract.CreateDate.ToShortDateString()</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-2" @onclick="() => OnEdit.InvokeAsync(contract)">Edit</button>
+                        <button class="btn btn-sm btn-info" @onclick="() => OnDetails.InvokeAsync(contract)">Details</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public List<Contract> Contracts { get; set; }
+
+    [Parameter]
+    public EventCallback<Contract> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<Contract> OnDetails { get; set; }
+}

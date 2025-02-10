@@ -1,0 +1,39 @@
+﻿@using Model.Inbound
+
+<div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">InLading Details</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Batch:</strong> @InLading.Batch?.BatchNumber</p>
+                        <p><strong>Trans Company:</strong> @InLading.TransCompany?.CompanyName</p>
+                        <p><strong>Driver:</strong> @InLading.Driver?.DriverName</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Truck:</strong> @InLading.Truck?.TruckNumber</p>
+                        <p><strong>Created Date:</strong> @InLading.CreateDate.ToString("dd MMM yyyy")</p>
+                        <p><strong>Notes:</strong> @InLading.Notes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public InLading InLading { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private void CloseModal()
+    {
+        IsOpenChanged.InvokeAsync(false);
+    }
+}

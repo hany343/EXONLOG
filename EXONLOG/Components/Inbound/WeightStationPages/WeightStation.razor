@@ -19,7 +19,7 @@
         Your browser does not support the Web Serial API. Please use Chrome, Edge, or Opera.
     </div>
 }
-<div class="d-flex flex-wrap g-3 mw-100">
+<div class="d-flex flex-wrap  mw-100">
 
     <div class=" col-lg-7 d-flex  ">
         <!-- Live Weight Display -->
@@ -47,21 +47,20 @@
         </div>
 
     </div>
-    <div class="summary-box bg-light p-3  col-lg-5">
-        <div class="d-flex flex-wrap">
-            <div class="col-md-4 p-3" >
+    <div class="summary-box bg-light  ">
+        <div class="d-flex flex-wrap justify-content-between col-lg-5 summary-display">
+            <div class="col-md-4 p-4" >
                 <span class="barcode m-auto">@currentInLading.InladID</span>
             </div>
-            <div class="col-md-8 flex-column">
+            <div class="col-md-8 d-flex gap-2 justify-content-between " style="font-size:14px">
 
-                <div class="">
-                    <strong>Material:</strong> @MaterialName
+                <div class="d-flex flex-column gap-2 ">
+                    <div> <strong>Material:</strong> @MaterialName</div>
+                    <div><strong> Quantity:</strong> @currentInLading.Quantity.ToString("N2") Ton</div>
                 </div>
-                <div class="">
-                    <strong>Batch Quantity:</strong> @currentInLading.Quantity.ToString("N2") Ton
-                </div>
-                <div class="">
-                    <strong>Truck:</strong> @currentInLading.Truck?.TruckNumber
+                <div class="d-flex flex-column gap-2 ">
+                    <div><strong>Truck:</strong> @currentInLading.Truck?.TruckNumber</div>
+                    <div><strong>Driver:</strong> @currentInLading.Driver?.DriverName</div>
                 </div>
             </div>
 
