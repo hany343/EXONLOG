@@ -10,8 +10,8 @@
     <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>InLading Management</h3>
-        <button class="btn btn-primary" @onclick="ToggleAddForm">
-            @(showAddForm ? "Cancel" : "+ New InLading")
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            + New InLading
         </button>
     </div>
 
@@ -21,39 +21,39 @@
                @bind="searchTerm" @bind:event="oninput" />
     </div>
 
-    <!-- Add InLading Form -->
-    @if (showAddForm)
+    <!-- Create Modal -->
+    @if (showCreateModal)
     {
-        <CreateEditInLading @bind-IsOpen="showAddForm"
-                            InLading="newInLading"
-                            Mode="Create"
-                            OnSave="HandleSubmit"
-                            OnCancel="ToggleAddForm" />
+        <CreateInLading IsOpen="showCreateModal"
+                        
+                        OnSave="HandleCreateSubmit"
+                        OnCancel="CloseCreateModal" /> <!-- Bind OnCancel here -->
+    }
+
+    <!-- Edit Modal -->
+    @if (showEditModal)
+    {
+        <EditInLading InLading="selectedInLading"
+                      @bind-IsOpen="showEditModal"
+                      OnSave="HandleEditSubmit"
+                      OnCancel="CloseEditModal" />
     }
 
     <!-- InLadings Table -->
     <InLadingList InLadings="filteredInLadings"
+                  OnEdit="OpenEditModal"
                   OnDelete="DeleteInLading" />
-
-    <!-- Details Modal -->
-    @if (showDetailsModal)
-    {
-        <InLadingDetails @bind-IsOpen="showDetailsModal"
-                         InLading="detailsInLading"
-                         Mode="View" />
-    }
 </div>
 
 @code {
     private List<InLading> inLadings = new();
     private List<InLading> filteredInLadings = new();
-    private List<Batch> batches = new();
-    private List<TransCompany> transCompanies = new();
     private string searchTerm = string.Empty;
-    private bool showAddForm;
+    private bool showCreateModal;
+    private bool showEditModal;
+    private InLading selectedInLading = new();
     private bool showDetailsModal;
-    private InLading newInLading = new();
-    private InLading detailsInLading;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -62,9 +62,7 @@
 
     private async Task LoadData()
     {
-        inLadings = await inLadingService.GetAllInLadingsAsync(searchTerm);
-        batches = await batchService.GetBatchesAsync();
-        transCompanies = await transCompanyService.GetAllAsync();
+        inLadings = await inLadingService.GetAllInLadingsAsync();
         FilterInLadings();
     }
 
@@ -76,28 +74,51 @@
             .ToList();
     }
 
-    private async Task HandleSubmit()
+    private void OpenCreateModal()
+    {
+        showCreateModal = true;
+    }
+
+    private async Task HandleCreateSubmit(InLading newInLading)
     {
         await inLadingService.CreateInLadingAsync(newInLading);
         await LoadData();
-        showAddForm = false;
-        ResetForm();
+        showCreateModal = false;
     }
 
-    private void ResetForm()
+    private void CloseCreateModal()
     {
-        newInLading = new InLading();
+        showCreateModal = false;
+    }
+
+    private void OpenEditModal(InLading inLading)
+    {
+        selectedInLading = inLading;
+        showEditModal = true;
+    }
+
+    private async Task HandleEditSubmit(InLading updatedInLading)
+    {
+        await inLadingService.UpdateInLadingAsync(updatedInLading);
+        await LoadData();
+        showEditModal = false;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedInLading = new InLading();
     }
 
     private async Task DeleteInLading(int id)
     {
-        //await inLadingService.DeleteInLadingAsync(id);
+        await inLadingService.DeleteInLadingAsync(id);
         await LoadData();
     }
-
-    private void ToggleAddForm()
+    // Add this method
+    private void OpenDetailsModal(InLading inLading)
     {
-        showAddForm = !showAddForm;
-        if (showAddForm) newInLading = new();
+        selectedInLading = inLading;
+        showDetailsModal = true;
     }
 }

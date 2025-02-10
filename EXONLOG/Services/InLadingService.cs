@@ -48,10 +48,39 @@ namespace EXONLOG.Services
         }
 
         // Update an existing IntLading
-        public async Task UpdateIntLadingAsync(InLading inlading)
+        public async Task UpdateInLadingAsync(InLading inlading)
         {
             _context.InLadings.Update(inlading);
             await _context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Deletes an InLading record by its ID.
+        /// </summary>
+        /// <param name="inLadingId">The ID of the InLading to delete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public async Task DeleteInLadingAsync(int inLadingId)
+        {
+            // Find the InLading record by ID
+            var inLading = await _context.InLadings
+                .FirstOrDefaultAsync(i => i.InladID == inLadingId);
+
+            if (inLading == null)
+            {
+                throw new KeyNotFoundException($"InLading with ID {inLadingId} not found.");
+            }
+
+            // Remove the InLading from the database
+            _context.InLadings.Remove(inLading);
+            await _context.SaveChangesAsync();
+        }
+        public async Task<List<InLading>> GetInladingsByBatchAsync(int batchId)
+        {
+            return await _context.InLadings
+                .Include(i => i.Batch)
+                .Where(i => i.BatchID == batchId)
+                .ToListAsync();
+        }
+
     }
 }

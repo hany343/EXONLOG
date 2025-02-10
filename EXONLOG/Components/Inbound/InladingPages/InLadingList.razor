@@ -5,9 +5,11 @@
         <thead class="table-dark">
             <tr>
                 <th>Lading ID</th>
+                <th>Quantity</th>
                 <th>Batch</th>
                 <th>Truck</th>
                 <th>Driver</th>
+                <th>Status</th>
                 <th>Created Date</th>
                 <th>Actions</th>
             </tr>
@@ -31,11 +33,24 @@
                 {
                     <tr>
                         <td>@inLading.InladID</td>
+                        <td>@inLading.Quantity</td>
                         <td>@inLading.Batch?.BatchNumber</td>
                         <td>@inLading.Truck?.TruckNumber</td>
                         <td>@inLading.Driver?.DriverName</td>
+                        <td>@inLading.WeightStatus</td>
                         <td>@inLading.CreateDate.ToString("dd MMM yyyy")</td>
                         <td>
+                            <!-- Edit Button -->
+                            <button class="btn btn-sm btn-warning me-2" @onclick="() => OnEdit.InvokeAsync(inLading)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+
+                            <!-- View Details Button -->
+                            <button class="btn btn-sm btn-info me-2" @onclick="() => OnDetails.InvokeAsync(inLading)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+
+                            <!-- Delete Button -->
                             <button class="btn btn-sm btn-danger" @onclick="() => OnDelete.InvokeAsync(inLading.InladID)">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -50,6 +65,12 @@
 @code {
     [Parameter]
     public List<InLading> InLadings { get; set; }
+
+    [Parameter]
+    public EventCallback<InLading> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<InLading> OnDetails { get; set; } // Add this
 
     [Parameter]
     public EventCallback<int> OnDelete { get; set; }

@@ -12,8 +12,9 @@ namespace EXONLOG.Model.Inbound
         [Key]
         public int InladID { get; set; }
 
+        [Required]
         [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
-        public double Quantity { get; set; } // Total quantity in the shipment
+        public double Quantity { get; set; } 
 
         // Foreign keys with explicit relationships
         [Required(ErrorMessage = "Batch is required")]

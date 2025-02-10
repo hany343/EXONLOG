@@ -10,9 +10,10 @@ namespace EXONLOG.Model.Outbound
         [Key]
         public int LadingID { get; set; }
 
-        [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
-        public double Quantity { get; set; } // Total quantity in the shipment
 
+        [Required]
+        [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
+        public double Quantity { get; set; }
         public int TruckID { get; set; } // Foreign Key to Truck
 
         

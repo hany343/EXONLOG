@@ -1,12 +1,14 @@
 ﻿@using Model.Inbound
 @inject BatchService batchService
 @inject TransCompanyService transCompanyService
+@inject DriverService driverService
+@inject TruckService truckService
 
 <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">@(Mode == "Create" ? "Create InLading" : "Edit InLading")</h5>
+                <h5 class="modal-title">Edit InLading</h5>
                 <button type="button" class="btn-close" @onclick="CloseModal"></button>
             </div>
             <div class="modal-body">
@@ -15,6 +17,7 @@
                     <ValidationSummary class="text-danger" />
 
                     <div class="row g-3">
+                        <!-- Batch Selection -->
                         <div class="col-md-6">
                             <label class="form-label">Batch *</label>
                             <InputSelect @bind-Value="@InLading.BatchID" class="form-control">
@@ -27,6 +30,7 @@
                             <ValidationMessage For="@(() => InLading.BatchID)" />
                         </div>
 
+                        <!-- Trans Company Selection -->
                         <div class="col-md-6">
                             <label class="form-label">Trans Company *</label>
                             <InputSelect @bind-Value="@InLading.TransCompanyID" class="form-control">
@@ -39,35 +43,39 @@
                             <ValidationMessage For="@(() => InLading.TransCompanyID)" />
                         </div>
 
+                        <!-- Driver Selection -->
                         <div class="col-md-6">
                             <label class="form-label">Driver *</label>
-                            <SearchDriver OnDriverSelected="HandleDriverSelected" />
-                            @if (selectedDriver != null)
+                            @if (currentDriver != null)
                             {
-                                <div class="selected-item">
-                                    Selected: @selectedDriver.DriverName (@selectedDriver.NationalID)
+                                <div class="selected-item mb-2">
+                                    Current: @currentDriver.DriverName (@currentDriver.NationalID)
                                 </div>
                             }
+                            <SearchDriver OnDriverSelected="HandleDriverSelected" />
                         </div>
 
+                        <!-- Truck Selection -->
                         <div class="col-md-6">
                             <label class="form-label">Truck *</label>
-                            <SearchTruck OnTruckSelected="HandleTruckSelected" />
-                            @if (selectedTruck != null)
+                            @if (currentTruck != null)
                             {
-                                <div class="selected-item">
-                                    Selected: @selectedTruck.TruckNumber
+                                <div class="selected-item mb-2">
+                                    Current: @currentTruck.TruckNumber
                                 </div>
                             }
+                            <SearchTruck OnTruckSelected="HandleTruckSelected" />
                         </div>
 
+                        <!-- Notes -->
                         <div class="col-12">
                             <label class="form-label">Notes</label>
                             <InputTextArea class="form-control" @bind-Value="@InLading.Notes" />
                         </div>
 
+                        <!-- Buttons -->
                         <div class="col-12">
-                            <button type="submit" class="btn btn-success">Save</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
                             <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
                         </div>
                     </div>
@@ -82,45 +90,52 @@
     public InLading InLading { get; set; } = new();
 
     [Parameter]
-    public string Mode { get; set; } = "Create";
-
-    [Parameter]
-    public EventCallback OnSave { get; set; }
-
-    [Parameter]
     public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<InLading> OnSave { get; set; }
 
     private List<Batch> batches = new();
     private List<TransCompany> transCompanies = new();
-    private Driver? selectedDriver;
-    private Truck? selectedTruck;
+    private Driver? currentDriver;
+    private Truck? currentTruck;
 
     protected override async Task OnInitializedAsync()
     {
         batches = await batchService.GetBatchesAsync();
         transCompanies = await transCompanyService.GetAllAsync();
+
+        // Load current driver/truck data
+        if (InLading.DriverID > 0)
+        {
+            currentDriver = await driverService.GetDriverByIdAsync(InLading.DriverID);
+        }
+        if (InLading.TruckID > 0)
+        {
+            currentTruck = await truckService.GetTruckByIdAsync(InLading.TruckID);
+        }
     }
 
     private void HandleDriverSelected(Driver driver)
     {
-        selectedDriver = driver;
+        currentDriver = driver;
         InLading.DriverID = driver.DriverID;
     }
 
     private void HandleTruckSelected(Truck truck)
     {
-        selectedTruck = truck;
+        currentTruck = truck;
         InLading.TruckID = truck.TruckID;
+    }
+
+    private async Task HandleSubmit()
+    {
+        await OnSave.InvokeAsync(InLading);
+        CloseModal();
     }
 
     private void CloseModal()
     {
         IsOpenChanged.InvokeAsync(false);
-    }
-
-    private async Task HandleSubmit()
-    {
-        await OnSave.InvokeAsync();
-        CloseModal();
     }
 }

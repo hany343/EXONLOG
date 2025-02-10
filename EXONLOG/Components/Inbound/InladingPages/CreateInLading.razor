@@ -1,0 +1,231 @@
+﻿@using Model.Inbound
+@inject BatchService batchService
+@inject TransCompanyService transCompanyService
+@inject InLadingService inLadingService
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New InLading</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@NewInLading" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+                        <!-- Batch Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Batch *</label>
+                            <select class="form-control" @onchange="async e => await LoadBatchAvailableQuantity(e)">
+                                <option value="">Select Batch</option>
+                                @foreach (var batch in batches)
+                                {
+                                    <option value="@batch.ID">@batch.BatchNumber</option>
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => NewInLading.BatchID)" />
+                        </div>
+
+                        <!-- Available Quantity Display -->
+                        <div class="col-md-6">
+                            <label class="form-label">Available Quantity</label>
+                            <input class="form-control"
+                                   value="@availableQuantity.ToString("N2")"
+                                   disabled />
+                        </div>
+
+                        <!-- Quantity Input -->
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <input type="number" class="form-control" @bind="NewInLading.Quantity"
+                                         min="0"
+                                         @oninput="CheckQuantity" />
+                            <ValidationMessage For="@(() => NewInLading.Quantity)" />
+                            @if (quantityError)
+                            {
+                                <div class="text-danger mt-1">
+                                    Quantity exceeds available stock! Available: @availableQuantity.ToString("N2")
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Trans Company Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Trans Company *</label>
+                            <InputSelect @bind-Value="@NewInLading.TransCompanyID" class="form-control">
+                                <option value="">Select Trans Company</option>
+                                @foreach (var company in transCompanies)
+                                {
+                                    <option value="@company.TransCompanyID">@company.CompanyName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => NewInLading.TransCompanyID)" />
+                        </div>
+
+                        <!-- Driver Search -->
+                        <div class="col-md-6">
+                            <label class="form-label">Driver *</label>
+                            <SearchDriver OnDriverSelected="HandleDriverSelected" />
+                            @if (selectedDriver != null)
+                            {
+                                <div class="selected-item">
+                                    Selected: @selectedDriver.DriverName (@selectedDriver.NationalID)
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Truck Search -->
+                        <div class="col-md-6">
+                            <label class="form-label">Truck *</label>
+                            <SearchTruck OnTruckSelected="HandleTruckSelected" />
+                            @if (selectedTruck != null)
+                            {
+                                <div class="selected-item">
+                                    Selected: @selectedTruck.TruckNumber
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@NewInLading.Notes" />
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">Create</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<InLading> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private InLading NewInLading { get; set; } = new();
+    private List<Batch> batches = new();
+    private List<TransCompany> transCompanies = new();
+    private Driver? selectedDriver;
+    private Truck? selectedTruck;
+    private double availableQuantity;
+    private bool quantityError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        batches = await batchService.GetBatchesAsync();
+        transCompanies = await transCompanyService.GetAllAsync();
+    }
+
+    private async Task LoadBatchAvailableQuantity(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int batchId))
+        {
+            // Get the selected batch
+            var batch = await batchService.GetBatchByIdAsync(batchId);
+
+            // Get all inladings for this batch
+            var inladings = await inLadingService.GetInladingsByBatchAsync(batchId);
+
+            // Calculate used quantity
+            var completedInladings = inladings.Where(i => i.SecondWeighDate != null);
+            var pendingInladings = inladings.Where(i => i.SecondWeighDate== null);
+
+            double usedQuantity =
+                completedInladings.Sum(i => i.NetWeight) +
+                pendingInladings.Sum(i => i.Quantity);
+
+            availableQuantity = batch.Quantity - usedQuantity;
+            NewInLading.BatchID = batchId;
+
+            //// Check initial quantity
+            //CheckQuantity();
+
+        }
+        else
+        {
+            availableQuantity = 0;
+        }
+        // Check if the quantity exceeds the available quantity
+        quantityError = NewInLading.Quantity > availableQuantity;
+    }
+
+    private void CheckQuantity(ChangeEventArgs e)
+    {
+        // Safely parse the input value
+        if (int.TryParse(e.Value?.ToString(), out int inputQuantity))
+        {
+            // Update the quantity in the model
+            NewInLading.Quantity = inputQuantity;
+
+            // Check if the quantity exceeds the available quantity
+            quantityError = NewInLading.Quantity > availableQuantity;
+
+            // Optional: Reset quantity if it exceeds available quantity
+            if (quantityError)
+            {
+                // Optionally, you can reset the quantity to the available quantity
+                // NewInLading.Quantity = (int)availableQuantity;
+            }
+        }
+        else
+        {
+            // Handle invalid input (e.g., non-numeric input)
+            NewInLading.Quantity = 0; // Reset to 0 or handle as needed
+            quantityError = true; // Set error flag
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        // Final validation before submission
+        if (quantityError)
+        {
+            return;
+        }
+
+        await OnSave.InvokeAsync(NewInLading);
+        CloseModal();
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
+        NewInLading = new InLading();
+        selectedDriver = null;
+        selectedTruck = null;
+        availableQuantity = 0;
+        quantityError = false;
+    }
+
+    private void HandleDriverSelected(Driver driver)
+    {
+        selectedDriver = driver;
+        NewInLading.DriverID = driver.DriverID;
+    }
+
+    private void HandleTruckSelected(Truck truck)
+    {
+        selectedTruck = truck;
+        NewInLading.TruckID = truck.TruckID;
+    }
+}
