@@ -113,3 +113,20 @@ h1:focus {
     background-color: #e9ecef;
     border-radius: 4px;
 }
+
+
+@font-face {
+    font-family: 'IDAutomationHC39M';
+    src: url('/fonts/IDAutomationHC39M.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.barcode {
+    font-family: "IDAutomationHC39M", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16pt;
+    margin: 15px 0;
+    text-align: center;
+}

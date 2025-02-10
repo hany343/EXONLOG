@@ -39,7 +39,7 @@ namespace EXONLOG.Services
             return await _context.InLadings
                 .Include(o => o.Truck)
                 .Include(o => o.Driver)
-                .Include(o => o.Batch)
+                .Include(o => o.Batch)?.ThenInclude(b=>b.Shipment)?.ThenInclude(s=>s.Material)
                 .Include(o => o.FirstWeigher)
                 .Include(o => o.SecondWeigher)
                 .Include(o => o.User)

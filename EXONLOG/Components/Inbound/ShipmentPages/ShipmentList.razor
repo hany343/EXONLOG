@@ -5,6 +5,7 @@
     <table class="table table-hover table-striped">
         <thead class="table-dark">
             <tr>
+                <th>Shipment Name</th>
                 <th>Material</th>
                 <th>Quantity</th>
                 <th>Supplier</th>
@@ -17,6 +18,7 @@
             @foreach (var shipment in Shipments)
             {
                 <tr>
+                    <td>@shipment.ShipmentName</td>
                     <td>@shipment.Material?.MaterialName</td>
                     <td>@shipment.Quantity.ToString("N2")</td>
                     <td>@shipment.Supplier?.SupplierName</td>

@@ -46,8 +46,8 @@
         public async Task<List<Driver>> SearchDriversAsync(string searchTerm)
         {
             var drivers = _dbContext.Drivers
-   .Where(d => EF.Functions.Like(d.DriverName, $"%{searchTerm}%") || EF.Functions.Like(d.NationalID, $"%{searchTerm}%")).Take(5)
-   .ToList();
+               .Where(d => EF.Functions.Like(d.DriverName, $"%{searchTerm}%") || EF.Functions.Like(d.NationalID, $"%{searchTerm}%")).Take(5)
+               .ToList();
             return drivers;
         }
         // Update an existing driver

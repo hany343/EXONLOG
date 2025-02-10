@@ -21,7 +21,7 @@
 }
 <div class="d-flex flex-wrap g-3 mw-100">
 
-    <div class=" col-lg-8 d-flex  ">
+    <div class=" col-lg-7 d-flex  ">
         <!-- Live Weight Display -->
         <div class="weight-display col-lg-10">
             <div class="black-screen">
@@ -35,32 +35,36 @@
                 <button @onclick="InitializeScale"
                         class="btn btn-primary"
                         disabled="@isScaleInitialized">
-                    Connect to Scale
+                    Connect
                 </button>
 
                 <button @onclick="ConfirmWeight"
                         class="btn btn-success"
                         disabled="@(!isWeightStable || !isScaleInitialized)">
-                    Confirm Weight
+                    Confirm
                 </button>
             </div>
         </div>
 
     </div>
-    <div class="summary-box bg-light p-3  col-lg-4">
-        <div class="row flex-wrap">
-            <div class="col-md-3">
-                <strong>Material:</strong> @MaterialName
+    <div class="summary-box bg-light p-3  col-lg-5">
+        <div class="d-flex flex-wrap">
+            <div class="col-md-4 p-3" >
+                <span class="barcode m-auto">@currentInLading.InladID</span>
             </div>
-            <div class="col-md-3">
-                <strong>Batch Quantity:</strong> @currentInLading.Quantity.ToString("N2") kg
+            <div class="col-md-8 flex-column">
+
+                <div class="">
+                    <strong>Material:</strong> @MaterialName
+                </div>
+                <div class="">
+                    <strong>Batch Quantity:</strong> @currentInLading.Quantity.ToString("N2") Ton
+                </div>
+                <div class="">
+                    <strong>Truck:</strong> @currentInLading.Truck?.TruckNumber
+                </div>
             </div>
-            <div class="col-md-3">
-                <strong>Truck:</strong> @currentInLading.Truck?.TruckNumber
-            </div>
-            <div class="col-md-3">
-                <strong>Lading ID:</strong> @currentInLading.InladID
-            </div>
+
         </div>
     </div>
 
@@ -70,17 +74,17 @@
 <div class="d-flex flex-wrap g-3 mw-100 ">
 
     <!-- Camera Preview -->
-    <div class="camera-preview col-lg-6">
+    <div class="camera-preview col-lg-6 p-3 rounded ">
         @if (showCamera)
         {
-            <LiveStream></LiveStream>
+            <LiveStream ></LiveStream>
         }
         else
         {
             <div class="camera-placeholder">Camera Offline</div>
         }
     </div>
-    <div class="col-lg-6">
+    <div class="col-lg-6 p-3">
         <!-- Weight Input Section -->
         <div class="card mb-4">
             <div class="card-body">
@@ -197,7 +201,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        currentInLading = await inLadingService.GetInLadingByIdAsync(3);
+        currentInLading = await inLadingService.GetInLadingByIdAsync(12500003);
         //weighStations = await InLadingService.GetWeighStations();
         MaterialName = GetMaterialName();
     }

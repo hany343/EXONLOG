@@ -7,6 +7,7 @@
 @using Model.Stocks
 
 
+
 <PageTitle>Shipment Management</PageTitle>
 
 <div class="container mt-4">
@@ -18,11 +19,7 @@
         </button>
     </div>
 
-    <!-- Search Bar -->
-    <div class="mb-4">
-        <input type="text" class="form-control" placeholder="Search shipments..."
-               @bind="searchTerm" @bind:event="oninput" />
-    </div>
+
 
     <!-- Add Shipment Form -->
     @if (showAddForm)
@@ -30,22 +27,28 @@
         <ShipmentCreate OnSubmit="HandleAddSubmit" OnCancel="ToggleAddForm" />
     }
 
+    <!-- Edit Modal -->
+    @if (showEditModal)
+    {
+        <ShipmentEdit Shipment="selectedShipment"
+                      materials="materials"
+                      suppliers="suppliers"
+                      ports="ports"
+                      OnSubmit="HandleEditSubmit"
+                      OnCancel="CloseEditModal" />
+    }
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search shipments..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
     <!-- Shipments Table -->
     <ShipmentList Shipments="filteredShipments"
                   OnEdit="ShowEditModal"
                   OnDelete="DeleteShipment"
                   OnDetails="ShowDetailsModal" />
 
-    <!-- Edit Modal -->
-    @if (showEditModal)
-    {
-       <ShipmentEdit Shipment="selectedShipment"
-                     materials="materials"
-                     suppliers="suppliers"
-                     ports="ports"
-                     OnSubmit="HandleEditSubmit"
-                     OnCancel="CloseEditModal" />
-    }
+
 
     <!-- Details Modal -->
     @if (showDetailsModal)
