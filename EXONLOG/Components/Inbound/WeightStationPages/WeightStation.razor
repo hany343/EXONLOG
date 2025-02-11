@@ -200,7 +200,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        currentInLading = await inLadingService.GetInLadingByIdAsync(12500003);
+        currentInLading =  inLadingService.GetInLadingByIdAsync(12500003);
         //weighStations = await InLadingService.GetWeighStations();
         MaterialName = GetMaterialName();
     }

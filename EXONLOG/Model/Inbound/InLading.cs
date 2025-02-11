@@ -10,6 +10,7 @@ namespace EXONLOG.Model.Inbound
     public class InLading
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int InladID { get; set; }
 
         [Required]
@@ -63,8 +64,8 @@ namespace EXONLOG.Model.Inbound
 
         [Column(TypeName = "nvarchar(150)")]
         public string? SecondWeighStation { get; set; }
-        // Computed net weight (not stored in DB)
-        [NotMapped]
+
+        // Calculated fields
         public double NetWeight => Math.Abs(SecondWeight - FirstWeight);
 
         // Additional fields

@@ -176,7 +176,8 @@ namespace EXONLOG.Migrations
                 {
                     b.Property<int>("InladID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:Identity", "12500000, 1");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InladID"));
 
@@ -572,7 +573,8 @@ namespace EXONLOG.Migrations
                 {
                     b.Property<int>("LadingID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:Identity", "22500000, 1");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LadingID"));
 

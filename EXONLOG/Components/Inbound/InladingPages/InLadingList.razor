@@ -7,6 +7,7 @@
                 <th>Lading ID</th>
                 <th>Quantity</th>
                 <th>Batch</th>
+                <th>Material</th>
                 <th>Truck</th>
                 <th>Driver</th>
                 <th>Status</th>
@@ -35,6 +36,7 @@
                         <td>@inLading.InladID</td>
                         <td>@inLading.Quantity</td>
                         <td>@inLading.Batch?.BatchNumber</td>
+                        <td>@inLading.Batch?.Shipment?.Material?.MaterialName</td>
                         <td>@inLading.Truck?.TruckNumber</td>
                         <td>@inLading.Driver?.DriverName</td>
                         <td>@inLading.WeightStatus</td>

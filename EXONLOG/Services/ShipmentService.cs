@@ -24,14 +24,17 @@ namespace EXONLOG.Services
         public async Task CreateShipmentAsync(Shipment shipment)
         {
             shipment.CreateDate = DateTime.UtcNow;
-           // shipment.ShipmentStatusId = "Pending";
+            shipment.UserID = 1;
+            // shipment.ShipmentStatusId = "Pending";
             _context.Shipments.Add(shipment);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateShipmentAsync(Shipment shipment)
         {
-            _context.Entry(shipment).State = EntityState.Modified;
+           
+            //_context.Entry(shipment).State = EntityState.Modified;
+            _context.Shipments.Update(shipment);
             await _context.SaveChangesAsync();
         }
 

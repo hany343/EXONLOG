@@ -56,10 +56,10 @@
     private List<InLading> inLadings = new();
     private List<InLading> filteredInLadings = new();
     private string searchTerm = string.Empty;
-    private bool showCreateModal;
-    private bool showEditModal;
+    private bool showCreateModal=false;
+    private bool showEditModal = false;
     private InLading selectedInLading = new();
-    private bool showDetailsModal;
+    private bool showDetailsModal =false;
 
 
     protected override async Task OnInitializedAsync()
@@ -125,8 +125,8 @@
     // Add this method
     private void OpenDetailsModal(InLading inLading)
     {
-        selectedInLading = inLading;
-        inLadingService.get
+        //selectedInLading = inLading;
+        selectedInLading=  inLadingService.GetInLadingByIdAsync(inLading.InladID);
         showDetailsModal = true;
     }
 }

@@ -271,6 +271,12 @@
 
             #region Outlading
 
+            modelBuilder.Entity<OutLading>(entity =>
+            {
+                entity.Property(e => e.LadingID)
+                      .ValueGeneratedOnAdd()
+                      .HasAnnotation("SqlServer:Identity", "22500000, 1");
+            });
             // First Weigher -> OutLading Relationship
             modelBuilder.Entity<OutLading>()
                 .HasOne(il => il.FirstWeigher)
@@ -383,7 +389,12 @@
                 .HasForeignKey(l => l.UserID)
                 .OnDelete(DeleteBehavior.Restrict);  // Handle delete behavior
 
-
+            modelBuilder.Entity<InLading>(entity =>
+            {
+                entity.Property(e => e.InladID)
+                      .ValueGeneratedOnAdd()
+                      .HasAnnotation("SqlServer:Identity", "12500000, 1");
+            });
             // First Weigher -> InLadings Relationship
             modelBuilder.Entity<InLading>()
                 .HasOne(il => il.FirstWeigher)

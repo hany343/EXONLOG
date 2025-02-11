@@ -16,7 +16,7 @@ namespace EXONLOG.Services
         public async Task<List<InLading>> GetAllInLadingsAsync(string searchTerm = "")
         {
             return await _context.InLadings
-                .Include(i => i.Batch)
+                .Include(i => i.Batch).ThenInclude(s=>s.Shipment).ThenInclude(m=>m.Material)
                 .Include(i => i.Truck)
                 .Include(i => i.Driver)
                 .Include(i => i.TransCompany)
@@ -34,9 +34,9 @@ namespace EXONLOG.Services
         }
 
         // Get OutLading by ID
-        public async Task<InLading> GetInLadingByIdAsync(int id)
+        public  InLading GetInLadingByIdAsync(int id)
         {
-            return await _context.InLadings
+            return  _context.InLadings
                 .Include(o => o.Truck)
                 .Include(o => o.Driver)
                 .Include(o => o.Batch)?.ThenInclude(b=>b.Shipment)?.ThenInclude(s=>s.Material)
@@ -44,7 +44,7 @@ namespace EXONLOG.Services
                 .Include(o => o.SecondWeigher)
                 .Include(o => o.User)
                 .Include(o => o.TransCompany)
-                .FirstOrDefaultAsync(o => o.InladID == id);
+                .FirstOrDefault(o => o.InladID == id);
         }
 
         // Update an existing IntLading

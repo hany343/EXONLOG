@@ -33,7 +33,6 @@ namespace EXONLOG.Model.Inbound
         public int UserID { get; set; } // Foreign key to the user who registered the shipment
 
         // Navigation Properties
-        //public int ShipmentStatusId { get; set; }
         public string? ShipmentStatus { get; set; }= Status.Pending.ToString(); // Status of the shipment
         public Material? Material { get; set; } // Related Material
         public Port? Port { get; set; } // Related Port
