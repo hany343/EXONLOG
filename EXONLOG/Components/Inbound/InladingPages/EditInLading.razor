@@ -4,7 +4,7 @@
 @inject DriverService driverService
 @inject TruckService truckService
 
-<div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -90,10 +90,16 @@
     public InLading InLading { get; set; } = new();
 
     [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
     public EventCallback<bool> IsOpenChanged { get; set; }
 
     [Parameter]
     public EventCallback<InLading> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
 
     private List<Batch> batches = new();
     private List<TransCompany> transCompanies = new();
@@ -136,6 +142,8 @@
 
     private void CloseModal()
     {
+        IsOpen = false;
         IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
     }
 }

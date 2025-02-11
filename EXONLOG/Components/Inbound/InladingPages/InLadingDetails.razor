@@ -1,23 +1,36 @@
 ﻿@using Model.Inbound
 
-<div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">InLading Details</h5>
+                <h5 class="modal-title text-primary">InLading Details</h5>
+               
                 <button type="button" class="btn-close" @onclick="CloseModal"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
+                    <div class="col-md-12 d-flex gap-5">
+                        <p><span class="barcode">@InLading.InladID</span> </p>
+                        <p><strong>Created Date:</strong> @InLading.CreateDate.ToString("dd MMM yyyy")</p>
+                    </div>
                     <div class="col-md-6">
-                        <p><strong>Batch:</strong> @InLading.Batch?.BatchNumber</p>
-                        <p><strong>Trans Company:</strong> @InLading.TransCompany?.CompanyName</p>
+                        
+                        <p><strong>Quantity:</strong> @InLading.Quantity.ToString("N2") Tons</p>
+                        <p><strong>Truck:</strong> @InLading.Truck?.TruckNumber</p>
                         <p><strong>Driver:</strong> @InLading.Driver?.DriverName</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Truck:</strong> @InLading.Truck?.TruckNumber</p>
-                        <p><strong>Created Date:</strong> @InLading.CreateDate.ToString("dd MMM yyyy")</p>
-                        <p><strong>Notes:</strong> @InLading.Notes</p>
+                        
+                        <p><strong>Material</strong> @InLading.Batch?.Shipment?.Material?.MaterialName</p>
+                        <p><strong>Batch:</strong> @InLading.Batch?.BatchNumber</p>
+
+                        <p><strong>Trans Company:</strong> @InLading.TransCompany?.CompanyName</p>
+
+
+                    </div>
+                    <div class="col-md-12">
+                        <p><strong>Notes:</strong><p class="border border-1 rounded border-secondary p-3" > @InLading.Notes notes are displayed here</p></p>
                     </div>
                 </div>
             </div>
@@ -30,10 +43,14 @@
     public InLading InLading { get; set; }
 
     [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
     public EventCallback<bool> IsOpenChanged { get; set; }
 
     private void CloseModal()
     {
+        IsOpen = false;
         IsOpenChanged.InvokeAsync(false);
     }
 }
