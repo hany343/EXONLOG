@@ -1,13 +1,17 @@
 ﻿using EXONLOG.Model.Account;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
 
 namespace EXONLOG.Model.Inbound
 {
+
     public class Batch
     {
         public int ID { get; set; } // Primary Key
 
         [Column(TypeName = "nvarchar(100)")]
+       
         public string BatchNumber { get; set; } = string.Empty; // Unique reference for the batch
 
         public int ShipmentID { get; set; } // Foreign key to the shipment

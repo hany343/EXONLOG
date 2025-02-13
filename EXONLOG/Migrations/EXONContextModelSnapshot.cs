@@ -124,6 +124,9 @@ namespace EXONLOG.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("BatchNumber")
+                        .IsUnique();
+
                     b.HasIndex("ShipmentID");
 
                     b.HasIndex("UserID");
@@ -352,6 +355,9 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("PortID");
 
+                    b.HasIndex("ShipmentName")
+                        .IsUnique();
+
                     b.HasIndex("ShipmentStatusId");
 
                     b.HasIndex("SupplierID");
@@ -429,6 +435,9 @@ namespace EXONLOG.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("SupplierName")
+                        .IsUnique();
+
                     b.HasIndex("UserID");
 
                     b.ToTable("Suppliers");
@@ -480,6 +489,9 @@ namespace EXONLOG.Migrations
 
                     b.HasKey("ContractID");
 
+                    b.HasIndex("ContractNumber")
+                        .IsUnique();
+
                     b.HasIndex("CustomerID");
 
                     b.HasIndex("MaterialID");
@@ -525,6 +537,9 @@ namespace EXONLOG.Migrations
 
                     b.HasKey("CustomerID");
 
+                    b.HasIndex("CustomerName")
+                        .IsUnique();
+
                     b.HasIndex("UserID");
 
                     b.ToTable("Customers");
@@ -563,6 +578,9 @@ namespace EXONLOG.Migrations
                     b.HasKey("OrderID");
 
                     b.HasIndex("ContractID");
+
+                    b.HasIndex("OrderNumber")
+                        .IsUnique();
 
                     b.HasIndex("UserID");
 
@@ -729,6 +747,9 @@ namespace EXONLOG.Migrations
 
                     b.HasKey("MaterialID");
 
+                    b.HasIndex("MaterialName")
+                        .IsUnique();
+
                     b.HasIndex("MaterialTypeId");
 
                     b.HasIndex("UserID");
@@ -811,6 +832,9 @@ namespace EXONLOG.Migrations
                     b.HasKey("StockID");
 
                     b.HasIndex("MaterialId");
+
+                    b.HasIndex("StockName")
+                        .IsUnique();
 
                     b.HasIndex("UserID");
 
@@ -897,6 +921,12 @@ namespace EXONLOG.Migrations
 
                     b.HasKey("DriverID");
 
+                    b.HasIndex("DriverName")
+                        .IsUnique();
+
+                    b.HasIndex("NationalID")
+                        .IsUnique();
+
                     b.HasIndex("UserID");
 
                     b.ToTable("Drivers");
@@ -936,6 +966,9 @@ namespace EXONLOG.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("TransCompanyID");
+
+                    b.HasIndex("CompanyName")
+                        .IsUnique();
 
                     b.HasIndex("UserID");
 

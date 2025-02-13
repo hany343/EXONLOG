@@ -218,6 +218,9 @@
              .HasForeignKey(m => m.MaterialId)
              .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Material>()
+                .HasIndex(c => c.MaterialName)
+                .IsUnique();
             //// Define computed columns using the HasComputedColumnSql method
             //modelBuilder.Entity<Material>()
             //    .Property(m => m.ReservedQuantity)
@@ -237,6 +240,9 @@
             .HasForeignKey(m => m.StockId)
             .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Stock>()
+               .HasIndex(c => c.StockName)
+               .IsUnique();
             #endregion  Stocks & Materials
 
             #region Outbound
@@ -248,6 +254,9 @@
                 .HasForeignKey(c => c.CustomerID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Customer>()
+               .HasIndex(c => c.CustomerName)
+               .IsUnique();
             // Contract-Order relationship: One Contract can have many Orders
             modelBuilder.Entity<Contract>()
                 .HasMany(c => c.Orders)
@@ -255,6 +264,9 @@
                 .HasForeignKey(o => o.ContractID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Contract>()
+               .HasIndex(c => c.ContractNumber)
+               .IsUnique();
             // Contract-Order relationship: One Contract can have many Orders
             modelBuilder.Entity<Contract>()
                 .HasOne(m => m.Material)
@@ -269,6 +281,9 @@
                 .HasForeignKey(ol => ol.OrderID) // Foreign key in OutLading referring to Order
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of Order if OutLading exists
 
+            modelBuilder.Entity<Order>()
+               .HasIndex(c => c.OrderNumber)
+               .IsUnique();
             #region Outlading
 
             modelBuilder.Entity<OutLading>(entity =>
@@ -349,6 +364,9 @@
                  .WithOne(i => i.Supplier)
                  .HasForeignKey(i => i.SupplierID)
                  .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a supplier with related shipments
+            modelBuilder.Entity<Supplier>()
+               .HasIndex(c => c.SupplierName)
+               .IsUnique();
 
             // Shipment -> Batches Relationship
             modelBuilder.Entity<Shipment>()
@@ -356,6 +374,9 @@
                 .WithOne(b => b.Shipment)
                 .HasForeignKey(b => b.ShipmentID)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting shipment with batches
+            modelBuilder.Entity<Shipment>()
+               .HasIndex(c => c.ShipmentName)
+               .IsUnique();
 
             modelBuilder.Entity<Shipment>()
                 .HasOne(l => l.Material)  // First weigher as a user
@@ -381,7 +402,9 @@
                 .WithOne(il => il.Batch)
                 .HasForeignKey(il => il.BatchID)
                 .OnDelete(DeleteBehavior.Restrict);
-
+            modelBuilder.Entity<Batch>()
+               .HasIndex(c => c.BatchNumber)
+               .IsUnique();
 
             modelBuilder.Entity<InLading>()
                 .HasOne(l => l.User)  // First weigher as a user
@@ -438,6 +461,18 @@
               .HasIndex(t => new { t.TruckNumber, t.TrailerNumber })
               .IsUnique()
               .HasDatabaseName("IX_Truck_TruckNumber_TrailerNumber"); // Optional: Name the index
+
+            modelBuilder.Entity<Driver>()
+                 .HasIndex(d => d.DriverName)
+                 .IsUnique();
+
+            modelBuilder.Entity<Driver>()
+                .HasIndex(d => d.NationalID)
+                .IsUnique();
+
+            modelBuilder.Entity<TransCompany>()
+                .HasIndex(d => d.CompanyName)
+                .IsUnique();
 
             #endregion
 
