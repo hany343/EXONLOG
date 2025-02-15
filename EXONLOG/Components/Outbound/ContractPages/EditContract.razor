@@ -1,0 +1,118 @@
+﻿@using Model.Stocks
+@inject MaterialService materialService
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Contract</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@Contract" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+                        <!-- Contract Number -->
+                        <div class="col-md-6">
+                            <label class="form-label">Contract Number *</label>
+                            <InputText class="form-control" @bind-Value="@Contract.ContractNumber" />
+                            <ValidationMessage For="@(() => Contract.ContractNumber)" />
+                        </div>
+
+                        <!-- Material Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Material *</label>
+                            <InputSelect @bind-Value="@Contract.MaterialID" class="form-control" @onchange="CheckMaterialStock">
+                                <option value="">Select Material</option>
+                                @foreach (var material in materials)
+                                {
+                                    <option value="@material.MaterialID">@material.MaterialName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Contract.MaterialID)" />
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <InputNumber class="form-control" @bind-Value="@Contract.Quantity" />
+                            <ValidationMessage For="@(() => Contract.Quantity)" />
+                            @if (quantityError)
+                            {
+                                <div class="text-danger mt-1">
+                                    Quantity exceeds available stock! Available: @availableQuantity.ToString("N2")
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@Contract.Notes" />
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Contract Contract { get; set; } = new();
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<Contract> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private List<Material> materials = new();
+    private double availableQuantity;
+    private bool quantityError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        materials = await materialService.GetMaterialsAsync();
+        await CheckMaterialStock();
+    }
+
+    private async Task CheckMaterialStock()
+    {
+        var material = await materialService.GetMaterialDetailsAsync(Contract.MaterialID);
+        availableQuantity = material.FreeQuantityInStock;
+        quantityError = Contract.Quantity > availableQuantity;
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (quantityError)
+        {
+            return;
+        }
+
+        await OnSave.InvokeAsync(Contract);
+        CloseModal();
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
+    }
+}

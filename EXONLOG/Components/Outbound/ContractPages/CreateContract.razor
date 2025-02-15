@@ -1,0 +1,162 @@
+﻿@using Model.Outbound
+@inject MaterialService materialService
+@inject IToastService toastService
+@using Model.Stocks
+@using EXONLOG.Components.Outbound.CustomerPages
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Contract</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@NewContract" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+                        <!-- Contract Number -->
+                        <div class="col-md-6">
+                            <label class="form-label">Contract Number *</label>
+                            <InputText class="form-control" @bind-Value="@NewContract.ContractNumber" />
+                            <ValidationMessage For="@(() => NewContract.ContractNumber)" />
+                        </div>
+
+                        <!-- Customer Search -->
+                        <div class="col-md-6">
+                            <label class="form-label">Customer *</label>
+                            <SearchCustomer OnCustomerSelected="HandleCustomerSelected" />
+                            <ValidationMessage For="@(() => NewContract.CustomerID)" />
+                        </div>
+
+                        <!-- Material Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Material *</label>
+                            <InputSelect @bind-Value="@NewContract.MaterialID" class="form-control" @onchange="CheckMaterialStock">
+                                <option value="">Select Material</option>
+                                @foreach (var material in materials)
+                                {
+                                    <option value="@material.MaterialID">@material.MaterialName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => NewContract.MaterialID)" />
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <InputNumber class="form-control" @bind-Value="@NewContract.Quantity" />
+                            <ValidationMessage For="@(() => NewContract.Quantity)" />
+                            @if (quantityError)
+                            {
+                                <div class="text-danger mt-1">
+                                    Quantity exceeds available stock! Available: @availableQuantity.ToString("N2")
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@NewContract.Notes" />
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">Create</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<Contract> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private Contract NewContract { get; set; } = new();
+    private List<Material> materials = new();
+    private double availableQuantity;
+    private bool quantityError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            materials = await materialService.GetMaterialsAsync();
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError("Failed to load materials. Please try again.");
+            Console.Error.WriteLine(ex.Message);
+        }
+    }
+
+    private void HandleCustomerSelected(Customer customer)
+    {
+        NewContract.CustomerID = customer.CustomerID;
+    }
+
+    private async Task CheckMaterialStock(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int materialId))
+        {
+            try
+            {
+                var material = await materialService.GetMaterialDetailsAsync(materialId);
+                availableQuantity = material.FreeQuantityInStock;
+                quantityError = NewContract.Quantity > availableQuantity;
+            }
+            catch (Exception ex)
+            {
+                toastService.ShowError("Failed to check material stock. Please try again.");
+                Console.Error.WriteLine(ex.Message);
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (quantityError)
+        {
+            toastService.ShowError("Quantity exceeds available stock.");
+            return;
+        }
+
+        try
+        {
+            await OnSave.InvokeAsync(NewContract);
+            toastService.ShowSuccess("Contract created successfully.");
+            CloseModal();
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError("Failed to create contract. Please try again.");
+            Console.Error.WriteLine(ex.Message);
+        }
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
+        NewContract = new Contract();
+        availableQuantity = 0;
+        quantityError = false;
+    }
+}

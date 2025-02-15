@@ -1,0 +1,105 @@
+﻿@using Model.Outbound
+@inject OutLadingService outLadingService
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary">Order Details</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 d-flex gap-5">
+                        <p><span class="barcode">@Order.OrderID</span> </p>
+                        <p><strong>Created Date:</strong> @Order.CreateDate.ToString("dd MMM yyyy")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Order Number:</strong> @Order.OrderNumber</p>
+                        <p><strong>Contract Number:</strong> @Order.Contract?.ContractNumber</p>
+                        <p><strong>Material:</strong> @Order.Contract?.Material?.MaterialName</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Quantity:</strong> @Order.Quantity.ToString("N2")</p>
+                        <p><strong>Delivered Quantity:</strong> @deliveredQuantity.ToString("N2")</p>
+                        <p><strong>Pending Quantity:</strong> @pendingQuantity.ToString("N2")</p>
+                    </div>
+                    <div class="col-md-12">
+                        <p><strong>Notes:</strong><p class="border border-1 rounded border-secondary p-3">@Order.Notes</p></p>
+                    </div>
+
+                    <!-- OutLadings Table -->
+                    <div class="col-md-12 mt-4">
+                        <h5 class="mb-3">OutLadings</h5>
+                        @if (outLadings == null)
+                        {
+                            <p>Loading outladings...</p>
+                        }
+                        else if (!outLadings.Any())
+                        {
+                            <p>No outladings found.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>OutLading ID</th>
+                                        <th>Net Weight</th>
+                                        <th>Status</th>
+                                        <th>Created Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var outLading in outLadings)
+                                    {
+                                        <tr>
+                                            <td>@outLading.OutLadingID</td>
+                                            <td>@outLading.NetWeight.ToString("N2")</td>
+                                            <td>@outLading.WeightStatus</td>
+                                            <td>@outLading.CreateDate.ToString("dd MMM yyyy")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Order Order { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private List<OutLading> outLadings = new();
+    private double deliveredQuantity;
+    private double pendingQuantity;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Order != null)
+        {
+            // Fetch outladings for the order
+            outLadings = await outLadingService.GetOutLadingsByOrderIdAsync(Order.OrderID);
+
+            // Calculate delivered and pending quantities
+            deliveredQuantity = outLadings.Sum(ol => ol.NetWeight);
+            pendingQuantity = Order.Quantity - deliveredQuantity;
+        }
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+}

@@ -3,7 +3,9 @@
     using EXONLOG.Data;
     using EXONLOG.Model.Outbound;
     using EXONLOG.Model.Stocks;
+    using EXONLOG.Model.Trans;
     using Microsoft.EntityFrameworkCore;
+    using System.Text;
 
     public class CustomerService
     {
@@ -23,9 +25,21 @@
         {
             return await _context.Customers.FindAsync(id);
         }
-
+        public async Task<List<Customer>> SearchCustomersAsync(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return new List<Customer>(); // Return empty list if search term is null or empty
+            }
+            var customers = _context.Customers
+               .Where(d => EF.Functions.Like(d.CustomerName, $"%{searchTerm}%") ).Take(5)
+               .ToList();
+            return customers;
+        }
+        
         public async Task AddCustomerAsync(Customer customer)
         {
+            customer.UserID = 1;
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
         }

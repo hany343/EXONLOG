@@ -1,0 +1,62 @@
+﻿@using Model.Outbound
+@inject CustomerService customerService
+
+<div class="search-customer">
+    <!-- Search Input -->
+    <input type="text" class="form-control" placeholder="Search customers..."  @oninput="SearchCustomers" />
+
+    <!-- Search Results -->
+    @if (customers != null && customers.Any())
+    {
+        <div class="search-results">
+            @foreach (var customer in customers)
+            {
+                <div class="search-result-item" @onclick="() => SelectCustomer(customer)">
+                    @customer.CustomerName
+                </div>
+            }
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(searchTerm))
+    {
+        <div class="text-muted">No customers found.</div>
+    }
+
+    <!-- Selected Customer -->
+    @if (selectedCustomer != null)
+    {
+        <div class="selected-customer mt-2">
+            Selected: <strong>@selectedCustomer.CustomerName</strong>
+        </div>
+    }
+</div>
+
+@code {
+    private string searchTerm = string.Empty;
+    private List<Customer> customers = new();
+    private Customer selectedCustomer;
+
+    [Parameter]
+    public EventCallback<Customer> OnCustomerSelected { get; set; }
+
+    
+
+    private async Task SearchCustomers(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            customers = await customerService.SearchCustomersAsync(searchTerm);
+        }
+        else
+        {
+            customers.Clear();
+        }
+    }
+
+    private async Task SelectCustomer(Customer customer)
+    {
+        selectedCustomer = customer;
+        await OnCustomerSelected.InvokeAsync(customer);
+    }
+}

@@ -1,0 +1,102 @@
+﻿@using Model.Outbound
+@inject ContractService contractService
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Order</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@NewOrder" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+                        <!-- Contract Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Contract *</label>
+                            <InputSelect @bind-Value="@NewOrder.ContractID" class="form-control">
+                                <option value="">Select Contract</option>
+                                @foreach (var contract in contracts)
+                                {
+                                    <option value="@contract.ContractID">@contract.ContractNumber</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => NewOrder.ContractID)" />
+                        </div>
+
+                        <!-- Order Number -->
+                        <div class="col-md-6">
+                            <label class="form-label">Order Number *</label>
+                            <InputText class="form-control" @bind-Value="@NewOrder.OrderNumber" />
+                            <ValidationMessage For="@(() => NewOrder.OrderNumber)" />
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <InputNumber class="form-control" @bind-Value="@NewOrder.Quantity" />
+                            <ValidationMessage For="@(() => NewOrder.Quantity)" />
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@NewOrder.Notes" />
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">Create</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<Order> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private Order NewOrder { get; set; } = new();
+    private List<Contract> contracts = new();
+
+    private EditContext editContext;
+
+    protected override async Task OnInitializedAsync()
+    {
+        contracts = await contractService.GetAllContractsAsync();
+        editContext = new EditContext(NewOrder);
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (editContext.Validate())
+        {
+            await OnSave.InvokeAsync(NewOrder);
+            CloseModal();
+        }
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
+        NewOrder = new Order();
+    }
+}

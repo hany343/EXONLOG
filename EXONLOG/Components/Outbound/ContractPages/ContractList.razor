@@ -1,54 +1,64 @@
-﻿@using EXONLOG.Model.Outbound
+﻿@using Model.Outbound
 
-<table class="table table-striped">
-    <thead class="bg-gradient">
-        <tr>
-            <th>ID</th>
-            <th>Contract Number</th>
-            <th>Customer</th>
-            <th>Material</th>
-            <th>Quantity</th>
-            <th>Start Date</th>
-            <th>Deadline</th>
-            <th>Create Date</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Contracts == null)
-        {
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
             <tr>
-                <td colspan="9" class="text-center">Loading contracts...</td>
+                <th>Contract ID</th>
+                <th>Contract Number</th>
+                <th>Material</th>
+                <th>Quantity</th>
+                <th>Customer</th>
+                <th>Created Date</th>
+                <th>Actions</th>
             </tr>
-        }
-        else if (!Contracts.Any())
-        {
-            <tr>
-                <td colspan="9" class="text-center">No contracts found.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var contract in Contracts)
+        </thead>
+        <tbody>
+            @if (Contracts == null)
             {
                 <tr>
-                    <td>@contract.ContractID</td>
-                    <td>@contract.ContractNumber</td>
-                    <td>@contract.Customer?.CustomerName</td>
-                    <td>@contract.Material?.MaterialName</td>
-                    <td>@contract.Quantity</td>
-                    <td>@contract.StartDate?.ToShortDateString()</td>
-                    <td>@contract.Deadline?.ToShortDateString()</td>
-                    <td>@contract.CreateDate.ToShortDateString()</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning me-2" @onclick="() => OnEdit.InvokeAsync(contract)">Edit</button>
-                        <button class="btn btn-sm btn-info" @onclick="() => OnDetails.InvokeAsync(contract)">Details</button>
-                    </td>
+                    <td colspan="7" class="text-center">Loading contracts...</td>
                 </tr>
             }
-        }
-    </tbody>
-</table>
+            else if (!Contracts.Any())
+            {
+                <tr>
+                    <td colspan="7" class="text-center">No contracts found.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var contract in Contracts)
+                {
+                    <tr>
+                        <td>@contract.ContractID</td>
+                        <td>@contract.ContractNumber</td>
+                        <td>@contract.Material?.MaterialName</td>
+                        <td>@contract.Quantity.ToString("N2")</td>
+                        <td>@contract.Customer?.CustomerName</td>
+                        <td>@contract.CreateDate.ToString("dd MMM yyyy")</td>
+                        <td>
+                            <!-- Edit Button -->
+                            <button class="btn btn-sm btn-warning me-2" @onclick="() => OnEdit.InvokeAsync(contract)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+
+                            <!-- View Details Button -->
+                            <button class="btn btn-sm btn-info me-2" @onclick="() => OnDetails.InvokeAsync(contract)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+
+                            <!-- Delete Button -->
+                            <button class="btn btn-sm btn-danger" @onclick="() => OnDelete.InvokeAsync(contract.ContractID)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
 
 @code {
     [Parameter]
@@ -59,4 +69,7 @@
 
     [Parameter]
     public EventCallback<Contract> OnDetails { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnDelete { get; set; }
 }

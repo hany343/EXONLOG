@@ -1,0 +1,136 @@
+﻿@page "/OrdersManagement"
+@inject OrderService orderService
+@inject ContractService contractService
+
+<PageTitle>Order Management</PageTitle>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Order Management</h3>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            + New Order
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search orders..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
+
+    <!-- Create Modal -->
+    @if (showCreateModal)
+    {
+        <CreateOrder IsOpen="showCreateModal"
+                     OnSave="HandleCreateSubmit"
+                     OnCancel="CloseCreateModal" />
+    }
+
+    <!-- Edit Modal -->
+    @if (showEditModal)
+    {
+        <EditOrder Order="selectedOrder"
+                   @bind-IsOpen="showEditModal"
+                   OnSave="HandleEditSubmit"
+                   OnCancel="CloseEditModal" />
+    }
+
+    <!-- Details Modal -->
+    @if (showDetailsModal)
+    {
+        <OrderDetails Order="selectedOrder"
+                      @bind-IsOpen="showDetailsModal" />
+    }
+
+    <!-- Orders Table -->
+    <OrderList Orders="filteredOrders"
+               OnEdit="OpenEditModal"
+               OnDetails="OpenDetailsModal"
+               OnDelete="DeleteOrder" />
+</div>
+
+@code {
+    private List<Order> orders = new();
+    private List<Order> filteredOrders = new();
+    private string searchTerm = string.Empty;
+    private bool showCreateModal = false;
+    private bool showEditModal = false;
+    private Order selectedOrder = new();
+    private bool showDetailsModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        orders = await orderService.GetAllOrdersAsync();
+        FilterOrders();
+    }
+
+    private void FilterOrders()
+    {
+        filteredOrders = orders
+            .Where(o => string.IsNullOrEmpty(searchTerm) ||
+                o.OrderNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private void OpenCreateModal()
+    {
+        showCreateModal = true;
+    }
+
+    private async Task HandleCreateSubmit(Order newOrder)
+    {
+        try
+        {
+            await orderService.AddOrderAsync(newOrder);
+            await LoadData();
+            showCreateModal = false;
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private void CloseCreateModal()
+    {
+        showCreateModal = false;
+    }
+
+    private void OpenEditModal(Order order)
+    {
+        selectedOrder = order;
+        showEditModal = true;
+    }
+
+    private async Task HandleEditSubmit(Order updatedOrder)
+    {
+        await orderService.UpdateOrderAsync(updatedOrder);
+        await LoadData();
+        showEditModal = false;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedOrder = new Order();
+    }
+
+    private async Task DeleteOrder(int id)
+    {
+        await orderService.DeleteOrderAsync(id);
+        await LoadData();
+    }
+
+    private void OpenDetailsModal(Order order)
+    {
+        selectedOrder = order;
+        showDetailsModal = true;
+    }
+}

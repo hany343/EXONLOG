@@ -8,6 +8,7 @@
     public class ContractService
     {
         private readonly EXONContext _context;
+        private readonly MaterialService _materialService;
 
         public ContractService(EXONContext context)
         {
@@ -67,11 +68,11 @@
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateContractAsync(Contract contract)
-        {
-            _context.Contracts.Update(contract);
-            await _context.SaveChangesAsync();
-        }
+        //public async Task UpdateContractAsync(Contract contract)
+        //{
+        //    _context.Contracts.Update(contract);
+        //    await _context.SaveChangesAsync();
+        //}
 
         public async Task DeleteContractAsync(int id)
         {
@@ -81,6 +82,58 @@
                 _context.Contracts.Remove(contract);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task<List<Contract>> GetContractsByCustomerIdAsync(int customerId)
+        {
+            return await _context.Contracts
+                .Include(c => c.Material)
+                .Include(c => c.Orders)
+                    .ThenInclude(o => o.OutLadings)
+                .Where(c => c.CustomerID == customerId)
+                .ToListAsync();
+        }
+        public async Task CreateContractAsync(Contract contract)
+        {
+            // Validate input
+            if (contract == null)
+                throw new ArgumentNullException(nameof(contract));
+
+            if (string.IsNullOrEmpty(contract.ContractNumber))
+                throw new ArgumentException("Contract number is required.");
+
+            if (contract.Quantity <= 0)
+                throw new ArgumentException("Quantity must be greater than 0.");
+
+            // Check material stock
+            var material = await _materialService.GetMaterialDetailsAsync(contract.MaterialID);
+            if (material.FreeQuantityInStock < contract.Quantity)
+                throw new InvalidOperationException("Insufficient material stock.");
+            contract.UserID = 1;
+            // Save contract
+            _context.Contracts.Add(contract);
+            await _context.SaveChangesAsync();
+        }
+        
+        public async Task UpdateContractAsync(Contract contract)
+        {
+            // Validate input
+            if (contract == null)
+                throw new ArgumentNullException(nameof(contract));
+
+            if (string.IsNullOrEmpty(contract.ContractNumber))
+                throw new ArgumentException("Contract number is required.");
+
+            if (contract.Quantity <= 0)
+                throw new ArgumentException("Quantity must be greater than 0.");
+
+            // Check material stock
+            var material = await _materialService.GetMaterialDetailsAsync(contract.MaterialID);
+            if (material.FreeQuantityInStock < contract.Quantity)
+                throw new InvalidOperationException("Insufficient material stock.");
+
+            // Update contract
+            _context.Contracts.Update(contract);
+            await _context.SaveChangesAsync();
         }
     }
 

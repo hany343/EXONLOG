@@ -5,11 +5,11 @@ using System;
 using EXONLOG.Model.Enums;
 namespace EXONLOG.Services
 {
-    public class OutladingService
+    public class OutLadingService
     {
         private readonly EXONContext _context;
 
-        public OutladingService(EXONContext context)
+        public OutLadingService(EXONContext context)
         {
             _context = context;
         }
@@ -41,6 +41,20 @@ namespace EXONLOG.Services
                 .FirstOrDefault(o => o.OutLadingID == id);
         }
 
+        /// <summary>
+        /// Fetches all OutLadings associated with a specific OrderID.
+        /// </summary>
+        /// <param name="orderId">The ID of the order.</param>
+        /// <returns>A list of OutLadings with related data.</returns>
+        public async Task<List<OutLading>> GetOutLadingsByOrderIdAsync(int orderId)
+        {
+            return await _context.OutLadings
+                .Include(ol => ol.Truck) // Include Truck details
+                .Include(ol => ol.Driver) // Include Driver details
+                .Include(ol => ol.TransCompany) // Include TransCompany details
+                .Where(ol => ol.OrderID == orderId) // Filter by OrderID
+                .ToListAsync();
+        }
         // Add a new OutLading
         public async Task AddOutLadingAsync(OutLading outLading)
         {

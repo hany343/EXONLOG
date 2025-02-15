@@ -1,0 +1,166 @@
+﻿@page "/CustomersManagement"
+@inject CustomerService customerService
+@inject UserService userService
+
+<PageTitle>Customer Management</PageTitle>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Customer Management</h3>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            + New Customer
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search customers..."  @oninput="OnSearchInput" />
+    </div>
+
+    <!-- Create Modal -->
+    @if (showCreateModal)
+    {
+        <CreateCustomer IsOpen="showCreateModal"
+                        OnSave="HandleCreateSubmit"
+                        OnCancel="CloseCreateModal" />
+    }
+
+    <!-- Edit Modal -->
+    @if (showEditModal)
+    {
+        <EditCustomer Customer="selectedCustomer"
+                      @bind-IsOpen="showEditModal"
+                      OnSave="HandleEditSubmit"
+                      OnCancel="CloseEditModal" />
+    }
+
+    <!-- Details Modal -->
+    @if (showDetailsModal)
+    {
+        <CustomerDetails Customer="selectedCustomer"
+                         @bind-IsOpen="showDetailsModal" />
+    }
+
+    <!-- Customers Table -->
+    <CustomerList Customers="filteredCustomers"
+                  OnEdit="OpenEditModal"
+                  OnDetails="OpenDetailsModal"
+                  OnDelete="DeleteCustomer" />
+</div>
+
+@code {
+    private List<Customer> customers = new();
+    private List<Customer> filteredCustomers = new();
+    private string searchTerm = string.Empty;
+    private bool showCreateModal = false;
+    private bool showEditModal = false;
+    private Customer selectedCustomer = new();
+    private bool showDetailsModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        customers = await customerService.GetCustomersAsync();
+        FilterCustomers();
+    }
+
+    private void FilterCustomers()
+    {
+        filteredCustomers = customers
+            .Where(c => string.IsNullOrEmpty(searchTerm) ||
+                c.CustomerName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private void OpenCreateModal()
+    {
+        showCreateModal = true;
+    }
+
+    private async Task HandleCreateSubmit(Customer newCustomer)
+    {
+        try
+        {
+            await customerService.AddCustomerAsync(newCustomer);
+            await LoadData();
+            showCreateModal = false;
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private void CloseCreateModal()
+    {
+        showCreateModal = false;
+    }
+
+    private void OpenEditModal(Customer customer)
+    {
+        selectedCustomer = customer;
+        showEditModal = true;
+    }
+
+    private async Task HandleEditSubmit(Customer updatedCustomer)
+    {
+        await customerService.UpdateCustomerAsync(updatedCustomer);
+        await LoadData();
+        showEditModal = false;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedCustomer = new Customer();
+    }
+
+    private async Task DeleteCustomer(int id)
+    {
+        await customerService.DeleteCustomerAsync(id);
+        await LoadData();
+    }
+
+    private void OpenDetailsModal(Customer customer)
+    {
+        selectedCustomer = customer;
+        showDetailsModal = true;
+    }
+
+    private System.Timers.Timer debounceTimer;
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+
+        //// Reset the timer
+        //debounceTimer?.Stop();
+        //debounceTimer = new System.Timers.Timer(500); // 500ms debounce time
+        //debounceTimer.Elapsed += async (sender, args) =>
+        //{
+        //    debounceTimer.Stop();
+        //    await InvokeAsync(StateHasChanged); // Trigger UI update
+        //    await PerformSearch();
+        //};
+        //debounceTimer.AutoReset = false;
+        //debounceTimer.Start();
+        //await PerformSearch();
+        filteredCustomers = customers
+            .Where(c => string.IsNullOrEmpty(searchTerm) ||
+                c.CustomerName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private Task PerformSearch()
+    {
+        // Implement the search logic here
+        FilterCustomers();
+        return Task.CompletedTask;
+    }
+}

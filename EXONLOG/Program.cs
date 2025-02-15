@@ -1,3 +1,4 @@
+using Blazored.Toast;
 using EXONLOG;
 using EXONLOG.Components;
 using EXONLOG.Data;
@@ -77,7 +78,7 @@ builder.Services.AddHttpContextAccessor(); // Required for IHttpContextAccessor
 
 builder.Services.AddScoped<ContractService>();
 builder.Services.AddScoped<OrderService>();
-builder.Services.AddScoped<OutladingService>();
+builder.Services.AddScoped<OutLadingService>();
 
 builder.Services.AddScoped<MaterialTypeService>();
 builder.Services.AddScoped<MaterialService>();
@@ -100,6 +101,9 @@ builder.Services.AddScoped<InLadingService>();
 
 builder.Services.AddSingleton<FFmpegService>();
 
+
+
+builder.Services.AddBlazoredToast();
 
 builder.Services.AddScoped<HttpClient>(sp =>
 {

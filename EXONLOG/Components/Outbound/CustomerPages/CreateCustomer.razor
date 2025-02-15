@@ -1,0 +1,102 @@
+﻿@using Model.Outbound
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Customer</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@NewCustomer" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+                        <!-- Customer Name -->
+                        <div class="col-md-6">
+                            <label class="form-label">Customer Name *</label>
+                            <InputText class="form-control" @bind-Value="@NewCustomer.CustomerName" />
+                            <ValidationMessage For="@(() => NewCustomer.CustomerName)" class="text-danger" />
+                        </div>
+
+                        <!-- Address -->
+                        <div class="col-md-6">
+                            <label class="form-label">Address</label>
+                            <InputText class="form-control" @bind-Value="@NewCustomer.Address" />
+                            <ValidationMessage For="@(() => NewCustomer.Address)" class="text-danger" />
+                        </div>
+
+                        <!-- Contact Number -->
+                        <div class="col-md-6">
+                            <label class="form-label">Contact Number</label>
+                            <InputText class="form-control" @bind-Value="@NewCustomer.ContactNumber" />
+                            <ValidationMessage For="@(() => NewCustomer.ContactNumber)" class="text-danger" />
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <InputText class="form-control" @bind-Value="@NewCustomer.Email" />
+                            <ValidationMessage For="@(() => NewCustomer.Email)" class="text-danger" />
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@NewCustomer.Notes" />
+                            <ValidationMessage For="@(() => NewCustomer.Notes)" class="text-danger" />
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">Create</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<Customer> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private Customer NewCustomer { get; set; } = new();
+
+    private EditContext editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(NewCustomer);
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (editContext.Validate()) // Check validation before submitting
+        {
+            await OnSave.InvokeAsync(NewCustomer);
+            CloseModal();
+        }
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
+        NewCustomer = new Customer();
+        editContext = new EditContext(NewCustomer); // Reset validation state
+    }
+}

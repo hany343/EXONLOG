@@ -1,58 +1,104 @@
-﻿@using EXONLOG.Model.Outbound
-@using EXONLOG.Services
-@inject ContractService contractService
+﻿@using Model.Outbound
+@inject OrderService orderService
 
-@if (IsOpen)
-{
-    <div class="modal show d-block mt-3">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">@Mode @("Contract")</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <!-- Details of the Contract -->
-                        <dt class="col-sm-3">Contract Number</dt>
-                        <dd class="col-sm-9">@Contract.ContractNumber</dd>
-
-                        <dt class="col-sm-3">Material</dt>
-                        <dd class="col-sm-9">@Contract.Material?.MaterialName</dd>
-
-                        <dt class="col-sm-3">Customer</dt>
-                        <dd class="col-sm-9">@Contract.Customer?.CustomerName</dd>
-
-                        <dt class="col-sm-3">Quantity</dt>
-                        <dd class="col-sm-9">@Contract.Quantity</dd>
-
-                        <dt class="col-sm-3">Start Date</dt>
-                        <dd class="col-sm-9">@Contract.StartDate?.ToShortDateString()</dd>
-
-                        <dt class="col-sm-3">Deadline</dt>
-                        <dd class="col-sm-9">@Contract.Deadline?.ToShortDateString()</dd>
-
-                        <dt class="col-sm-3">Notes</dt>
-                        <dd class="col-sm-9">@Contract.Notes</dd>
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary">Contract Details</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 d-flex gap-5">
+                        <p><span class="barcode">@Contract.ContractID</span> </p>
+                        <p><strong>Created Date:</strong> @Contract.CreateDate.ToString("dd MMM yyyy")</p>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                    <div class="col-md-6">
+                        <p><strong>Contract Number:</strong> @Contract.ContractNumber</p>
+                        <p><strong>Material:</strong> @Contract.Material?.MaterialName</p>
+                        <p><strong>Quantity:</strong> @Contract.Quantity.ToString("N2")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Customer:</strong> @Contract.Customer?.CustomerName</p>
+                        <p><strong>Created By:</strong> @Contract.User?.Username</p>
+                    </div>
+                    <div class="col-md-12">
+                        <p><strong>Notes:</strong><p class="border border-1 rounded border-secondary p-3">@Contract.Notes</p></p>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <div class="col-md-12 mt-4">
+                        <h5 class="mb-3">Orders</h5>
+                        @if (orders == null)
+                        {
+                            <p>Loading orders...</p>
+                        }
+                        else if (!orders.Any())
+                        {
+                            <p>No orders found.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Order Number</th>
+                                        <th>Quantity</th>
+                                        <th>Delivered</th>
+                                        <th>Pending</th>
+                                        <th>Created Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in orders)
+                                    {
+                                        var deliveredQuantity = order.OutLadings?.Sum(ol => ol.NetWeight) ?? 0;
+                                        var pendingQuantity = order.Quantity - deliveredQuantity;
+
+                                        <tr>
+                                            <td>@order.OrderID</td>
+                                            <td>@order.OrderNumber</td>
+                                            <td>@order.Quantity.ToString("N2")</td>
+                                            <td>@deliveredQuantity.ToString("N2")</td>
+                                            <td>@pendingQuantity.ToString("N2")</td>
+                                            <td>@order.CreateDate.ToString("dd MMM yyyy")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-}
+</div>
 
 @code {
-    [Parameter] public Contract Contract { get; set; }
-    [Parameter] public bool IsOpen { get; set; }
-    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
-    [Parameter] public string Mode { get; set; }
+    [Parameter]
+    public Contract Contract { get; set; }
 
-    private async Task CloseModal()
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private List<Order> orders = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Contract != null)
+        {
+            orders = await orderService.GetOrdersByContractIdAsync(Contract.ContractID);
+        }
+    }
+
+    private void CloseModal()
     {
         IsOpen = false;
-        await IsOpenChanged.InvokeAsync(IsOpen);
+        IsOpenChanged.InvokeAsync(false);
     }
 }

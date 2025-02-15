@@ -1,0 +1,105 @@
+﻿@using Model.Outbound
+@inject ContractService contractService
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary">Customer Details</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 d-flex gap-5">
+                        <p><span class="barcode">@Customer.CustomerID</span> </p>
+                        <p><strong>Created Date:</strong> @Customer.CreateDate.ToString("dd MMM yyyy")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Customer Name:</strong> @Customer.CustomerName</p>
+                        <p><strong>Contact Number:</strong> @Customer.ContactNumber</p>
+                        <p><strong>Email:</strong> @Customer.Email</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Address:</strong> @Customer.Address</p>
+                        <p><strong>Created By:</strong> @Customer.User?.Username</p>
+                    </div>
+                    <div class="col-md-12">
+                        <p><strong>Notes:</strong><p class="border border-1 rounded border-secondary p-3">@Customer.Notes</p></p>
+                    </div>
+
+                    <!-- Contract Information -->
+                    <div class="col-md-12 mt-4">
+                        <h5 class="mb-3">Contract Information</h5>
+                        @if (contracts == null)
+                        {
+                            <p>Loading contract data...</p>
+                        }
+                        else if (!contracts.Any())
+                        {
+                            <p>No active contracts found.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Contract Number</th>
+                                        <th>Material</th>
+                                        <th>Total Quantity</th>
+                                        <th>Delivered Quantity</th>
+                                        <th>Pending Quantity</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var contract in contracts)
+                                    {
+                                        var deliveredQuantity = contract.Orders?.Sum(o => o.OutLadings?.Sum(ol => ol.NetWeight)) ?? 0;
+                                        var pendingQuantity = contract.Quantity - deliveredQuantity;
+
+                                        <tr>
+                                            <td>@contract.ContractNumber</td>
+                                            <td>@contract.Material?.MaterialName</td>
+                                            <td>@contract.Quantity.ToString("N2")</td>
+                                            <td>@deliveredQuantity.ToString("N2")</td>
+                                            <td>@pendingQuantity.ToString("N2")</td>
+                                            <td>@(pendingQuantity > 0 ? "Active" : "Completed")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Customer Customer { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private List<Contract> contracts = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Customer != null)
+        {
+            // Fetch contracts for the customer
+            contracts = await contractService.GetContractsByCustomerIdAsync(Customer.CustomerID);
+        }
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+}
