@@ -25,7 +25,7 @@
             <th>Order</th>
             <th>Driver</th>
             <th>Truck</th>
-            <th>Type</th>
+            <th>WeightStatus</th>
             <th>Quantity</th>
             <th>Actions</th>
         </tr>
@@ -34,20 +34,21 @@
         @foreach (var outlading in filteredOutladings)
         {
             <tr>
-                <td>@outlading.LadingID</td>
+                <td>@outlading.OutLadingID</td>
                 <td>@outlading.Order?.OrderNumber</td>
                 <td>@outlading.Driver?.DriverName</td>
                 <td>@outlading.Truck?.TruckNumber</td>
-                <td>@outlading.Type</td>
+                <td>@outlading.WeightStatus</td>
                 <td>@outlading.Quantity</td>
                 <td>
-                    <button class="btn btn-info btn-sm" @onclick="() => ViewDetails(outlading.LadingID)">View</button>
+                    <button class="btn btn-info btn-sm" @onclick="() => ViewDetails(outlading.OutLadingID)">View</button>
                     <button class="btn btn-warning btn-sm" @onclick="() => EditOutlading(outlading)">Edit</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
 
 <!-- Add/Edit Outlading Modal -->
 @if (ShowModal)
@@ -190,7 +191,7 @@
         private List<OutLading> outladings { get; set; } = new();
         private List<OutLading> filteredOutladings { get; set; } = new();
         private List<Order> orders { get; set; } = new();
-        private List<Order> filteredOrders { get; set; } = new();
+
         private List<Driver> drivers { get; set; } = new();
         private List<Driver> filteredDrivers { get; set; } = new();
         private List<Truck> trucks { get; set; } = new();
@@ -202,7 +203,7 @@
         private bool isEditing = false;
         private Order selectedOrder = new();
         private Contract selectedContract = new();
-
+        private List<Order> filteredOrders { get; set; } = new();
         private string orderSearchTerm = "";
         private string driverSearchTerm = "";
         private string truckSearchTerm = "";
@@ -350,7 +351,7 @@
 
         private void EditOutlading(int ladingId)
         {
-            CurrentOutlading = outladings.First(o => o.LadingID == ladingId);
+            CurrentOutlading = outladings.First(o => o.OutLadingID == ladingId);
             isEditing = true;
             showModal = true;
         }

@@ -44,7 +44,7 @@ namespace EXONLOG.Services
                 .Include(o => o.SecondWeigher)
                 .Include(o => o.User)
                 .Include(o => o.TransCompany)
-                .FirstOrDefault(o => o.InladID == id);
+                .FirstOrDefault(o => o.InLadingID == id);
         }
 
         // Update an existing IntLading
@@ -63,7 +63,7 @@ namespace EXONLOG.Services
         {
             // Find the InLading record by ID
             var inLading = await _context.InLadings
-                .FirstOrDefaultAsync(i => i.InladID == inLadingId);
+                .FirstOrDefaultAsync(i => i.InLadingID == inLadingId);
 
             if (inLading == null)
             {

@@ -288,7 +288,7 @@
 
             modelBuilder.Entity<OutLading>(entity =>
             {
-                entity.Property(e => e.LadingID)
+                entity.Property(e => e.OutLadingID)
                       .ValueGeneratedOnAdd()
                       .HasAnnotation("SqlServer:Identity", "22500000, 1");
             });
@@ -337,9 +337,9 @@
                 .Property(l => l.ShippingType)
                 .HasMaxLength(50); // ShippingType field
 
-            modelBuilder.Entity<OutLading>()
-                .Property(l => l.Shrink)
-                .HasDefaultValue(0); // Default value for Shrink if not calculated
+            //modelBuilder.Entity<OutLading>()
+            //    .Property(l => l.sh)
+            //    .HasDefaultValue(0); // Default value for Shrink if not calculated
 
             // Configure default CreateDate
             modelBuilder.Entity<OutLading>()
@@ -414,7 +414,7 @@
 
             modelBuilder.Entity<InLading>(entity =>
             {
-                entity.Property(e => e.InladID)
+                entity.Property(e => e.InLadingID)
                       .ValueGeneratedOnAdd()
                       .HasAnnotation("SqlServer:Identity", "12500000, 1");
             });

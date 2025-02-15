@@ -1,51 +1,96 @@
 ﻿using EXONLOG.Model.Account;
+using EXONLOG.Model.Inbound;
 using EXONLOG.Model.Trans;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using EXONLOG.Model.Enums;
 
 namespace EXONLOG.Model.Outbound
 {
     public class OutLading
     {
         [Key]
-        public int LadingID { get; set; }
+        public int OutLadingID { get; set; }
 
 
         [Required]
         [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
         public double Quantity { get; set; }
-        public int TruckID { get; set; } // Foreign Key to Truck
 
-        
-        public int DriverID { get; set; } // Foreign Key to Driver
-
-        
+        // Foreign keys with explicit relationships
+        [Required(ErrorMessage = "Order is required")]
+        [ForeignKey("Order")]
         public int OrderID { get; set; } // Foreign Key to Order
 
-       
-        [Column(TypeName = "nvarchar(100)")]
-        public string? Type { get; set; } // "Inbound" or "Outbound"
+        [Required(ErrorMessage = "Truck is required")]
+        [ForeignKey("Truck")]
+        public int TruckID { get; set; }
 
-        // First Weight Information
-        public double? FirstWeight { get; set; } // Weight after first weighbridge
-        public int? FirstWeigherID { get; set; } // Foreign Key to User who performed the first weigh
+        [Required(ErrorMessage = "Driver is required")]
+        [ForeignKey("Driver")]
+        public int DriverID { get; set; }
+
+
+        // Enum-based status
+        [Required]
+        [Column(TypeName = "nvarchar(50)")]
+        public WeightStatus WeightStatus { get; set; } = WeightStatus.Pending;
+
+        // Weight validations
+        [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
+        public double FirstWeight { get; set; } = 0;
+
+        [Column(TypeName = "nvarchar(150)")]
+        public string? FirstWeighStation { get; set; }
+
+        // Date validations
+        [Column(TypeName = "datetime2(0)")]
+        public DateTime? FirstWeighDate { get; set; }
+
+        // Weigher relationships
+        [ForeignKey("FirstWeigher")]
+        public int? FirstWeigherID { get; set; }
+
+
 
         [Column(TypeName = "datetime2(0)")]
-        public DateTime? FirstWeightDate { get; set; } // Date and time of first weighing
+        public DateTime? SecondWeighDate { get; set; }
 
-        // Second Weight Information
-        public double? SecondWeight { get; set; } // Weight after second weighbridge
-        public int? SecondWeigherID { get; set; } // Foreign Key to User who performed the second weigh
+        [ForeignKey("SecondWeigher")]
+        public int? SecondWeigherID { get; set; }
+
+        [Range(0.00, double.MaxValue, ErrorMessage = "Second weight must be positive")]
+        public double SecondWeight { get; set; } = 0;
+
+        [Column(TypeName = "nvarchar(150)")]
+        public string? SecondWeighStation { get; set; }
+
+        // Calculated fields
+        public double NetWeight => Math.Abs(SecondWeight - FirstWeight);
+
+        // Additional fields
+        [MaxLength(250, ErrorMessage = "Notes cannot exceed 250 characters")]
+        [Column(TypeName = "nvarchar(250)")]
+        public string? Notes { get; set; }
+
+        [Required]
         [Column(TypeName = "datetime2(0)")]
-        public DateTime? SecondWeightDate { get; set; } // Date and time of second weighing
+        public DateTime CreateDate { get; set; } = DateTime.UtcNow; // Use UTC
 
-        // Net Weight Information
-        public double NetWeight { get; set; } // Net weight (auto-calculated)
-        public double Shrink { get; set; } // Shrinkage between quantity and net weight (auto-calculated)
+        // User relationships
+        [Required(ErrorMessage = "User is required")]
+        [ForeignKey("User")]
+        public int UserID { get; set; }
 
-        
+        // Transportation company relationship
+        [Required(ErrorMessage = "Transport company is required")]
+        [ForeignKey("TransCompany")]
+        public int TransCompanyID { get; set; }
+
+
+
         [Column(TypeName = "nvarchar(100)")]
-        public  string FillType { get; set; } // Fill type: full, half, etc.
+        public  string? FillType { get; set; } // Fill type: full, half, etc.
         [Column(TypeName = "nvarchar(100)")]
         public string? StackBar { get; set; } // Stack bar identifier
         public int? BagsCount { get; set; } // Number of bags in the shipment
@@ -67,24 +112,15 @@ namespace EXONLOG.Model.Outbound
 
         
         [Column(TypeName = "nvarchar(100)")]
-        public  string LadingState { get; set; } // State of the lading: "In Progress", "Completed"
+        public  string? LadingState { get; set; } // State of the lading: "In Progress", "Completed"
 
        
         [Column(TypeName = "nvarchar(100)")]
         // New ShippingType column as Enum
         public  string ShippingType { get; set; } // Type of shipping: Air, Sea, Road, etc.
 
-        
-        // Weight Status as String
-        [Column(TypeName = "nvarchar(100)")]
-        public  string WeightStatus { get; set; } // Status of the weighing process: "Pending", "FinishedFirstWeight", "FinishedSecondWeight", "Finished"
 
-        [Column(TypeName = "datetime2(0)")]
-        public DateTime CreateDate { get; set; } = DateTime.UtcNow;
-
-        public int UserID { get; set; } // Foreign Key to user who created the record
-
-        public int TransCompanyID { get; set; }  // Foreign key to TransCompany
+       
         public TransCompany? TransCompany { get; set; }  // Navigation property
         // Navigation properties
         public virtual User? FirstWeigher { get; set; }
@@ -94,18 +130,7 @@ namespace EXONLOG.Model.Outbound
         public virtual Driver? Driver { get; set; }
         public virtual Order? Order { get; set; } // Reference to the related Order
 
-        // Method to calculate NetWeight and Shrink based on weights and quantity
-        //public void CalculateNetWeightAndShrink()
-        //{
-        //    // Check if both weights are available and status is correct
-        //    if (WeightStatus == "FinishedSecondWeight" && FirstWeight > 0 && SecondWeight > 0)
-        //    {
-        //        // Calculate NetWeight using absolute value to avoid negative net weight
-        //        NetWeight = Math.Abs(SecondWeight - FirstWeight); // Calculate absolute NetWeight
-        //        Shrink = Quantity - NetWeight; // Calculate Shrinkage based on quantity and net weight
-        //        WeightStatus = "Finished"; // Update status to "Finished" once the calculation is complete
-        //    }
-        //}
+        
     }
-
+    
 }

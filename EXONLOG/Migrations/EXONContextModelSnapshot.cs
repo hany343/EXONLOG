@@ -177,12 +177,12 @@ namespace EXONLOG.Migrations
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.InLading", b =>
                 {
-                    b.Property<int>("InladID")
+                    b.Property<int>("InLadingID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:Identity", "12500000, 1");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InladID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InLadingID"));
 
                     b.Property<int>("BatchID")
                         .HasColumnType("int");
@@ -235,11 +235,14 @@ namespace EXONLOG.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("int");
 
+                    b.Property<string>("WeighNotes")
+                        .HasColumnType("nvarchar(250)");
+
                     b.Property<string>("WeightStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("InladID");
+                    b.HasKey("InLadingID");
 
                     b.HasIndex("BatchID");
 
@@ -589,12 +592,12 @@ namespace EXONLOG.Migrations
 
             modelBuilder.Entity("EXONLOG.Model.Outbound.OutLading", b =>
                 {
-                    b.Property<int>("LadingID")
+                    b.Property<int>("OutLadingID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:Identity", "22500000, 1");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LadingID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OutLadingID"));
 
                     b.Property<int?>("ApprovedUserID")
                         .HasColumnType("int");
@@ -611,27 +614,29 @@ namespace EXONLOG.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("FillType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("FirstWeighDate")
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<string>("FirstWeighStation")
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<int?>("FirstWeigherID")
                         .HasColumnType("int");
 
-                    b.Property<double?>("FirstWeight")
+                    b.Property<double>("FirstWeight")
                         .HasColumnType("float");
 
-                    b.Property<DateTime?>("FirstWeightDate")
-                        .HasColumnType("datetime2(0)");
-
                     b.Property<string>("LadingState")
-                        .IsRequired()
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("LeaveDate")
                         .HasColumnType("datetime2(0)");
 
-                    b.Property<double>("NetWeight")
-                        .HasColumnType("float");
+                    b.Property<string>("Notes")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<int>("OrderID")
                         .HasColumnType("int");
@@ -642,14 +647,17 @@ namespace EXONLOG.Migrations
                     b.Property<string>("RepresentativeName")
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<DateTime?>("SecondWeighDate")
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<string>("SecondWeighStation")
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<int?>("SecondWeigherID")
                         .HasColumnType("int");
 
-                    b.Property<double?>("SecondWeight")
+                    b.Property<double>("SecondWeight")
                         .HasColumnType("float");
-
-                    b.Property<DateTime?>("SecondWeightDate")
-                        .HasColumnType("datetime2(0)");
 
                     b.Property<string>("ShippingAddress")
                         .HasColumnType("nvarchar(100)");
@@ -662,11 +670,6 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<double>("Shrink")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("float")
-                        .HasDefaultValue(0.0);
-
                     b.Property<string>("StackBar")
                         .HasColumnType("nvarchar(100)");
 
@@ -675,9 +678,6 @@ namespace EXONLOG.Migrations
 
                     b.Property<int>("TruckID")
                         .HasColumnType("int");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
@@ -688,9 +688,9 @@ namespace EXONLOG.Migrations
                     b.Property<string>("WeightStatus")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("LadingID");
+                    b.HasKey("OutLadingID");
 
                     b.HasIndex("DriverID");
 

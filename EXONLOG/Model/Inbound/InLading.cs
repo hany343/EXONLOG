@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using EXONLOG.Model.Enums;
 
 namespace EXONLOG.Model.Inbound
 {
@@ -11,7 +12,7 @@ namespace EXONLOG.Model.Inbound
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int InladID { get; set; }
+        public int InLadingID { get; set; }
 
         [Required]
         [Range(0.00, double.MaxValue, ErrorMessage = "First weight must be positive")]
@@ -87,6 +88,9 @@ namespace EXONLOG.Model.Inbound
         [ForeignKey("TransCompany")]
         public int TransCompanyID { get; set; }
 
+        [Column(TypeName = "nvarchar(250)")]
+        public string? WeighNotes { get; set; } // Additional notes related to the weigh process
+
         // Navigation properties
         public virtual Batch? Batch { get; set; }
         public virtual Truck? Truck { get; set; }
@@ -99,12 +103,5 @@ namespace EXONLOG.Model.Inbound
        
     }
 
-    public enum WeightStatus
-    {
-        Pending,
-        FirstWeighCompleted,
-        SecondWeighCompleted,
-        Verified,
-        Disputed
-    }
+
 }

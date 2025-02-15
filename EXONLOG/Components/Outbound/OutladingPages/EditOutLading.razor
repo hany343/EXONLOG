@@ -1,0 +1,127 @@
+﻿@using EXONLOG.Model.Outbound
+@inject OrderService orderService
+@inject TransCompanyService transCompanyService
+@inject OutladingService outLadingService
+@inject TruckService truckService
+@inject DriverService driverService
+
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit OutLading</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@OutLading" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+                        <!-- Order Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Order *</label>
+                            <InputSelect @bind-Value="@OutLading.OrderID" class="form-control">
+                                <option value="">Select Order</option>
+                                @foreach (var order in orders)
+                                {
+                                    <option value="@order.OrderID">@order.OrderNumber</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => OutLading.OrderID)" />
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <InputNumber @bind-Value="@OutLading.Quantity"
+                                         class="form-control"
+                                         min="0" />
+                            <ValidationMessage For="@(() => OutLading.Quantity)" />
+                        </div>
+
+                        <!-- Truck Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Truck *</label>
+                            <InputSelect @bind-Value="@OutLading.TruckID" class="form-control">
+                                <option value="">Select Truck</option>
+                                @foreach (var truck in trucks)
+                                {
+                                    <option value="@truck.TruckID">@truck.TruckNumber</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => OutLading.TruckID)" />
+                        </div>
+
+                        <!-- Driver Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Driver *</label>
+                            <InputSelect @bind-Value="@OutLading.DriverID" class="form-control">
+                                <option value="">Select Driver</option>
+                                @foreach (var driver in drivers)
+                                {
+                                    <option value="@driver.DriverID">@driver.DriverName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => OutLading.DriverID)" />
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@OutLading.WeighNotes" />
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public OutLading OutLading { get; set; } = new();
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<OutLading> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private List<Order> orders = new();
+    private List<Truck> trucks = new();
+    private List<Driver> drivers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await orderService.GetAllOrdersAsync();
+        trucks = await truckService.GetAllTrucksAsync();
+        drivers = await driverService.GetAllDriversAsync();
+    }
+
+    private async Task HandleSubmit()
+    {
+        await OnSave.InvokeAsync(OutLading);
+        CloseModal();
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
+    }
+}

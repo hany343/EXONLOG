@@ -1,0 +1,62 @@
+﻿@using EXONLOG.Model.Stocks
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Material Name</th>
+                <th>Description</th>
+                <th>Total Stock</th>
+                <th>Reserved</th>
+                <th>Available</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Materials == null)
+            {
+                <tr>
+                    <td colspan="6" class="text-center">Loading materials...</td>
+                </tr>
+            }
+            else if (!Materials.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center">No materials found</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var material in Materials)
+                {
+                    <tr>
+                        <td>@material.MaterialName</td>
+                        <td>@material.Description</td>
+                        <td>@material.TotalStockQuantity.ToString("N2")</td>
+                        <td>@material.ReservedQuantity.ToString("N2")</td>
+                        <td>@material.FreeQuantityInStock.ToString("N2")</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-2" @onclick="() => OnEdit.InvokeAsync(material)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-info" @onclick="() => OnDetails.InvokeAsync(material)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => OnDelete.InvokeAsync(material.MaterialID)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter] public List<Material> Materials { get; set; }
+    [Parameter] public EventCallback<Material> OnEdit { get; set; }
+    [Parameter] public EventCallback<Material> OnDetails { get; set; }
+    [Parameter] public EventCallback<int> OnDelete { get; set; }
+
+}

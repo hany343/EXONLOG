@@ -1,0 +1,83 @@
+﻿@using EXONLOG.Model.Stocks
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Material</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@Material" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Material Name *</label>
+                            <InputText @bind-Value="@Material.MaterialName" class="form-control" />
+                            <ValidationMessage For="@(() => Material.MaterialName)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Prefix</label>
+                            <InputText @bind-Value="@Material.Prefix" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Material Type *</label>
+                            <div class="input-group">
+                                <InputSelect @bind-Value="@Material.MaterialTypeId" class="form-control">
+                                    <option value="">Select Material Type</option>
+                                    @foreach (var type in MaterialTypes)
+                                    {
+                                        <option value="@type.MaterialTypeID">@type.MaterialTypeName</option>
+                                    }
+                                </InputSelect>
+                                <button type="button" class="btn btn-outline-secondary" @onclick="OpenTypeCreateModal">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                            <ValidationMessage For="@(() => Material.MaterialTypeId)" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Description</label>
+                            <InputTextArea @bind-Value="@Material.Description" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Create</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Material Material { get; set; } = new();
+    [Parameter] public List<MaterialType> MaterialTypes { get; set; } = new();
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<Material> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter]
+    public bool IsOpen { get; set; }
+    private async Task HandleSubmit()
+    {
+        await OnSave.InvokeAsync(Material);
+        CloseModal();
+    }
+
+    private void CloseModal()
+    {
+        IsOpenChanged.InvokeAsync(false);
+    }
+
+    private void OpenTypeCreateModal()
+    {
+        OnCancel.InvokeAsync();
+    }
+}

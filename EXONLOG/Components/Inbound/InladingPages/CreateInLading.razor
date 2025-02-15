@@ -1,4 +1,4 @@
-﻿@using Model.Inbound
+﻿@using EXONLOG.Components.Trans
 @inject BatchService batchService
 @inject TransCompanyService transCompanyService
 @inject InLadingService inLadingService
@@ -41,8 +41,8 @@
                         <div class="col-md-6">
                             <label class="form-label">Quantity *</label>
                             <input type="number" class="form-control" @bind="NewInLading.Quantity"
-                                         min="0"
-                                         @oninput="CheckQuantity" />
+                                   min="0"
+                                   @oninput="CheckQuantity" />
                             <ValidationMessage For="@(() => NewInLading.Quantity)" />
                             @if (quantityError)
                             {
@@ -146,7 +146,7 @@
 
             // Calculate used quantity
             var completedInladings = inladings.Where(i => i.SecondWeighDate != null);
-            var pendingInladings = inladings.Where(i => i.SecondWeighDate== null);
+            var pendingInladings = inladings.Where(i => i.SecondWeighDate == null);
 
             double usedQuantity =
                 completedInladings.Sum(i => i.NetWeight) +

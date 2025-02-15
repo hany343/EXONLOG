@@ -109,7 +109,7 @@
                 @foreach (var inLading in filteredInLadings)
                 {
                     <tr>
-                        <td>@inLading.InladID</td>
+                        <td>@inLading.InLadingID</td>
                         <td>@inLading.Batch?.BatchNumber</td>
                         <td>@inLading.Truck?.TruckNumber</td>
                         <td>@inLading.Driver?.DriverName</td>
@@ -117,7 +117,7 @@
                         <td>
 
                             <button class="btn btn-sm btn-danger"
-                                    @onclick="() => DeleteInLading(inLading.InladID)">
+                                    @onclick="() => DeleteInLading(inLading.InLadingID)">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>

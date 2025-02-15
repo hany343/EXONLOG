@@ -2,7 +2,7 @@
 using EXONLOG.Model.Outbound;
 using Microsoft.EntityFrameworkCore;
 using System;
-
+using EXONLOG.Model.Enums;
 namespace EXONLOG.Services
 {
     public class OutladingService
@@ -28,9 +28,9 @@ namespace EXONLOG.Services
         }
 
         // Get OutLading by ID
-        public async Task<OutLading> GetOutLadingByIdAsync(int id)
+        public OutLading GetOutLadingByIdAsync(int id)
         {
-            return await _context.OutLadings
+            return  _context.OutLadings
                 .Include(o => o.Truck)
                 .Include(o => o.Driver)
                 .Include(o => o.Order)
@@ -38,7 +38,7 @@ namespace EXONLOG.Services
                 .Include(o => o.SecondWeigher)
                 .Include(o => o.User)
                 .Include(o => o.TransCompany)
-                .FirstOrDefaultAsync(o => o.LadingID == id);
+                .FirstOrDefault(o => o.OutLadingID == id);
         }
 
         // Add a new OutLading
@@ -47,13 +47,59 @@ namespace EXONLOG.Services
             outLading.CreateDate = DateTime.UtcNow;
             outLading.UserID = 1;
             outLading.LadingState = "pending";
-            outLading.WeightStatus = "first";
+            outLading.WeightStatus = WeightStatus.Pending;
 
 
             _context.OutLadings.Add(outLading);
             await _context.SaveChangesAsync();
         }
+        public async Task<(bool Success, string Message, OutLading? SavedOutLading)> CreateOutLadingAsync(OutLading outLading)
+        {
+            if (outLading.OrderID <= 0)
+                return (false, "Invalid OrderID", null);
 
+            var order = await _context.Orders
+                .Include(o => o.OutLadings)
+                .FirstOrDefaultAsync(o => o.OrderID == outLading.OrderID);
+
+            if (order == null)
+                return (false, "Invalid Order", null);
+
+            var totalUsed = order.OutLadings?.Sum(ol => ol.Quantity) ?? 0;
+
+            if (outLading.Quantity > (order.Quantity - totalUsed))
+                return (false, "Quantity exceeds available order quantity", null);
+
+            outLading.UserID = GetCurrentUserId(); // Replace with actual user retrieval logic
+
+            _context.OutLadings.Add(outLading);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return (true, "OutLading saved successfully", outLading);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Database error: {ex.Message}", null);
+            }
+        }
+
+        private int GetCurrentUserId()
+        {
+            return 1; // Replace with real user ID retrieval logic
+        }
+
+
+        public async Task<List<OutLading>> GetAllOutLadingsAsync()
+        {
+            return await _context.OutLadings
+                .Include(ol => ol.Order)
+                    .ThenInclude(o => o.Contract)
+                .Include(ol => ol.Truck)
+                .Include(ol => ol.Driver)
+                .ToListAsync();
+        }
         // Update an existing OutLading
         public async Task UpdateOutLadingAsync(OutLading outLading)
         {
@@ -81,16 +127,16 @@ namespace EXONLOG.Services
         }
 
         // Calculate NetWeight and Shrink for an OutLading
-        public void CalculateNetWeightAndShrink(OutLading outLading)
-        {
-            if (outLading.WeightStatus == "FinishedSecondWeight" && outLading.FirstWeight > 0 && outLading.SecondWeight > 0)
-            {
-                // Calculate NetWeight using absolute value to avoid negative net weight
-                outLading.NetWeight =  (double) (outLading.SecondWeight - outLading.FirstWeight);
-                outLading.Shrink = outLading.Quantity - outLading.NetWeight;
-                outLading.WeightStatus = "Finished"; // Update status to "Finished" once the calculation is complete
-            }
-        }
+        //public void CalculateNetWeightAndShrink(OutLading outLading)
+        //{
+        //    if (outLading.WeightStatus == WeightStatus.SecondWeighCompleted && outLading.FirstWeight > 0 && outLading.SecondWeight > 0)
+        //    {
+        //        // Calculate NetWeight using absolute value to avoid negative net weight
+        //        outLading.NetWeight =  (double) (outLading.SecondWeight - outLading.FirstWeight);
+        //        outLading.Shrink = outLading.Quantity - outLading.NetWeight;
+        //        outLading.WeightStatus = "Finished"; // Update status to "Finished" once the calculation is complete
+        //    }
+        //}
 
         // Get filtered OutLadings by status
         public async Task<List<OutLading>> GetOutLadingsByStatusAsync(string status)

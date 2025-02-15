@@ -33,7 +33,7 @@
                 @foreach (var inLading in InLadings)
                 {
                     <tr>
-                        <td>@inLading.InladID</td>
+                        <td>@inLading.InLadingID</td>
                         <td>@inLading.Quantity</td>
                         <td>@inLading.Batch?.BatchNumber</td>
                         <td>@inLading.Batch?.Shipment?.Material?.MaterialName</td>
@@ -53,7 +53,7 @@
                             </button>
 
                             <!-- Delete Button -->
-                            <button class="btn btn-sm btn-danger" @onclick="() => OnDelete.InvokeAsync(inLading.InladID)">
+                            <button class="btn btn-sm btn-danger" @onclick="() => OnDelete.InvokeAsync(inLading.InLadingID)">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>

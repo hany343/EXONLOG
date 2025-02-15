@@ -1,0 +1,169 @@
+﻿@page "/OutLadingManagement"
+@inject OutladingService outladingService
+@inject ContractService contractService
+@inject OrderService orderService
+@inject DriverService driverService
+@inject TruckService truckService
+@inject TransCompanyService transCompanyService
+
+<PageTitle>OutLading Management</PageTitle>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>OutLading Management</h3>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            @(showCreateModal ? "Cancel" : "+ New OutLading")
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search by Order Number..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
+
+    <!-- Create Modal -->
+    @if (showCreateModal)
+    {
+        <CreateOutLading @bind-IsOpen="showCreateModal"
+                         OutLading="newOutLading"
+                         OnSave="HandleCreateSubmit"
+                         OnCancel="CloseCreateModal" />
+    }
+
+    <!-- Edit Modal -->
+    @if (showEditModal)
+    {
+        <EditOutLading OutLading="selectedOutLading"
+                       @bind-IsOpen="showEditModal"
+                       OnSave="HandleEditSubmit"
+                       OnCancel="CloseEditModal" />
+    }
+
+    <!-- Details Modal -->
+    @if (showDetailsModal)
+    {
+        <OutLadingDetails OutLading="selectedDetails"
+                          @bind-IsOpen="showDetailsModal" />
+    }
+
+    <!-- OutLadings Table -->
+    <OutLadingList OutLadings="filteredOutLadings"
+                   OnEdit="OpenEditModal"
+                   OnDetails="OpenDetailsModal"
+                   OnDelete="DeleteOutLading" />
+</div>
+
+@code {
+    private List<OutLading> outLadings = new();
+    private List<OutLading> filteredOutLadings = new();
+    private string searchTerm = string.Empty;
+    private bool showCreateModal;
+    private bool showEditModal;
+    private bool showDetailsModal;
+    private OutLading newOutLading = new();
+    private OutLading selectedOutLading = new();
+    private OutLading selectedDetails = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        outLadings = await outladingService.GetAllOutLadingsAsync();
+        FilterOutLadings();
+    }
+
+    private void FilterOutLadings()
+    {
+        filteredOutLadings = outLadings
+            .Where(o => string.IsNullOrEmpty(searchTerm) ||
+                o.Order?.OrderNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true)
+            .ToList();
+    }
+
+    
+    private void OpenCreateModal()
+    {
+        newOutLading = new();
+        showCreateModal = true;
+    }
+    private void CloseCreateModal()
+    {
+        showCreateModal = false;
+        showCreateModal = new();
+    }
+
+    private async Task HandleCreateSubmit(OutLading outLading)
+    {
+        try
+        {
+            var result = await outladingService.CreateOutLadingAsync(outLading);
+
+            if (result.Success)
+            {
+                await LoadData();
+                showCreateModal = false;
+                Console.WriteLine("OutLading created successfully.");
+            }
+            else
+            {
+                Console.WriteLine($"Failed to create OutLading: {result.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unexpected error: {ex.Message}");
+        }
+    }
+
+
+
+    private void OpenEditModal(OutLading outLading)
+    {
+        selectedOutLading = outLading;
+        showEditModal = true;
+    }
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedOutLading = new();
+    }
+    private async Task HandleEditSubmit(OutLading updatedOutLading)
+    {
+        try
+        {
+            await outladingService.UpdateOutLadingAsync(updatedOutLading);
+            await LoadData();
+            showEditModal = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating outlading: {ex.Message}");
+        }
+    }
+
+    private void OpenDetailsModal(OutLading outLading)
+    {
+        selectedDetails = outLading;
+        showDetailsModal = true;
+    }
+
+    private async Task DeleteOutLading(int ladingId)
+    {
+        try
+        {
+            await outladingService.DeleteOutLadingAsync(ladingId);
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting outlading: {ex.Message}");
+        }
+    }
+
+
+}
