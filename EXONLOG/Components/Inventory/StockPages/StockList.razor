@@ -1,0 +1,79 @@
+﻿@using EXONLOG.Model.Stocks
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Stock ID</th>
+                <th>Stock Name</th>
+                <th>Material</th>
+                <th>Stock Type</th>
+                <th>Quantity</th>
+                <th>Reserved</th>
+                <th>Pending</th>
+                <th>Free</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Stocks == null)
+            {
+                <tr>
+                    <td colspan="9" class="text-center">Loading stocks...</td>
+                </tr>
+            }
+            else if (!Stocks.Any())
+            {
+                <tr>
+                    <td colspan="9" class="text-center">No stocks found.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var stock in Stocks)
+                {
+                    <tr>
+                        <td>@stock.StockID</td>
+                        <td>@stock.StockName</td>
+                        <td>@stock.Material?.MaterialName</td>
+                        <td>@stock.StockType</td>
+                        <td>@stock.Quantity.ToString("N2")</td>
+                        <td>@stock.ReservedQuantity.ToString("N2")</td>
+                        <td>@stock.PendingQuantity.ToString("N2")</td>
+                        <td>@stock.FreeQuantity.ToString("N2")</td>
+                        <td>
+                            <!-- Edit Button -->
+                            <button class="btn btn-sm btn-warning me-2" @onclick="() => OnEdit.InvokeAsync(stock)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+
+                            <!-- View Details Button -->
+                            <button class="btn btn-sm btn-info me-2" @onclick="() => OnDetails.InvokeAsync(stock)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+
+                            <!-- Delete Button -->
+                            <button class="btn btn-sm btn-danger" @onclick="() => OnDelete.InvokeAsync(stock.StockID)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<Stock> Stocks { get; set; }
+
+    [Parameter]
+    public EventCallback<Stock> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<Stock> OnDetails { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnDelete { get; set; }
+}

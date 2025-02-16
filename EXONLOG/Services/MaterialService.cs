@@ -86,7 +86,7 @@ namespace EXONLOG.Services
 
                 // Get total stock
                 var totalStock =  _context.Stocks
-                    .Where(s => s.MaterialId == materialId)
+                    .Where(s => s.MaterialID == materialId)
                     .Sum(s => (double?)s.Quantity) ?? 0;
 
                 // Get reserved quantity

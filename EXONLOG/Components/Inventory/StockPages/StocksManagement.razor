@@ -1,0 +1,127 @@
+﻿@page "/StocksManagement"
+@inject StockService stockService
+@using Model.Stocks
+<PageTitle>Stock Management</PageTitle>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Stock Management</h3>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            + New Stock
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search stocks..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
+
+    <!-- Create Modal -->
+    @if (showCreateModal)
+    {
+        <CreateStock IsOpen="showCreateModal"
+                     OnSave="HandleCreateSubmit"
+                     OnCancel="CloseCreateModal" />
+    }
+
+    <!-- Edit Modal -->
+    @if (showEditModal)
+    {
+        <EditStock Stock="selectedStock"
+                   @bind-IsOpen="showEditModal"
+                   OnSave="HandleEditSubmit"
+                   OnCancel="CloseEditModal" />
+    }
+
+    <!-- Details Modal -->
+    @if (showDetailsModal)
+    {
+        <StockDetails Stock="selectedStock"
+                      @bind-IsOpen="showDetailsModal" />
+    }
+
+    <!-- Stocks Table -->
+    <StockList Stocks="filteredStocks"
+               OnEdit="OpenEditModal"
+               OnDetails="OpenDetailsModal"
+               OnDelete="DeleteStock" />
+</div>
+
+@code {
+    private List<Stock> stocks = new();
+    private List<Stock> filteredStocks = new();
+    private string searchTerm = string.Empty;
+    private bool showCreateModal = false;
+    private bool showEditModal = false;
+    private Stock selectedStock = new();
+    private bool showDetailsModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        stocks = await stockService.GetAllStocksAsync();
+        FilterStocks();
+    }
+
+    private void FilterStocks()
+    {
+        filteredStocks = stocks
+            .Where(s => string.IsNullOrEmpty(searchTerm) ||
+                s.StockName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private void OpenCreateModal()
+    {
+        showCreateModal = true;
+    }
+
+    private async Task HandleCreateSubmit(Stock newStock)
+    {
+        await stockService.CreateStockAsync(newStock);
+        await LoadData();
+        showCreateModal = false;
+    }
+
+    private void CloseCreateModal()
+    {
+        showCreateModal = false;
+    }
+
+    private void OpenEditModal(Stock stock)
+    {
+        selectedStock = stock;
+        showEditModal = true;
+    }
+
+    private async Task HandleEditSubmit(Stock updatedStock)
+    {
+        await stockService.UpdateStockAsync(updatedStock);
+        await LoadData();
+        showEditModal = false;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedStock = new Stock();
+    }
+
+    private async Task DeleteStock(int id)
+    {
+        await stockService.DeleteStockAsync(id);
+        await LoadData();
+    }
+
+    private void OpenDetailsModal(Stock stock)
+    {
+        selectedStock = stock;
+        showDetailsModal = true;
+    }
+}

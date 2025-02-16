@@ -215,7 +215,7 @@
             modelBuilder.Entity<Material>()
              .HasMany(s => s.Stocks)
              .WithOne(m => m.Material) // One User can create many materials
-             .HasForeignKey(m => m.MaterialId)
+             .HasForeignKey(m => m.MaterialID)
              .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Material>()
@@ -234,11 +234,11 @@
             //    .Property(m => m.FreeQuantityInStock)
             //    .HasComputedColumnSql("TotalStockQuantity - ReservedQuantity", stored: true);
 
-            modelBuilder.Entity<Stock>()
-            .HasMany(s => s.StockMovements)
-            .WithOne(m => m.Stock) // One User can create many materials
-            .HasForeignKey(m => m.StockId)
-            .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<Stock>()
+            //.HasMany(s => s.StockMovements)
+            //.WithOne(m => m.Stock) // One User can create many materials
+            //.HasForeignKey(m => m.StockId)
+            //.OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Stock>()
                .HasIndex(c => c.StockName)

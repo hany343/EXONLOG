@@ -808,17 +808,19 @@ namespace EXONLOG.Migrations
                     b.Property<DateTime?>("LastUpdated")
                         .HasColumnType("datetime2(0)");
 
-                    b.Property<string>("Location")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("MaterialId")
+                    b.Property<int>("MaterialID")
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<double>("PendingQuantity")
+                        .HasColumnType("float");
+
                     b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.Property<double>("ReservedQuantity")
                         .HasColumnType("float");
 
                     b.Property<string>("StockName")
@@ -826,12 +828,15 @@ namespace EXONLOG.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("StockType")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserID")
                         .HasColumnType("int");
 
                     b.HasKey("StockID");
 
-                    b.HasIndex("MaterialId");
+                    b.HasIndex("MaterialID");
 
                     b.HasIndex("StockName")
                         .IsUnique();
@@ -1359,7 +1364,7 @@ namespace EXONLOG.Migrations
                 {
                     b.HasOne("EXONLOG.Model.Stocks.Material", "Material")
                         .WithMany("Stocks")
-                        .HasForeignKey("MaterialId")
+                        .HasForeignKey("MaterialID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1377,9 +1382,9 @@ namespace EXONLOG.Migrations
             modelBuilder.Entity("EXONLOG.Model.Stocks.StockMovement", b =>
                 {
                     b.HasOne("EXONLOG.Model.Stocks.Stock", "Stock")
-                        .WithMany("StockMovements")
+                        .WithMany()
                         .HasForeignKey("StockId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EXONLOG.Model.Account.User", "User")
@@ -1476,11 +1481,6 @@ namespace EXONLOG.Migrations
             modelBuilder.Entity("EXONLOG.Model.Stocks.MaterialType", b =>
                 {
                     b.Navigation("Materials");
-                });
-
-            modelBuilder.Entity("EXONLOG.Model.Stocks.Stock", b =>
-                {
-                    b.Navigation("StockMovements");
                 });
 #pragma warning restore 612, 618
         }
