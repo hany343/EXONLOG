@@ -1,79 +1,84 @@
 ﻿using EXONLOG.Data;
 using EXONLOG.Model.Inbound;
-using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace EXONLOG.Services
+public class SupplierService
 {
-    public class SupplierService
+    private readonly EXONContext _context;
+
+    public SupplierService(EXONContext context)
     {
-        private readonly EXONContext _context;
+        _context = context;
+    }
 
-        public SupplierService(EXONContext context)
-        {
-            _context = context;
-        }
+    /// <summary>
+    /// Fetches all suppliers from the database.
+    /// </summary>
+    public async Task<List<Supplier>> GetAllSuppliersAsync()
+    {
+        return await _context.Suppliers
+            .Include(s => s.User) // Include User details
+            .ToListAsync();
+    }
 
-        public async Task<List<Supplier>> GetSuppliersAsync(string searchTerm = "")
-        {
-            return await _context.Suppliers
-                .Where(s => string.IsNullOrEmpty(searchTerm) || s.SupplierName.Contains(searchTerm))
-                .ToListAsync();
-        }
+    /// <summary>
+    /// Fetches a supplier by its BatchID.
+    /// </summary>
+    public async Task<Supplier> GetSupplierByIdAsync(int supplierId)
+    {
+        return await _context.Suppliers
+            .Include(s => s.User) // Include User details
+            .FirstOrDefaultAsync(s => s.ID == supplierId);
+    }
 
-        public async Task<Supplier?> GetSupplierByIdAsync(int id)
-        {
-            return await _context.Suppliers.FindAsync(id);
-        }
+    /// <summary>
+    /// Creates a new supplier.
+    /// </summary>
+    public async Task CreateSupplierAsync(Supplier supplier)
+    {
+        if (supplier == null)
+            throw new ArgumentNullException(nameof(supplier));
+        supplier.UserID = 1;
+        supplier.CreateDate = DateTime.UtcNow;
+        _context.Suppliers.Add(supplier);
+        await _context.SaveChangesAsync();
+    }
 
-        public async Task AddSupplierAsync(Supplier supplier)
-        {
-            _context.Suppliers.Add(supplier);
-            await _context.SaveChangesAsync();
-        }
+    /// <summary>
+    /// Updates an existing supplier.
+    /// </summary>
+    public async Task UpdateSupplierAsync(Supplier supplier)
+    {
+        if (supplier == null)
+            throw new ArgumentNullException(nameof(supplier));
 
-        public async Task UpdateSupplierAsync(Supplier supplier)
-        {
-            _context.Suppliers.Update(supplier);
-            await _context.SaveChangesAsync();
-        }
+        var existingSupplier = await _context.Suppliers.FindAsync(supplier.ID);
+        if (existingSupplier == null)
+            throw new ArgumentException("Supplier not found.");
 
-        public async Task DeleteSupplierAsync(int id)
-        {
-            var supplier = await _context.Suppliers.FindAsync(id);
-            if (supplier != null)
-            {
-                _context.Suppliers.Remove(supplier);
-                await _context.SaveChangesAsync();
-            }
-        }
-        //public async Task<byte[]> ExportSuppliersToCsv()
-        //{
-        //    var suppliers = await _context.Suppliers.ToListAsync();
-        //    using var memoryStream = new MemoryStream();
-        //    using var streamWriter = new StreamWriter(memoryStream);
-        //    using var csvWriter = new CsvWriter(streamWriter);
+        existingSupplier.SupplierName = supplier.SupplierName;
+        existingSupplier.Type = supplier.Type;
+        existingSupplier.Address = supplier.Address;
+        existingSupplier.ContactNumber = supplier.ContactNumber;
+        existingSupplier.Email = supplier.Email;
+        existingSupplier.Notes = supplier.Notes;
 
-        //    csvWriter.SetColumns(new[] { "SupplierId", "SupplierName", "ContactName", "City", "Country" });
-        //    foreach (var supplier in suppliers)
-        //    {
-        //        csvWriter.WriteValueStart();
-        //        csvWriter.Write(supplier.ID.ToString());
-        //        csvWriter.WriteCellDelimiter();
-        //        csvWriter.Write(supplier.SupplierName);
-        //        csvWriter.WriteCellDelimiter();
-        //        csvWriter.Write(supplier.ContactName);
-        //        csvWriter.WriteCellDelimiter();
-        //        csvWriter.Write(supplier.City);
-        //        csvWriter.WriteCellDelimiter();
-        //        csvWriter.Write(supplier.Country);
-        //        csvWriter.WriteValueEnd();
-        //        csvWriter.NextRow();
-        //    }
+        await _context.SaveChangesAsync();
+    }
 
-        //    await streamWriter.FlushAsync();
-        //    return memoryStream.ToArray();
-        //}
+    /// <summary>
+    /// Deletes a supplier by its BatchID.
+    /// </summary>
+    public async Task DeleteSupplierAsync(int supplierId)
+    {
+        var supplier = await _context.Suppliers.FindAsync(supplierId);
+        if (supplier == null)
+            throw new ArgumentException("Supplier not found.");
+
+        _context.Suppliers.Remove(supplier);
+        await _context.SaveChangesAsync();
     }
 }

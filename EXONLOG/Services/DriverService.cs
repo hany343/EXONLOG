@@ -26,7 +26,7 @@
                     .ToListAsync();
             }
 
-            // Get a driver by ID
+            // Get a driver by BatchID
             public async Task<Driver> GetDriverByIdAsync(int driverId)
             {
                 return await _dbContext.Drivers
@@ -41,7 +41,7 @@
                 await _dbContext.SaveChangesAsync();
             }
 
-        // Get a single truck by ID
+        // Get a single truck by BatchID
         
         public async Task<List<Driver>> SearchDriversAsync(string searchTerm)
         {
@@ -57,7 +57,7 @@
                 await _dbContext.SaveChangesAsync();
             }
 
-            // Delete a driver by ID
+            // Delete a driver by BatchID
             public async Task DeleteDriverAsync(int driverId)
             {
                 var driver = await _dbContext.Drivers.FindAsync(driverId);

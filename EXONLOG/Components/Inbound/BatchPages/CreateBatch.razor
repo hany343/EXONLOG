@@ -1,0 +1,126 @@
+﻿@using EXONLOG.Model.Inbound
+@inject ShipmentService shipmentService
+@inject IToastService toastService
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Batch</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@NewBatch" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="row g-3">
+                        <!-- Shipment Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Shipment *</label>
+                            <select class="form-control" @onchange="LoadShipmentData">
+                                <option value="">Select Shipment</option>
+                                @foreach (var shipment in shipments)
+                                {
+                                    <option value="@shipment.ShipmentID">@shipment.ShipmentName</option>
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => NewBatch.ShipmentID)" />
+                        </div>
+
+                        <!-- Available Quantity -->
+                        <div class="col-md-6">
+                            <label class="form-label">Available Quantity</label>
+                            <input class="form-control"
+                                   value="@availableQuantity.ToString("N2")"
+                                   disabled />
+                        </div>
+
+                        <!-- Batch Number -->
+                        <div class="col-md-6">
+                            <label class="form-label">Batch Number *</label>
+                            <InputText class="form-control" @bind-Value="@NewBatch.BatchNumber" />
+                            <ValidationMessage For="@(() => NewBatch.BatchNumber)" />
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <InputNumber class="form-control" @bind-Value="@NewBatch.Quantity" />
+                            <ValidationMessage For="@(() => NewBatch.Quantity)" />
+                            @if (quantityError)
+                            {
+                                <div class="text-danger">Quantity exceeds available shipment quantity</div>
+                            }
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@NewBatch.Notes" />
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">Create</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<Batch> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private Batch NewBatch { get; set; } = new();
+    private List<Shipment> shipments = new();
+    private double availableQuantity;
+    private bool quantityError;
+    private int selectedShipmentID;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        shipments = await shipmentService.GetAllShipmentsAsync();
+    }
+
+
+
+    private async Task LoadShipmentData(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int shipmentId))
+        {
+            NewBatch.ShipmentID = shipmentId;
+            var shipment = await shipmentService.GetShipmentByIdAsync(shipmentId);
+            availableQuantity = shipment?.Quantity ?? 0;
+            quantityError = NewBatch.Quantity > availableQuantity;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (quantityError)
+        {
+            toastService.ShowError("Cannot create batch - quantity exceeds available shipment quantity");
+            return;
+        }
+
+        await OnSave.InvokeAsync(NewBatch);
+        CloseModal();
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
+        NewBatch = new Batch();
+        availableQuantity = 0;
+        quantityError = false;
+    }
+}

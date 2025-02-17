@@ -41,9 +41,9 @@ public class OrderService
         }
 
         /// <summary>
-        /// Retrieves a single order by its ID.
+        /// Retrieves a single order by its BatchID.
         /// </summary>
-        /// <param name="orderId">Order ID</param>
+        /// <param name="orderId">Order BatchID</param>
         /// <returns>Order</returns>
         public Task<Order?> GetOrderByIdAsync(int orderId)
         {
@@ -112,7 +112,7 @@ public class OrderService
         /// <summary>
         /// Deletes an order from the database.
         /// </summary>
-        /// <param name="orderId">Order ID</param>
+        /// <param name="orderId">Order BatchID</param>
         /// <returns>Task</returns>
         public async Task DeleteOrderAsync(int orderId)
         {

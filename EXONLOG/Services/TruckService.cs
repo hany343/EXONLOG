@@ -30,14 +30,14 @@
             return trucks;
         }
 
-        // Get a single truck by ID
+        // Get a single truck by BatchID
         public async Task<Truck?> GetTruckByIdAsync(int truckId)
             {
                 return await _dbContext.Set<Truck>()
                                        .FirstOrDefaultAsync(t => t.TruckID == truckId);
             }
 
-            // Get a single truck by ID
+            // Get a single truck by BatchID
             public async Task<Truck?> searchTruck(string tnum)
             {
                 return await _dbContext.Set<Truck>()

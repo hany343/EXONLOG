@@ -81,7 +81,7 @@ namespace EXONLOG.Migrations
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -95,11 +95,11 @@ namespace EXONLOG.Migrations
 
             modelBuilder.Entity("EXONLOG.Model.Inbound.Batch", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("BatchID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BatchID"));
 
                     b.Property<string>("BatchNumber")
                         .IsRequired()
@@ -122,7 +122,7 @@ namespace EXONLOG.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
+                    b.HasKey("BatchID");
 
                     b.HasIndex("BatchNumber")
                         .IsUnique();

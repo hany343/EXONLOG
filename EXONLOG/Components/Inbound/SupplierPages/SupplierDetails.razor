@@ -1,0 +1,102 @@
+﻿@using EXONLOG.Model.Inbound
+@inject ShipmentService shipmentService
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary">Supplier Details</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 d-flex gap-5">
+                        <p><span class="barcode">@Supplier.ID</span> </p>
+                        <p><strong>Created Date:</strong> @Supplier.CreateDate.ToString("dd MMM yyyy")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Supplier Name:</strong> @Supplier.SupplierName</p>
+                        <p><strong>Supplier Type:</strong> @Supplier.Type</p>
+                        <p><strong>Contact Number:</strong> @Supplier.ContactNumber</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Address:</strong> @Supplier.Address</p>
+                        <p><strong>Email:</strong> @Supplier.Email</p>
+                        <p><strong>Created By:</strong> @Supplier.User?.UserName</p>
+                    </div>
+                    <div class="col-md-12">
+                        <p><strong>Notes:</strong><p class="border border-1 rounded border-secondary p-3">@Supplier.Notes</p></p>
+                    </div>
+
+                    <!-- Shipments Table -->
+                    <div class="col-md-12 mt-4">
+                        <h5 class="mb-3">Shipments</h5>
+                        @if (shipments == null)
+                        {
+                            <p>Loading shipments...</p>
+                        }
+                        else if (!shipments.Any())
+                        {
+                            <p>No shipments found.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Shipment ID</th>
+                                        <th>Shipment Name</th>
+                                        <th>Material</th>
+                                        <th>Quantity</th>
+                                        <th>Arrival Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var shipment in shipments)
+                                    {
+                                        <tr>
+                                            <td>@shipment.ShipmentID</td>
+                                            <td>@shipment.ShipmentName</td>
+                                            <td>@shipment.Material?.MaterialName</td>
+                                            <td>@shipment.Quantity.ToString("N2")</td>
+                                            <td>@shipment.ArrivalDate?.ToString("dd MMM yyyy")</td>
+                                            <td>@shipment.ShipmentStatus</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Supplier Supplier { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private List<Shipment> shipments = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Supplier != null)
+        {
+            shipments = await shipmentService.GetShipmentsBySupplierIdAsync(Supplier.ID);
+        }
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
+}

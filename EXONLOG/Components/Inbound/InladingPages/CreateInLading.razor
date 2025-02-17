@@ -23,7 +23,7 @@
                                 <option value="">Select Batch</option>
                                 @foreach (var batch in batches)
                                 {
-                                    <option value="@batch.ID">@batch.BatchNumber</option>
+                                    <option value="@batch.BatchID">@batch.BatchNumber</option>
                                 }
                             </select>
                             <ValidationMessage For="@(() => NewInLading.BatchID)" />
@@ -130,7 +130,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        batches = await batchService.GetBatchesAsync();
+        batches = await batchService.GetAllBatchesAsync();
         transCompanies = await transCompanyService.GetAllAsync();
     }
 

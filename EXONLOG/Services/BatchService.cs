@@ -1,72 +1,159 @@
 ﻿using EXONLOG.Data;
 using EXONLOG.Model.Inbound;
+using EXONLOG.Model.Stocks;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace EXONLOG.Services
+public class BatchService
 {
-    public class BatchService
+    private readonly EXONContext _context;
+    private readonly StockService _stockService;
+
+    public BatchService(EXONContext context, StockService stockService)
     {
-        private readonly EXONContext _context;
+        _context = context;
+        _stockService = stockService;
+    }
 
-        public BatchService(EXONContext context)
-        {
-            _context = context;
-        }
+    public async Task<List<Batch>> GetAllBatchesAsync()
+    {
+        return await _context.Batches
+            .Include(b => b.Shipment)
+                .ThenInclude(s => s.Material)
+            .Include(b => b.User)
+            .ToListAsync();
+    }
 
-        public async Task<List<Batch>> GetBatchesAsync(string searchTerm = "")
-        {
-            return await _context.Batches
-                .Include(b => b.Shipment)
-                    .ThenInclude(s => s.Material)
-                .Include(b => b.User)
-                .Where(b => string.IsNullOrEmpty(searchTerm) ||
-                    b.BatchNumber.Contains(searchTerm) ||
-                    b.Shipment.Material.MaterialName.Contains(searchTerm))
-                .OrderByDescending(b => b.CreateDate)
-                .ToListAsync();
-        }
+    public async Task<Batch> GetBatchByIdAsync(int batchId)
+    {
+        return await _context.Batches
+            .Include(b => b.Shipment)
+            .Include(b => b.User)
+            .FirstOrDefaultAsync(b => b.BatchID == batchId);
+    }
 
-        public async Task<Batch?> GetBatchByIdAsync(int id)
+    public async Task CreateBatchAsync(Batch batch)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            return await _context.Batches
-                .Include(b => b.Shipment)
-                .Include(b => b.User)
-                .FirstOrDefaultAsync(b => b.ID == id);
-        }
-
-        public async Task AddBatchAsync(Batch batch)
-        {
-            batch.CreateDate = DateTime.UtcNow;
-            _context.Batches.Add(batch);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateBatchAsync(Batch batch)
-        {
-            _context.Entry(batch).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteBatchAsync(int id)
-        {
-            var batch = await _context.Batches.FindAsync(id);
-            if (batch != null)
-            {
-                _context.Batches.Remove(batch);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        public async Task<double> GetAvailableQuantityAsync(int shipmentId)
-        {
+            // Get related shipment
             var shipment = await _context.Shipments
-                .Include(s => s.Batches)
-                .FirstOrDefaultAsync(s => s.ShipmentID == shipmentId);
+                .Include(s => s.Material)
+                .FirstOrDefaultAsync(s => s.ShipmentID == batch.ShipmentID);
 
-            if (shipment == null) return 0;
+            if (shipment == null)
+                throw new ArgumentException("Invalid Shipment ID");
 
-            var usedQuantity = shipment.Batches.Sum(b => b.Quantity);
-            return (shipment.Quantity - usedQuantity);
+            if (shipment.Quantity < batch.Quantity)
+                throw new InvalidOperationException("Batch quantity exceeds shipment quantity");
+
+            // Get raw material stock
+            var stock = await _context.Stocks
+                .FirstOrDefaultAsync(s => s.MaterialID == shipment.MaterialID &&
+                                         s.StockType == StockType.RawMaterial);
+
+            if (stock == null)
+                throw new InvalidOperationException("Raw Material stock not found");
+
+            // Update quantities
+            shipment.Quantity -= batch.Quantity;
+            stock.Quantity += batch.Quantity;
+            stock.LastUpdated = DateTime.UtcNow;
+
+            batch.CreateDate = DateTime.UtcNow;
+
+            batch.UserID = 1;
+            _context.Batches.Add(batch);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task UpdateBatchAsync(Batch batch)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var existingBatch = await _context.Batches
+                .Include(b => b.Shipment)
+                .FirstOrDefaultAsync(b => b.BatchID == batch.BatchID);
+
+            if (existingBatch == null)
+                throw new ArgumentException("Batch not found");
+
+            // Handle quantity changes
+            var quantityDifference = batch.Quantity - existingBatch.Quantity;
+
+            // Get original shipment and stock
+            var originalShipment = await _context.Shipments
+                .Include(s => s.Material)
+                .FirstOrDefaultAsync(s => s.ShipmentID == existingBatch.ShipmentID);
+
+            var originalStock = await _context.Stocks
+                .FirstOrDefaultAsync(s => s.MaterialID == originalShipment.MaterialID &&
+                                         s.StockType == StockType.RawMaterial);
+
+            // Update original values
+            originalShipment.Quantity += existingBatch.Quantity;
+            originalStock.Quantity -= existingBatch.Quantity;
+
+            // Update new values
+            originalShipment.Quantity -= batch.Quantity;
+            originalStock.Quantity += batch.Quantity;
+
+            // Update batch properties
+            existingBatch.BatchNumber = batch.BatchNumber;
+            existingBatch.Quantity = batch.Quantity;
+            existingBatch.Notes = batch.Notes;
+            existingBatch.ShipmentID = batch.ShipmentID;
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task DeleteBatchAsync(int batchId)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var batch = await _context.Batches
+                .Include(b => b.Shipment)
+                .FirstOrDefaultAsync(b => b.BatchID == batchId);
+
+            if (batch == null) return;
+
+            // Restore quantities
+            var shipment = await _context.Shipments.FindAsync(batch.ShipmentID);
+            var stock = await _context.Stocks
+                .FirstOrDefaultAsync(s => s.MaterialID == shipment.MaterialID &&
+                                        s.StockType == StockType.RawMaterial);
+
+            shipment.Quantity += batch.Quantity;
+            stock.Quantity -= batch.Quantity;
+
+            _context.Batches.Remove(batch);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
     }
 }

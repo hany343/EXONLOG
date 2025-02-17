@@ -17,7 +17,7 @@
             _httpContextAccessor = httpContextAccessor;
         }
 
-        // Method to get the current user ID
+        // Method to get the current user BatchID
         public int? GetCurrentUserId()
         {
             var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier);

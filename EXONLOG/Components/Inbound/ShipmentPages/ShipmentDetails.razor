@@ -1,23 +1,80 @@
 ﻿@using EXONLOG.Model.Inbound
-@using Model.Stocks
+@inject StockService stockService
 
-<div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)">
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Shipment Details</h5>
-                <button type="button" class="btn-close" @onclick="OnClose"></button>
+                <h5 class="modal-title text-primary">Shipment Details</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
+                    <div class="col-md-12 d-flex gap-5">
+                        <p><span class="barcode">@Shipment.ShipmentID</span></p>
+                        <p><strong>Created Date:</strong> @Shipment.CreateDate.ToString("dd MMM yyyy")</p>
+                    </div>
+
+                    <!-- Basic Info -->
                     <div class="col-md-6">
+                        <p><strong>Shipment Name:</strong> @Shipment.ShipmentName</p>
+                        <p><strong>Reference:</strong> @Shipment.ShipmentRef</p>
                         <p><strong>Material:</strong> @Shipment.Material?.MaterialName</p>
                         <p><strong>Quantity:</strong> @Shipment.Quantity.ToString("N2")</p>
-                        <p><strong>Supplier:</strong> @Shipment.Supplier?.SupplierName</p>
                     </div>
+
                     <div class="col-md-6">
-                        <p><strong>Shipment Date:</strong> @Shipment.CreateDate.ToString("dd MMM yyyy")</p>
+                        <p><strong>Supplier:</strong> @Shipment.Supplier?.SupplierName</p>
+                        <p><strong>Port:</strong> @Shipment.Port?.PortName</p>
+                        <p><strong>Arrival Date:</strong> @Shipment.ArrivalDate?.ToString("dd MMM yyyy")</p>
                         <p><strong>Status:</strong> @Shipment.ShipmentStatus</p>
+                    </div>
+
+                    <!-- Stock Pending Quantity -->
+                    <div class="col-md-12 mt-3">
+                        @if (stock != null)
+                        {
+                            <div class="alert alert-info">
+                                Pending Quantity in Stock: @stock.PendingQuantity.ToString("N2")
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="col-md-12">
+                        <p><strong>Notes:</strong></p>
+                        <div class="border rounded p-3">@Shipment.Notes</div>
+                    </div>
+
+                    <!-- Batches -->
+                    <div class="col-md-12 mt-4">
+                        <h5>Related Batches</h5>
+                        @if (Shipment.Batches?.Any() ?? false)
+                        {
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Batch Number</th>
+                                        <th>Quantity</th>
+                                        <th>Created Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var batch in Shipment.Batches)
+                                    {
+                                        <tr>
+                                            <td>@batch.BatchNumber</td>
+                                            <td>@batch.Quantity.ToString("N2")</td>
+                                            <td>@batch.CreateDate.ToString("dd MMM yyyy")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>No batches found for this shipment.</p>
+                        }
                     </div>
                 </div>
             </div>
@@ -26,9 +83,23 @@
 </div>
 
 @code {
-    [Parameter]
-    public Shipment Shipment { get; set; }
+    [Parameter] public Shipment Shipment { get; set; }
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
 
-    [Parameter]
-    public EventCallback OnClose { get; set; }
+    private Stock stock;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Shipment?.MaterialID != null)
+        {
+            stock = await stockService.GetStockByMaterialAsync(Shipment.MaterialID);
+        }
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+    }
 }

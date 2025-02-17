@@ -8,7 +8,7 @@ namespace EXONLOG.Model.Inbound
 
     public class Batch
     {
-        public int ID { get; set; } // Primary Key
+        public int BatchID { get; set; } // Primary Key
 
         [Column(TypeName = "nvarchar(100)")]
        
@@ -16,7 +16,7 @@ namespace EXONLOG.Model.Inbound
 
         public int ShipmentID { get; set; } // Foreign key to the shipment
 
-        public double Quantity { get; set; } // Quantity in the batch
+        public double Quantity { get; set; }  // Quantity in the batch
 
         public DateTime CreateDate { get; set; } = DateTime.Now; // Record creation date
 

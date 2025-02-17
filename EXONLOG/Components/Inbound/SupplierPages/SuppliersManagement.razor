@@ -1,0 +1,127 @@
+﻿@page "/SuppliersManagement"
+@inject SupplierService supplierService
+
+<PageTitle>Supplier Management</PageTitle>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Supplier Management</h3>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            + New Supplier
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Search suppliers..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
+
+    <!-- Create Modal -->
+    @if (showCreateModal)
+    {
+        <CreateSupplier IsOpen="showCreateModal"
+                        OnSave="HandleCreateSubmit"
+                        OnCancel="CloseCreateModal" />
+    }
+
+    <!-- Edit Modal -->
+    @if (showEditModal)
+    {
+        <EditSupplier Supplier="selectedSupplier"
+                      @bind-IsOpen="showEditModal"
+                      OnSave="HandleEditSubmit"
+                      OnCancel="CloseEditModal" />
+    }
+
+    <!-- Details Modal -->
+    @if (showDetailsModal)
+    {
+        <SupplierDetails Supplier="selectedSupplier"
+                         @bind-IsOpen="showDetailsModal" />
+    }
+
+    <!-- Suppliers Table -->
+    <SupplierList Suppliers="filteredSuppliers"
+                  OnEdit="OpenEditModal"
+                  OnDetails="OpenDetailsModal"
+                  OnDelete="DeleteSupplier" />
+</div>
+
+@code {
+    private List<Supplier> suppliers = new();
+    private List<Supplier> filteredSuppliers = new();
+    private string searchTerm = string.Empty;
+    private bool showCreateModal = false;
+    private bool showEditModal = false;
+    private Supplier selectedSupplier = new();
+    private bool showDetailsModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        suppliers = await supplierService.GetAllSuppliersAsync();
+        FilterSuppliers();
+    }
+
+    private void FilterSuppliers()
+    {
+        filteredSuppliers = suppliers
+            .Where(s => string.IsNullOrEmpty(searchTerm) ||
+                s.SupplierName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private void OpenCreateModal()
+    {
+        showCreateModal = true;
+    }
+
+    private async Task HandleCreateSubmit(Supplier newSupplier)
+    {
+        await supplierService.CreateSupplierAsync(newSupplier);
+        await LoadData();
+        showCreateModal = false;
+    }
+
+    private void CloseCreateModal()
+    {
+        showCreateModal = false;
+    }
+
+    private void OpenEditModal(Supplier supplier)
+    {
+        selectedSupplier = supplier;
+        showEditModal = true;
+    }
+
+    private async Task HandleEditSubmit(Supplier updatedSupplier)
+    {
+        await supplierService.UpdateSupplierAsync(updatedSupplier);
+        await LoadData();
+        showEditModal = false;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedSupplier = new Supplier();
+    }
+
+    private async Task DeleteSupplier(int id)
+    {
+        await supplierService.DeleteSupplierAsync(id);
+        await LoadData();
+    }
+
+    private void OpenDetailsModal(Supplier supplier)
+    {
+        selectedSupplier = supplier;
+        showDetailsModal = true;
+    }
+}

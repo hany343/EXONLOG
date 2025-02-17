@@ -148,7 +148,7 @@ using (var scope = app.Services.CreateScope())
         dbContext.Users.Add(new User
         {
 
-            Username = "admin",
+            UserName = "admin",
             FullName = "Admin", // MaterialName of the user
             Email = "admin@exonlog.com", // Admin email
             PasswordHash = HashPassword("admin"), // Use a secure hashed password

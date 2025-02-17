@@ -1,0 +1,122 @@
+﻿@inject BatchService batchService
+@inject ShipmentService shipmentService
+@inject UserService userService
+@inject IToastService toastService
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Batch</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@Batch" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="row g-3">
+                        <!-- Batch Number -->
+                        <div class="col-md-6">
+                            <label class="form-label">Batch Number *</label>
+                            <InputText class="form-control" @bind-Value="@Batch.BatchNumber" />
+                            <ValidationMessage For="@(() => Batch.BatchNumber)" />
+                        </div>
+
+                        <!-- Shipment Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Shipment *</label>
+                            <InputSelect @bind-Value="@Batch.ShipmentID" class="form-control">
+                                <option value="">Select Shipment</option>
+                                @foreach (var shipment in shipments)
+                                {
+                                    <option value="@shipment.ShipmentID">@shipment.ShipmentName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Batch.ShipmentID)" />
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <InputNumber class="form-control" @bind-Value="@Batch.Quantity" />
+                            <ValidationMessage For="@(() => Batch.Quantity)" />
+                        </div>
+
+                       
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@Batch.Notes" />
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Batch Batch { get; set; } = new();
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<Batch> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private List<Shipment> shipments = new();
+    //private List<User> users = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen)
+        {
+            try
+            {
+                // Load dropdown data only when the modal is opened
+                shipments = await shipmentService.GetAllShipmentsAsync();
+               // users = await userService.GetUsersAsync();
+            }
+            catch (Exception ex)
+            {
+                toastService.ShowError($"Failed to load data: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            // Update batch through service
+            await batchService.UpdateBatchAsync(Batch);
+            toastService.ShowSuccess("Batch updated successfully!");
+            await OnSave.InvokeAsync(Batch);
+            CloseModal();
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error updating batch: {ex.Message}");
+        }
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
+    }
+}

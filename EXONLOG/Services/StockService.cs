@@ -26,7 +26,17 @@ public class StockService
     }
 
     /// <summary>
-    /// Fetches a stock by its ID.
+    /// Fetches a stock by its BatchID.
+    /// </summary>
+    public async Task<Stock> GetStockByMaterialAsync(int materialId)
+    {
+        return await _context.Stocks
+            .Include(s => s.Material) // Include Material details
+            .FirstOrDefaultAsync(s => s.MaterialID == materialId);
+    }
+
+    /// <summary>
+    /// Fetches a stock by its BatchID.
     /// </summary>
     public async Task<Stock> GetStockByIdAsync(int stockId)
     {
@@ -34,7 +44,6 @@ public class StockService
             .Include(s => s.Material) // Include Material details
             .FirstOrDefaultAsync(s => s.StockID == stockId);
     }
-
     /// <summary>
     /// Creates a new stock entry.
     /// </summary>
@@ -46,7 +55,7 @@ public class StockService
         // Validate material
         var material = await _context.Materials.FindAsync(stock.MaterialID);
         if (material == null)
-            throw new ArgumentException("Invalid Material ID.");
+            throw new ArgumentException("Invalid Material BatchID.");
 
         // Set default values
         stock.CreateDate = DateTime.UtcNow;
@@ -83,7 +92,7 @@ public class StockService
     }
 
     /// <summary>
-    /// Deletes a stock entry by its ID.
+    /// Deletes a stock entry by its BatchID.
     /// </summary>
     public async Task DeleteStockAsync(int stockId)
     {

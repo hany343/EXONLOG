@@ -27,7 +27,7 @@ namespace EXONLOG.Services
                 .ToListAsync();
         }
 
-        // Get OutLading by ID
+        // Get OutLading by BatchID
         public OutLading GetOutLadingByIdAsync(int id)
         {
             return  _context.OutLadings
@@ -44,7 +44,7 @@ namespace EXONLOG.Services
         /// <summary>
         /// Fetches all OutLadings associated with a specific OrderID.
         /// </summary>
-        /// <param name="orderId">The ID of the order.</param>
+        /// <param name="orderId">The BatchID of the order.</param>
         /// <returns>A list of OutLadings with related data.</returns>
         public async Task<List<OutLading>> GetOutLadingsByOrderIdAsync(int orderId)
         {
@@ -101,7 +101,7 @@ namespace EXONLOG.Services
 
         private int GetCurrentUserId()
         {
-            return 1; // Replace with real user ID retrieval logic
+            return 1; // Replace with real user BatchID retrieval logic
         }
 
 
@@ -121,7 +121,7 @@ namespace EXONLOG.Services
             await _context.SaveChangesAsync();
         }
 
-        // Delete an OutLading by ID
+        // Delete an OutLading by BatchID
         public async Task DeleteOutLadingAsync(int id)
         {
             var outLading = await _context.OutLadings.FindAsync(id);
@@ -132,7 +132,7 @@ namespace EXONLOG.Services
             }
         }
 
-        // Get orders by Contract ID
+        // Get orders by Contract BatchID
         public async Task<List<Order>> GetOrdersByContractAsync(int contractId)
         {
             return await _context.Orders
@@ -167,7 +167,7 @@ namespace EXONLOG.Services
                 .ToListAsync();
         }
 
-        // Get OutLadings by Truck ID
+        // Get OutLadings by Truck BatchID
         public async Task<List<OutLading>> GetOutLadingsByTruckAsync(int truckId)
         {
             return await _context.OutLadings
@@ -182,7 +182,7 @@ namespace EXONLOG.Services
                 .ToListAsync();
         }
 
-        // Get OutLadings by Driver ID
+        // Get OutLadings by Driver BatchID
         public async Task<List<OutLading>> GetOutLadingsByDriverAsync(int driverId)
         {
             return await _context.OutLadings
@@ -197,7 +197,7 @@ namespace EXONLOG.Services
                 .ToListAsync();
         }
 
-        // Get OutLadings by Order ID
+        // Get OutLadings by Order BatchID
         public async Task<List<OutLading>> GetOutLadingsByOrderAsync(int orderId)
         {
             return await _context.OutLadings

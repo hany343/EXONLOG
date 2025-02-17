@@ -16,7 +16,7 @@
         [Required]
         [MaxLength(50)]
         [Column(TypeName = "nvarchar(50)")]
-        public string Username { get; set; } // Unique Username
+        public string UserName { get; set; } // Unique UserName
 
         [Required]
         [MaxLength(100)]

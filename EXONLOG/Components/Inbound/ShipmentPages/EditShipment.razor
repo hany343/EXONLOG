@@ -1,0 +1,156 @@
+﻿
+@inject MaterialService materialService
+@inject SupplierService supplierService
+@inject PortService portService
+@inject ShipmentService shipmentService
+@inject IToastService toastService
+
+<div class="modal fade show" style="display: @(IsOpen ? "block" : "none"); background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Shipment</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@Shipment" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="row g-3">
+                        <!-- Shipment Name -->
+                        <div class="col-md-6">
+                            <label class="form-label">Shipment Name *</label>
+                            <InputText class="form-control" @bind-Value="@Shipment.ShipmentName" />
+                            <ValidationMessage For="@(() => Shipment.ShipmentName)" />
+                        </div>
+
+                        <!-- Material Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Material *</label>
+                            <InputSelect @bind-Value="@Shipment.MaterialID" class="form-control">
+                                <option value="">Select Material</option>
+                                @foreach (var material in materials)
+                                {
+                                    <option value="@material.MaterialID">@material.MaterialName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Shipment.MaterialID)" />
+                        </div>
+
+                        <!-- Supplier Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Supplier *</label>
+                            <InputSelect @bind-Value="@Shipment.SupplierID" class="form-control">
+                                <option value="">Select Supplier</option>
+                                @foreach (var supplier in suppliers)
+                                {
+                                    <option value="@supplier.ID">@supplier.SupplierName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Shipment.SupplierID)" />
+                        </div>
+
+                        <!-- Port Selection -->
+                        <div class="col-md-6">
+                            <label class="form-label">Port *</label>
+                            <InputSelect @bind-Value="@Shipment.PortID" class="form-control">
+                                <option value="">Select Port</option>
+                                @foreach (var port in ports)
+                                {
+                                    <option value="@port.PortID">@port.PortName</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Shipment.PortID)" />
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity *</label>
+                            <InputNumber class="form-control" @bind-Value="@Shipment.Quantity" />
+                            <ValidationMessage For="@(() => Shipment.Quantity)" />
+                        </div>
+
+                        <!-- Arrival Date -->
+                        <div class="col-md-6">
+                            <label class="form-label">Arrival Date</label>
+                            <InputDate class="form-control" @bind-Value="@Shipment.ArrivalDate" />
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-6">
+                            <label class="form-label">Status *</label>
+                            <InputSelect @bind-Value="@Shipment.ShipmentStatus" class="form-control">
+                                <option value="Pending">Pending</option>
+                                <option value="InTransit">In Transit</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Shipment.ShipmentStatus)" />
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea class="form-control" @bind-Value="@Shipment.Notes" />
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Shipment Shipment { get; set; } = new();
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public EventCallback<Shipment> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private List<Material> materials = new();
+    private List<Supplier> suppliers = new();
+    private List<Port> ports = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            materials = await materialService.GetMaterialsAsync();
+            suppliers = await supplierService.GetAllSuppliersAsync();
+            ports = await portService.GetPortsAsync();
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Failed to load data: {ex.Message}");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            // Update shipment through service
+            await shipmentService.UpdateShipmentAsync(Shipment);
+            toastService.ShowSuccess("Shipment updated successfully!");
+            await OnSave.InvokeAsync(Shipment);
+            CloseModal();
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error updating shipment: {ex.Message}");
+        }
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+        IsOpenChanged.InvokeAsync(false);
+        OnCancel.InvokeAsync();
+    }
+}

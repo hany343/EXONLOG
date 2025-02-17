@@ -1,74 +1,56 @@
-﻿@page "/shipmentsmanage"
+﻿@page "/ShipmentsManagement"
 @inject ShipmentService shipmentService
 @inject MaterialService materialService
 @inject SupplierService supplierService
 @inject PortService portService
-@inject NavigationManager Navigation
-@using Model.Stocks
-
-
 
 <PageTitle>Shipment Management</PageTitle>
 
 <div class="container mt-4">
-    <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>Shipment Management</h3>
-        <button class="btn btn-primary" @onclick="ToggleAddForm">
-            @(showAddForm ? "Cancel" : "+ New Shipment")
-        </button>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">+ New Shipment</button>
     </div>
 
-
-
-    <!-- Add Shipment Form -->
-    @if (showAddForm)
-    {
-        <ShipmentCreate OnSubmit="HandleAddSubmit" OnCancel="ToggleAddForm" />
-    }
-
-    <!-- Edit Modal -->
-    @if (showEditModal)
-    {
-        <ShipmentEdit Shipment="selectedShipment"
-                      materials="materials"
-                      suppliers="suppliers"
-                      ports="ports"
-                      OnSubmit="HandleEditSubmit"
-                      OnCancel="CloseEditModal" />
-    }
-    <!-- Search Bar -->
     <div class="mb-4">
         <input type="text" class="form-control" placeholder="Search shipments..."
                @bind="searchTerm" @bind:event="oninput" />
     </div>
-    <!-- Shipments Table -->
-    <ShipmentList Shipments="filteredShipments"
-                  OnEdit="ShowEditModal"
-                  OnDelete="DeleteShipment"
-                  OnDetails="ShowDetailsModal" />
 
+    @if (showCreateModal)
+    {
+        <CreateShipment IsOpen="showCreateModal"
+                        OnSave="HandleCreateSubmit"
+                        OnCancel="CloseCreateModal" />
+    }
 
+    @if (showEditModal)
+    {
+        <EditShipment Shipment="selectedShipment"
+                      @bind-IsOpen="showEditModal"
+                      OnSave="HandleEditSubmit"
+                      OnCancel="CloseEditModal" />
+    }
 
-    <!-- Details Modal -->
     @if (showDetailsModal)
     {
         <ShipmentDetails Shipment="selectedShipment"
-                         OnClose="CloseDetailsModal" />
+                         @bind-IsOpen="showDetailsModal" />
     }
+
+    <ShipmentList Shipments="filteredShipments"
+                  OnEdit="OpenEditModal"
+                  OnDetails="OpenDetailsModal"
+                  OnDelete="DeleteShipment" />
 </div>
 
 @code {
     private List<Shipment> shipments = new();
     private List<Shipment> filteredShipments = new();
-    private List<Material> materials = new();
-    private List<Supplier> suppliers = new();
-    private List<Port> ports = new();
-
     private string searchTerm = string.Empty;
-    private bool showAddForm;
-    private bool showEditModal;
-    private bool showDetailsModal;
+    private bool showCreateModal = false;
+    private bool showEditModal = false;
+    private bool showDetailsModal = false;
     private Shipment selectedShipment = new();
 
     protected override async Task OnInitializedAsync()
@@ -79,28 +61,30 @@
     private async Task LoadData()
     {
         shipments = await shipmentService.GetAllShipmentsAsync();
-        materials = await materialService.GetMaterialsAsync();
-        suppliers = await supplierService.GetSuppliersAsync();
-        ports = await portService.GetPortsAsync();
         FilterShipments();
     }
 
     private void FilterShipments()
     {
-        filteredShipments = shipments
-            .Where(s => string.IsNullOrEmpty(searchTerm) ||
-                s.Material.MaterialName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        filteredShipments = shipments.Where(s =>
+            string.IsNullOrEmpty(searchTerm) ||
+            s.ShipmentName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            s.ShipmentRef.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+        ).ToList();
     }
 
-    private async Task HandleAddSubmit(Shipment newShipment)
+    private void OpenCreateModal() => showCreateModal = true;
+
+    private async Task HandleCreateSubmit(Shipment newShipment)
     {
         await shipmentService.CreateShipmentAsync(newShipment);
         await LoadData();
-        showAddForm = false;
+        showCreateModal = false;
     }
 
-    private void ShowEditModal(Shipment shipment)
+    private void CloseCreateModal() => showCreateModal = false;
+
+    private void OpenEditModal(Shipment shipment)
     {
         selectedShipment = shipment;
         showEditModal = true;
@@ -119,26 +103,15 @@
         selectedShipment = new Shipment();
     }
 
-    private void ShowDetailsModal(Shipment shipment)
+    private async Task DeleteShipment(int id)
     {
-        selectedShipment = shipment;
-        showDetailsModal = true;
-    }
-
-    private void CloseDetailsModal()
-    {
-        showDetailsModal = false;
-        selectedShipment = new Shipment();
-    }
-
-    private async Task DeleteShipment(int shipmentId)
-    {
-        await shipmentService.DeleteShipmentAsync(shipmentId);
+        await shipmentService.DeleteShipmentAsync(id);
         await LoadData();
     }
 
-    private void ToggleAddForm()
+    private void OpenDetailsModal(Shipment shipment)
     {
-        showAddForm = !showAddForm;
+        selectedShipment = shipment;
+        showDetailsModal = true;
     }
 }

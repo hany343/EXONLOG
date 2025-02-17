@@ -8,12 +8,13 @@ namespace EXONLOG.Model.Inbound
     {
         public int ShipmentID { get; set; } // Primary Key
 
-        [Column(TypeName = "nvarchar(100)")]
-        public string? ShipmentRef { get; set; } = string.Empty; // Unique reference for the shipment
-
+        
 
         [Column(TypeName = "nvarchar(100)")]
         public string ShipmentName { get; set; } = string.Empty; // Unique reference for the shipment
+
+        [Column(TypeName = "nvarchar(100)")]
+        public string? ShipmentRef { get; set; } = string.Empty; // Unique reference for the shipment
 
         public int MaterialID { get; set; } // Foreign key to the material
 
