@@ -52,6 +52,7 @@ public class StockService
         stock.CreateDate = DateTime.UtcNow;
         stock.LastUpdated = DateTime.UtcNow;
 
+        stock.UserID = 1;
         _context.Stocks.Add(stock);
         await _context.SaveChangesAsync();
     }
