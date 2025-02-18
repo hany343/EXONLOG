@@ -1010,12 +1010,10 @@ namespace EXONLOG.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("TrailerLicenseNumber")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TrailerNumber")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -1037,7 +1035,8 @@ namespace EXONLOG.Migrations
 
                     b.HasIndex("TruckNumber", "TrailerNumber")
                         .IsUnique()
-                        .HasDatabaseName("IX_Truck_TruckNumber_TrailerNumber");
+                        .HasDatabaseName("IX_Truck_TruckNumber_TrailerNumber")
+                        .HasFilter("[TrailerNumber] IS NOT NULL");
 
                     b.ToTable("Trucks");
                 });

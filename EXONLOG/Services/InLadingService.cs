@@ -1,4 +1,5 @@
 ﻿using EXONLOG.Data;
+using EXONLOG.Model.Enums;
 using EXONLOG.Model.Inbound;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,6 +48,18 @@ namespace EXONLOG.Services
                 .FirstOrDefault(o => o.InLadingID == id);
         }
 
+        public InLading GetFistInLadingAsync()
+        {
+            return _context.InLadings
+                .Include(o => o.Truck)
+                .Include(o => o.Driver)
+                .Include(o => o.Batch)?.ThenInclude(b => b.Shipment)?.ThenInclude(s => s.Material)
+                .Include(o => o.FirstWeigher)
+                .Include(o => o.SecondWeigher)
+                .Include(o => o.User)
+                .Include(o => o.TransCompany)
+                .FirstOrDefault(o => o.WeightStatus!=WeightStatus.SecondWeighCompleted);
+        }
         // Update an existing IntLading
         public async Task UpdateInLadingAsync(InLading inlading)
         {

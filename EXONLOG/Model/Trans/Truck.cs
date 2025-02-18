@@ -19,10 +19,10 @@
         public string LicenseNumber { get; set; } // License number for the truck
 
         [MaxLength(50)]
-        public string TrailerNumber { get; set; } // Trailer number (if applicable)
+        public string? TrailerNumber { get; set; } // Trailer number (if applicable)
 
         [MaxLength(50)]
-        public string TrailerLicenseNumber { get; set; } // Trailer license number (if applicable)
+        public string? TrailerLicenseNumber { get; set; } // Trailer license number (if applicable)
 
         [Required]
         [MaxLength(100)]
