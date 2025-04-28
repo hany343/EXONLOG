@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\ffmpeg\" />
     <Folder Include="wwwroot\screenshots\" />
     <Folder Include="wwwroot\stream\" />
